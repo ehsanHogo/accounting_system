@@ -1,0 +1,168 @@
+
+Create :
+
+    Scenario: User cannot leave the number field empty for an Accounting Voucher
+      Given the user is on the "Create Accounting Voucher" page
+      When the user leaves the "Number" field empty
+        And clicks the "Submit" button
+      Then an error message "Voucher number cannot be empty" is displayed
+        And the Accounting Voucher is not created
+
+
+    Scenario: User cannot enter a number longer than 64 characters for an Accounting Voucher
+      Given the user is on the "Create Accounting Voucher" page
+      When the user enters a number longer than 64 characters
+        And clicks the "Submit" button
+      Then an error message "Accounting Voucher number cannot exceed 64 characters" is displayed
+        And the Accounting Voucher is not created
+
+    Scenario: User cannot enter a duplicate number for an Accounting Voucher
+      Given an Accounting Voucher with the number "123" already exists
+      When the user enters the number "123"
+        And clicks the "Submit" button
+      Then an error message "Accounting Voucher number must be unique" is displayed
+        And the Accounting Voucher is not created
+
+
+
+    Scenario: Accounting Vouchers must be balanced
+      Given the user is trying to create a voucher
+        And the total debits do not equal the total credits
+      When the user clicks the "Submit" button
+      Then an error message "The voucher must be balanced" is displayed
+        And the voucher is not submitted
+
+
+
+
+    Scenario: An accounting voucher must have between 2 and 500 items
+      Given the user is trying to create an accounting voucher 
+      When the user adds less than 2 items to the voucher
+        And clicks the "Submit" button
+      Then an error message "A voucher must have at least 2 items" is displayed
+        And the voucher is not submitted
+
+      When the user adds more than 500 items to the voucher
+        And clicks the "Submit" button
+      Then an error message "A voucher cannot have more than 500 items" is displayed
+        And the voucher is not submitted
+
+
+    Scenario: User can create new voucher entity
+      Given use wants to add new voucher entity that is not present in database
+      When user enter valied and non-repeated number , also valied voucher item count
+      Then a message "voucher entity added successfully" is displayed
+          And the voucher entity is created
+
+Delete :
+
+    Scenario: User cannot delete a accounting voucher if the requested version was different from the database
+      Given the accounting voucher with id "0" and version "1" is  in database
+      When the user tries to delete  accounting voucher with id "0" and version "0" 
+      Then an error message "This accounting voucher version is different from database" is displayed
+        And the entity is not deleted
+
+
+    Scenario: User cannot delete a voucher entity if it is not in database
+      Given the voucher entity with id "123" is not in database
+      When the user tries to delete the entity with id "123"
+      Then an error message "This voucher entity is not in database and cannot be deleted" is displayed
+
+
+    Scenario : User can delete a voucher entity 
+    Given a voucher entity with id "0" and version "0" is in database
+    When user want to delete voucher entity  with id "0" and version "0"
+    Then a message "voucher entity version is deleted successfully from database" is displayed
+        And the entity is deleted
+
+
+    Scenario: Accounting Vouchers must be balanced
+      Given the user is trying to delete items from a voucher
+        And the total debits do not equal the total credits
+      When the user clicks the "Submit" button
+      Then an error message "The voucher must be balanced" is displayed
+        And the voucher is not submitted
+
+
+
+
+    Scenario: An accounting voucher must have at least 2 items
+      Given the user is trying to delete items from an accounting voucher 
+      When the voucher has less than 2 items 
+        And clicks the "Submit" button
+      Then an error message "A voucher must have at least 2 items" is displayed
+        And the voucher is not submitted
+
+
+Insert :
+
+
+
+    Scenario: Accounting Vouchers must be balanced
+      Given the user is trying to insert items from a voucher
+        And the total debits do not equal the total credits
+      When the user clicks the "Submit" button
+      Then an error message "The voucher must be balanced" is displayed
+        And the voucher is not submitted
+
+
+
+
+    Scenario: An accounting voucher cannot have more than 500 items
+      Given the user is trying to insert items from an accounting voucher 
+      When the voucher has more than 500 items 
+        And clicks the "Submit" button
+      Then an error message "A voucher cannot have more than 500 items" is displayed
+        And the voucher is not submitted
+
+
+Update:
+
+    Scenario: User cannot update a accounting voucher if the requested version was different from the database
+      Given the accounting voucher with id "0" and version "1" is in database
+      When the user tries to update  accounting voucher with id "0" and version "0" 
+      Then an error message "This accounting voucher version is different from database" is displayed
+        And the entity is not updated
+
+
+    Scenario: User cannot update a voucher entity if it is not in database
+      Given the voucher entity with id "123" is not in database
+      When the user tries to update the entity with "123"
+      Then an error message "This voucher entity is not in database and cannot be updated" is displayed
+
+
+    Scenario : User can update a voucher entity 
+    Given a voucher entity with id "0" and version "0" is in database
+    When user want to update voucher entity  with id "0" and version "0"
+    Then a message "voucher entity version is updated successfully in database" is displayed
+        And the entity is updated
+
+
+
+
+    Scenario: Accounting Vouchers must be balanced
+      Given the user is trying to update items from a voucher
+        And the total debits do not equal the total credits
+      When the user clicks the "Submit" button
+      Then an error message "The voucher must be balanced" is displayed
+        And the voucher is not submitted
+
+
+
+
+
+Read :
+
+
+    Scenario: User cannot read a voucher entity if it is not in database
+      Given the voucher entity with id "123" is not in database
+      When the user tries to read the entity with id "123"
+      Then an error message "This voucher entity is not in database and cannot be read" is displayed
+
+
+
+    Scenario : User can read a voucher entity 
+      Given a voucher entity with id "0" is in database
+      When user want to read voucher entity  with id "0" 
+      Then a message "voucher entity  is read successfully from database" is displayed
+          And the entity is passed to the user

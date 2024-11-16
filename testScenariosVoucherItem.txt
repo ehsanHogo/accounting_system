@@ -1,0 +1,96 @@
+Create :
+
+    Scenario: User cannot enter invalid values for debit and credit
+      Given the user is creating a Voucher Item
+      When the user enters both debit and credit as zero or both as non-zero or one of them as negative
+        And clicks the "Submit" button
+      Then an error message "one of the debit or credit must be greater than zero and the other must be zero" is displayed
+        And the Voucher Item is not created
+
+
+    Scenario: DL is required and must be in database when the SL is DL-enabled
+      Given the user is creating a Voucher Item
+        And its SL is DL-enabled
+      When the user does not select a DL
+        And clicks the "Submit" button
+      Then an error message "DL is mandatory for a SL that is DL-enabled " is displayed
+        And the Voucher Item is not created
+
+      When the selected DL does not exist in the database
+        And the user clicks the "Submit" button
+      Then an error message "The selected DL does not exist in the database" is displayed
+        And the Voucher Item is not created
+
+
+
+
+
+    Scenario: DL must be empty if the SL is not DL-enabled
+      Given the user is creating a Voucher Item that its Sl is not DL-enabled
+      When the user selects a DL
+        And clicks the "Submit" button
+      Then an error message "DL must be empty for a voucher Item that its SL is not DL-enabled" is displayed
+        And the Voucher Item is not created
+
+
+
+    Scenario: The SL must exist in the database and is mandatory
+      Given the user is creating a Voucher Item
+      When the user does not add SL
+        And clicks the "Submit" button
+      Then an error message "SL is mandatory for voucher item" is displayed
+        And the Voucher Item is not created
+
+      When the SL does not exist in the database
+        And the user clicks the "Submit" button
+      Then an error message "The SL does not exist in the database" is displayed
+        And the Voucher Item is not created
+
+
+
+
+
+Delete :
+
+    Scenario: User cannot delete a voucher item entity if it is not in database
+      Given the voucher item entity with id "123" is not in database
+      When the user tries to delete the entity with "123"
+      Then an error message "This voucher item entity is not in database and cannot be deleted" is displayed
+
+
+    Scenario : User can delete a voucher item entity 
+    Given a voucher item entity with id "0" is in database
+    When user want to delete voucher item entity  with id "0"
+    Then a message "voucher item entity  is deleted successfully in database" is displayed
+        And the entity is deleted
+
+
+
+Update :
+
+    Scenario: User cannot update a voucher item entity if it is not in database
+      Given the voucher item entity with id "123" is not in database
+      When the user tries to update the entity with "123"
+      Then an error message "This voucher item entity is not in database and cannot be updated" is displayed
+
+    Scenario : User can update a voucher item entity 
+    Given a voucher item entity with id "0" is in database
+    When user want to update voucher item entity  with id "0"
+    Then a message "voucher item entity version is updated successfully in database" is displayed
+        And the entity is updated
+
+
+Read:
+    Scenario: User cannot read a voucher entity if it is not in database
+      Given the voucher entity with id "123" is not in database
+      When the user tries to read the entity with "123"
+      Then an error message "This voucher entity is not in database and cannot be read" is displayed
+
+
+
+    Scenario : User can read a voucher item entity 
+    Given a voucher item entity with id "0"  is in database
+    When user want to read voucher item entity  with id "0"
+    Then a message "voucher item entity version is readd successfully in database" is displayed
+        And the entity is readd
+
