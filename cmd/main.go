@@ -2,9 +2,9 @@ package main
 
 import (
 	"accounting_system/config"
+	"accounting_system/internal/models"
 	"accounting_system/internal/repositories"
 	"fmt"
-	"log"
 
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
@@ -13,7 +13,7 @@ import (
 func main() {
 	dbUrl, err := config.SetupConfig()
 	if err != nil {
-		fmt.Println("Cant set database config")
+		fmt.Printf("Cant set database config : %v", err)
 		return
 	}
 	db, err := gorm.Open(postgres.Open(dbUrl), &gorm.Config{})
@@ -23,8 +23,9 @@ func main() {
 	}
 
 	repo := repositories.NewConnection(db)
-	
-	fmt.Print(repo)
 
+	repo.CreateDetailed(&models.Detailed{Code: "123", Title: "ehsan"})
+
+	// fmt.Print(repo)
 
 }

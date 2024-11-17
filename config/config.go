@@ -8,11 +8,15 @@ import (
 
 	_ "github.com/golang-migrate/migrate/v4/database/postgres"
 	_ "github.com/golang-migrate/migrate/v4/source/file"
+	"github.com/joho/godotenv"
 )
 
 func SetupConfig() (string, error) {
 
-
+	err := godotenv.Load()
+	if err != nil {
+		fmt.Printf("Error loading .env file: %v", err)
+	}
 	dbUser := os.Getenv("POSTGRES_USER")
 	dbPassword := os.Getenv("POSTGRES_PASSWORD")
 	dbName := os.Getenv("POSTGRES_DB")
