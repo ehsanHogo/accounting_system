@@ -18,10 +18,10 @@ type Subsidiary struct {
 type VoucherItem struct {
 	gorm.Model
 	VoucherID    uint
-	DatailedId   int64
-	SubsidiaryId int64
-	debit        int64
-	credit       int64
+	DatailedId   uint 
+	SubsidiaryId uint
+	Debit        int64
+	Credit       int64
 }
 
 type Voucher struct {

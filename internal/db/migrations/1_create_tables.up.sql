@@ -7,12 +7,16 @@ CREATE TABLE "detaileds" (
    "deleted_at" TIMESTAMP 
 );
 
-CREATE TABLE "subsidiary" (
-  "id" integer PRIMARY KEY,
-  "code" varchar,
-  "title" varchar,
-  "has_detaileds" bool
+CREATE TABLE subsidiaries (
+    "id" SERIAL PRIMARY KEY,
+    "code" VARCHAR ,
+    "title" VARCHAR ,
+    "has_detailed" BOOLEAN ,
+    "created_at" TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    "updated_at" TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    "deleted_at" TIMESTAMP
 );
+
 
 CREATE TABLE "voucher" (
   "id" integer PRIMARY KEY,
@@ -33,8 +37,8 @@ CREATE TABLE "voucher_item" (
   "credit" integer
 );
 
-ALTER TABLE "voucher_item" ADD FOREIGN KEY ("detaileds_id") REFERENCES "detaileds" ("id");
+-- ALTER TABLE "voucher_item" ADD FOREIGN KEY ("detaileds_id") REFERENCES "detaileds" ("id");
 
-ALTER TABLE "voucher_item" ADD FOREIGN KEY ("subsidiary_id") REFERENCES "subsidiary" ("id");
+-- ALTER TABLE "voucher_item" ADD FOREIGN KEY ("subsidiary_id") REFERENCES "subsidiary" ("id");
 
-ALTER TABLE "voucher" ADD FOREIGN KEY ("voucher_items_id") REFERENCES "voucher_items" ("id");
+-- ALTER TABLE "voucher" ADD FOREIGN KEY ("voucher_items_id") REFERENCES "voucher_items" ("id");

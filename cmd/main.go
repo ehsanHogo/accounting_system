@@ -24,7 +24,8 @@ func main() {
 
 	repo := repositories.NewConnection(db)
 
-	repo.CreateDetailed(&models.Detailed{Code: "123", Title: "ehsan"})
+	// repo.CreateDetailed(&models.Detailed{Code: "123", Title: "ehsan"})
+	repo.CreateSubsidiary(&models.Subsidiary{Code: "321", Title: "ehs", HasDetailed: false})
 
 	// fmt.Print(repo)
 
