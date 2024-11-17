@@ -18,11 +18,13 @@ func main() {
 	}
 	db, err := gorm.Open(postgres.Open(dbUrl), &gorm.Config{})
 	if err != nil {
-		log.Fatalf("failed to connect to database: %v", err)
+		fmt.Printf("failed to connect to database: %v", err)
+		return
 	}
 
 	repo := repositories.NewConnection(db)
+	
 	fmt.Print(repo)
 
-	println(dbUrl)
+
 }
