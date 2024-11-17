@@ -17,8 +17,9 @@ type Subsidiary struct {
 
 type VoucherItem struct {
 	gorm.Model
-	VoucherID    uint
-	DatailedId   uint 
+	VoucherID uint `gorm:"not null;constraint:OnDelete:CASCADE;"`
+
+	DetailedId   uint
 	SubsidiaryId uint
 	Debit        int64
 	Credit       int64
@@ -27,7 +28,7 @@ type VoucherItem struct {
 type Voucher struct {
 	gorm.Model
 	Number       string
-	VoucherItems []VoucherItem
+	VoucherItems []VoucherItem `gorm:"foreignKey:VoucherID"`
 }
 
 //creare models

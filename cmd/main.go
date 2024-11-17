@@ -25,7 +25,10 @@ func main() {
 	repo := repositories.NewConnection(db)
 
 	// repo.CreateDetailed(&models.Detailed{Code: "123", Title: "ehsan"})
-	repo.CreateSubsidiary(&models.Subsidiary{Code: "321", Title: "ehs", HasDetailed: false})
+	// repo.CreateSubsidiary(&models.Subsidiary{Code: "321", Title: "ehs", HasDetailed: false})
+	temp := []models.VoucherItem{models.VoucherItem{}, models.VoucherItem{}}
+	fmt.Printf("eeeee : %v\n", temp)
+	repo.CreateVoucher(&models.Voucher{Number: "13"}, temp)
 
 	// fmt.Print(repo)
 

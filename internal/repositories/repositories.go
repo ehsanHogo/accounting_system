@@ -38,3 +38,14 @@ func (db *Repositories) CreateSubsidiary(s *models.Subsidiary) {
 
 	println(res)
 }
+
+func (db *Repositories) CreateVoucher(v *models.Voucher, vi []models.VoucherItem) {
+	res := db.AccountingDB.Create(&models.Voucher{Number: v.Number, VoucherItems: vi})
+	if res.Error != nil {
+		fmt.Printf("Error creating voucher record: %v\n", res.Error)
+	} else {
+		fmt.Println("Record created successfully")
+	}
+
+	println(res)
+}
