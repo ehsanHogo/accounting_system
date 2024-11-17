@@ -29,7 +29,7 @@ func main() {
 	// repo.CreateVoucher(&models.Voucher{Number: "13", VoucherItems: temp})
 
 	// voucher := &models.Voucher{Number: "12345", VoucherItems: temp}
-	sub := &models.Subsidiary{Code: "12", Title: "qw",HasDetailed: false }
-	repositories.CreateRecord(repo, sub)
+	detailed := &models.Detailed{Code: "13", Title: "te2st"}
+	repositories.CreateRecord(repo, detailed)
 
 }

@@ -1,7 +1,7 @@
 CREATE TABLE "detaileds" (
   "id" serial PRIMARY KEY,
-  "code" varchar,
-  "title" varchar,
+  "code" varchar UNIQUE,
+  "title" varchar UNIQUE,
   "created_at" timestamp DEFAULT CURRENT_TIMESTAMP,
   "updated_at" timestamp DEFAULT CURRENT_TIMESTAMP,
   "deleted_at" TIMESTAMP

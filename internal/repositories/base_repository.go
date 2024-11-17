@@ -16,15 +16,15 @@ func NewConnection(db *gorm.DB) *Repositories {
 	}
 }
 
-func CreateRecord[T any](db *Repositories, v *T) {
+func CreateRecord[T any](db *Repositories, v *T) error {
 	res := db.AccountingDB.Create(v)
 	if res.Error != nil {
-		fmt.Printf("Error creating record: %v\n", res.Error)
+		return fmt.Errorf("error creating record: %w", res.Error)
+
 	} else {
 		fmt.Println("Record created successfully")
+
+		return nil
 	}
 
-	
-
-	println(res)
 }

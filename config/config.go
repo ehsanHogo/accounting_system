@@ -4,29 +4,25 @@ import (
 	"errors"
 	"fmt"
 
-	"os"
-
 	_ "github.com/golang-migrate/migrate/v4/database/postgres"
 	_ "github.com/golang-migrate/migrate/v4/source/file"
-	"github.com/joho/godotenv"
+)
+
+const (
+	DB       = "accounting"
+	USER     = "postgres"
+	PASSWORD = "12551255"
+	HOST     = "localhost"
+	PORT     = "5432"
 )
 
 func SetupConfig() (string, error) {
 
-	err := godotenv.Load()
-	if err != nil {
-		fmt.Printf("Error loading .env file: %v", err)
-	}
-	dbUser := os.Getenv("POSTGRES_USER")
-	dbPassword := os.Getenv("POSTGRES_PASSWORD")
-	dbName := os.Getenv("POSTGRES_DB")
-	dbHost := os.Getenv("POSTGRES_HOST")
-	dbPort := os.Getenv("POSTGRES_PORT")
-	if dbHost == "" || dbPassword == "" || dbName == "" || dbUser == "" || dbPort == "" {
+	if HOST == "" || PASSWORD == "" || DB == "" || USER == "" || PORT == "" {
 		// panic("Missing required environment variables for database connection")
 		return "", errors.New("missing required environment variables for database connection")
 	}
-	dbUrl := fmt.Sprintf("postgres://%s:%s@%s:%s/%s?sslmode=disable", dbUser, dbPassword, dbHost, dbPort, dbName)
+	dbUrl := fmt.Sprintf("postgres://%s:%s@%s:%s/%s?sslmode=disable", USER, PASSWORD, HOST, PORT, DB)
 	// m, err := migrate.New(
 	// 	"file://internal/db/migrations",
 	// 	dbUrl,
