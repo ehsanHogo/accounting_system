@@ -28,7 +28,7 @@ func main() {
 	// repo.CreateSubsidiary(&models.Subsidiary{Code: "321", Title: "ehs", HasDetailed: false})
 	temp := []models.VoucherItem{models.VoucherItem{}, models.VoucherItem{}}
 	fmt.Printf("eeeee : %v\n", temp)
-	repo.CreateVoucher(&models.Voucher{Number: "13"}, temp)
+	repo.CreateVoucher(&models.Voucher{Number: "13", VoucherItems: temp})
 
 	// fmt.Print(repo)
 
