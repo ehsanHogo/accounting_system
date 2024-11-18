@@ -4,6 +4,7 @@ import (
 	"accounting_system/config"
 	"accounting_system/internal/models"
 	randgenerator "accounting_system/internal/utils"
+	"fmt"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -37,7 +38,7 @@ func TestCreateDetailed(t *testing.T) {
 		title := randgenerator.GenerateRandomTitle()
 		detailed := &models.Detailed{Code: code, Title: title}
 		err := CreateRecord(repo, detailed)
-
+		fmt.Printf("detailed id : %v", detailed.Model.ID)
 		assert.NoError(t, err, "expected detailed record to be created, but got error")
 		var result models.Detailed
 		err = repo.AccountingDB.First(&result, "code = ?", detailed.Code).Error //Code is uniqe
@@ -175,4 +176,25 @@ func TestCreateVoucher(t *testing.T) {
 
 	})
 
+}
+
+func TestUpdateDetailed(t *testing.T) {
+
+	repo, err := createConnectionForTest()
+
+	if err != nil {
+		t.Fatalf("can not connect to database %v", err)
+	}
+	t.Run("can update detailed record successfully", func(t *testing.T) {
+		code := randgenerator.GenerateRandomCode()
+		title := randgenerator.GenerateRandomTitle()
+		detailed := &models.Detailed{Code: code, Title: title}
+		CreateRecord(repo, detailed)
+		fmt.Printf("prev code : %v", code)
+		prevDetailedId := detailed.Model.ID
+		code = randgenerator.GenerateRandomCode()
+		fmt.Printf("new code : %v", code)
+		detailed = &models.Detailed{Code: code, Title: title}
+		UpdateDetailed(repo, detailed, prevDetailedId)
+	})
 }
