@@ -10,8 +10,8 @@ type Detailed struct {
 
 type Subsidiary struct {
 	gorm.Model
-	Code        string
-	Title       string
+	Code        string `gorm:"unique"`
+	Title       string `gorm:"unique"`
 	HasDetailed bool
 }
 

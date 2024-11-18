@@ -3,7 +3,7 @@ package repositories
 import (
 	"accounting_system/config"
 	"accounting_system/internal/models"
-	"fmt"
+	randgenerator "accounting_system/internal/utils"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -11,55 +11,124 @@ import (
 	"gorm.io/gorm"
 )
 
-func TestCreateDetailed(t *testing.T) {
-
+func createConnectionForTest() (*Repositories, error) {
 	dbUrl, err := config.SetupConfig()
 	if err != nil {
-		fmt.Printf("Cant set database config : %v", err)
-		return
+		return nil, err
 	}
 	db, err := gorm.Open(postgres.Open(dbUrl), &gorm.Config{})
 	if err != nil {
-		fmt.Printf("failed to connect to database: %v", err)
-		return
+		return nil, err
 	}
 
-	repo := NewConnection(db)
+	return NewConnection(db), nil
+}
 
-	t.Run("the record successfully create", func(t *testing.T) {
-		detailed := &models.Detailed{Code: "12", Title: "test"}
+func TestCreateDetailed(t *testing.T) {
+
+	repo, err := createConnectionForTest()
+
+	if err != nil {
+		t.Fatalf("can not connect to database %v", err)
+	}
+
+	t.Run("the detailed record successfully create", func(t *testing.T) {
+		code := randgenerator.GenerateRandomCode()
+		title := randgenerator.GenerateRandomTitle()
+		detailed := &models.Detailed{Code: code, Title: title}
 		err := CreateRecord(repo, detailed)
 
 		assert.NoError(t, err, "expected detailed record to be created, but got error")
 		var result models.Detailed
-		err = repo.AccountingDB.First(&result, "code = ?", detailed.Code).Error //Code in uniqe
-		assert.NoError(t, err, " can not find the inserted record :")
+		err = repo.AccountingDB.First(&result, "code = ?", detailed.Code).Error //Code is uniqe
+		assert.NoError(t, err, " can not find the inserted detailed record :")
 
 	})
 
-	t.Run("the record fail because duplication code", func(t *testing.T) {
-		// fmt.Println("jdgfsdgh")
-		detailed := &models.Detailed{Code: "13", Title: "test13"}
+	t.Run("the detailed record creation fail because duplication code", func(t *testing.T) {
+
+		code := randgenerator.GenerateRandomCode()
+		title := randgenerator.GenerateRandomTitle()
+		detailed := &models.Detailed{Code: code, Title: title}
 		err := CreateRecord(repo, detailed)
 		assert.NoError(t, err, "expected detailed record to be created, but got error")
 
-		detailed = &models.Detailed{Code: "13", Title: "dup"}
+		title = randgenerator.GenerateRandomTitle()
+		detailed = &models.Detailed{Code: code, Title: title}
 		err = CreateRecord(repo, detailed)
 
-		assert.Error(t, err, "expected getting duplicate error")
+		assert.Error(t, err, "expected getting duplicate detailed code error")
 
 	})
 
-	t.Run("the record fail because duplication title", func(t *testing.T) {
-		// fmt.Println("jdgfsdgh")
-		detailed := &models.Detailed{Code: "13	", Title: "test13"}
+	t.Run("the detailed record creation fail because duplication title", func(t *testing.T) {
+
+		code := randgenerator.GenerateRandomCode()
+		title := randgenerator.GenerateRandomTitle()
+		detailed := &models.Detailed{Code: code, Title: title}
 		err := CreateRecord(repo, detailed)
 		assert.NoError(t, err, "expected detailed record to be created, but got error")
 
-		detailed = &models.Detailed{Code: "13", Title: "dup"}
+		code = randgenerator.GenerateRandomCode()
+		detailed = &models.Detailed{Code: code, Title: title}
 		err = CreateRecord(repo, detailed)
 
-		assert.Error(t, err, "expected getting duplicate error")
+		assert.Error(t, err, "expected getting duplicate detailed title error")
+
+	})
+
+}
+
+func TestCreateSubsidiary(t *testing.T) {
+
+	repo, err := createConnectionForTest()
+
+	if err != nil {
+		t.Fatalf("can not connect to database %v", err)
+	}
+
+	t.Run("the subsidiary record successfully create", func(t *testing.T) {
+		code := randgenerator.GenerateRandomCode()
+		title := randgenerator.GenerateRandomTitle()
+		subsidiary := &models.Subsidiary{Code: code, Title: title, HasDetailed: false}
+		err := CreateRecord(repo, subsidiary)
+
+		assert.NoError(t, err, "expected subsidiary record to be created, but got error")
+		var result models.Subsidiary
+		err = repo.AccountingDB.First(&result, "code = ?", subsidiary.Code).Error //Code is uniqe
+		assert.NoError(t, err, " can not find the inserted subsidiary record :")
+
+	})
+
+	t.Run("the subsidiary record creation fail because duplication code", func(t *testing.T) {
+
+		code := randgenerator.GenerateRandomCode()
+		title := randgenerator.GenerateRandomTitle()
+		subsidiary := &models.Subsidiary{Code: code, Title: title, HasDetailed: true}
+		err := CreateRecord(repo, subsidiary)
+		assert.NoError(t, err, "expected subsidiary record to be created, but got error")
+
+		title = randgenerator.GenerateRandomTitle()
+		subsidiary = &models.Subsidiary{Code: code, Title: title, HasDetailed: false}
+		err = CreateRecord(repo, subsidiary)
+
+		assert.Error(t, err, "expected getting duplicate subsidiary code error")
+
+	})
+
+	t.Run("the subsidiary record creation fail because duplication title", func(t *testing.T) {
+
+		code := randgenerator.GenerateRandomCode()
+		title := randgenerator.GenerateRandomTitle()
+		subsidiary := &models.Subsidiary{Code: code, Title: title, HasDetailed: false}
+		err := CreateRecord(repo, subsidiary)
+		assert.NoError(t, err, "expected subsidiary record to be created, but got error")
+
+		code = randgenerator.GenerateRandomCode()
+		subsidiary = &models.Subsidiary{Code: code, Title: title, HasDetailed: true}
+		err = CreateRecord(repo, subsidiary)
+
+		assert.Error(t, err, "expected getting duplicate subsidiary title error")
 
 	})
 

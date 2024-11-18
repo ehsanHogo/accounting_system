@@ -9,8 +9,8 @@ CREATE TABLE "detaileds" (
 
 CREATE TABLE subsidiaries (
   "id" SERIAL PRIMARY KEY,
-  "code" VARCHAR,
-  "title" VARCHAR,
+  "code" VARCHAR UNIQUE,
+  "title" VARCHAR UNIQUE,
   "has_detailed" BOOLEAN,
   "created_at" TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   "updated_at" TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
