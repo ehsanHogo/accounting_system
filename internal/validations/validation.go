@@ -51,3 +51,4 @@ func CheckBalance(v []*models.VoucherItem) error {
 		return errors.New("sum of credits and sum of debits cant be different")
 	}
 }
+
