@@ -254,20 +254,13 @@ func TestUpdateVoucher(t *testing.T) {
 		t.Fatalf("can not connect to database %v", err)
 	}
 	t.Run("can update voucher record successfully", func(t *testing.T) {
-
-		var tempDetailedId uint = 2
-		var tempSubsidiaryId uint = 4
-
 		code := randgenerator.GenerateRandomCode()
-		temp := make([]*models.VoucherItem, 2)
-		temp[0] = &models.VoucherItem{Credit: 11, DetailedId: tempDetailedId, SubsidiaryId: tempSubsidiaryId}
-		temp[1] = &models.VoucherItem{DetailedId: tempDetailedId, SubsidiaryId: tempSubsidiaryId}
-		voucher := &models.Voucher{Number: code, VoucherItems: temp}
+		voucher := createTempVoucher(code)
 		CreateRecord(repo, voucher)
 		fmt.Printf("prev Code %v\n", code)
 		prevVoucherId := voucher.Model.ID
 		code = randgenerator.GenerateRandomCode()
-		temp = append(temp, &models.VoucherItem{Credit: 13, DetailedId: tempDetailedId, SubsidiaryId: tempSubsidiaryId})
+		temp := append(voucher.VoucherItems, &models.VoucherItem{Credit: 13, DetailedId: tempDetailedId, SubsidiaryId: tempSubsidiaryId})
 		temp[1].Credit = 12
 
 		fmt.Printf("new Code %v\n", code)
@@ -277,18 +270,30 @@ func TestUpdateVoucher(t *testing.T) {
 	})
 
 	t.Run("return error when update voucher record that is not in databse", func(t *testing.T) {
-
-		var tempDetailedId uint = 2
-		var tempSubsidiaryId uint = 4
-
 		code := randgenerator.GenerateRandomCode()
-		temp := make([]*models.VoucherItem, 2)
-		temp[0] = &models.VoucherItem{DetailedId: tempDetailedId, SubsidiaryId: tempSubsidiaryId}
-		temp[1] = &models.VoucherItem{DetailedId: tempDetailedId, SubsidiaryId: tempSubsidiaryId}
-		voucher := &models.Voucher{Number: code, VoucherItems: temp}
+
+		voucher := createTempVoucher(code)
 
 		err := UpdateVoucher(repo, voucher, []*models.VoucherItem{}, []*models.VoucherItem{}, []*models.VoucherItem{}, 1_000_000)
 		assert.Error(t, err, "expected error indicate there is such id in database")
 
 	})
+}
+
+func createTempVoucher(number string) *models.Voucher {
+	var tempDetailedId uint = 2
+	var tempSubsidiaryId uint = 4
+
+	temp := make([]*models.VoucherItem, 2)
+	temp[0] = &models.VoucherItem{DetailedId: tempDetailedId, SubsidiaryId: tempSubsidiaryId}
+	temp[1] = &models.VoucherItem{DetailedId: tempDetailedId, SubsidiaryId: tempSubsidiaryId}
+
+	return &models.Voucher{Number: number, VoucherItems: temp}
+}
+
+func createTempVoucherItem() *models.VoucherItem {
+	var tempDetailedId uint = 2
+	var tempSubsidiaryId uint = 4
+
+	return &models.VoucherItem{DetailedId: tempDetailedId, SubsidiaryId: tempSubsidiaryId}
 }
