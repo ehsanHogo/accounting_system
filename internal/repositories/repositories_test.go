@@ -41,7 +41,7 @@ func TestCreateDetailed(t *testing.T) {
 		fmt.Printf("detailed id : %v", detailed.Model.ID)
 		assert.NoError(t, err, "expected detailed record to be created, but got error")
 		var result models.Detailed
-		err = repo.AccountingDB.First(&result, "code = ?", detailed.Code).Error //Code is uniqe
+		err = repo.AccountingDB.First(&result, detailed.Model.ID).Error //Code is uniqe
 		assert.NoError(t, err, " can not find the inserted detailed record :")
 
 	})
@@ -96,7 +96,7 @@ func TestCreateSubsidiary(t *testing.T) {
 
 		assert.NoError(t, err, "expected subsidiary record to be created, but got error")
 		var result models.Subsidiary
-		err = repo.AccountingDB.First(&result, "code = ?", subsidiary.Code).Error //Code is uniqe
+		err = repo.AccountingDB.First(&result, subsidiary.Model.ID).Error //Code is uniqe
 		assert.NoError(t, err, " can not find the inserted subsidiary record :")
 
 	})
@@ -153,7 +153,7 @@ func TestCreateVoucher(t *testing.T) {
 
 		assert.NoError(t, err, "expected voucher record to be created, but got error")
 		var result models.Voucher
-		err = repo.AccountingDB.First(&result, "number = ?", voucher.Number).Error //Number is uniqe
+		err = repo.AccountingDB.First(&result, voucher.Model.ID).Error //Number is uniqe
 		assert.NoError(t, err, " can not find the inserted voucher record :")
 
 	})

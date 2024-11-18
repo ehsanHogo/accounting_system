@@ -36,12 +36,11 @@ func UpdateDetailed(db *Repositories, v *models.Detailed, id uint) error {
 		return fmt.Errorf("record not found: %w", err)
 	}
 
-	// Update the fields
 	newV.Code = v.Code
 	newV.Title = v.Title
 
 	fmt.Printf("newval %v", newV)
-	// Save the updated record
+
 	if err := db.AccountingDB.Save(&newV).Error; err != nil {
 		return fmt.Errorf("failed to update record: %w", err)
 	}
