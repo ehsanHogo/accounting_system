@@ -1,12 +1,1 @@
-write test scanarios
-
-
-design tables 
-
-
-
-isntall postgres
-install dbeaver (gui)
-
-insatll migrate
-        
+testing creation of voucherItem
