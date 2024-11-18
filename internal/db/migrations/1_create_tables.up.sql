@@ -42,5 +42,10 @@ ALTER TABLE
 ADD
   FOREIGN KEY ("voucher_id") REFERENCES "vouchers" ("id");
 
+ALTER TABLE
+  "voucher_items"
+ADD
+  FOREIGN KEY ("detailed_id") REFERENCES "detaileds" ("id");
+
 -- ALTER TABLE "voucher_item" ADD FOREIGN KEY ("subsidiary_id") REFERENCES "subsidiary" ("id");
 -- ALTER TABLE "voucher" ADD FOREIGN KEY ("voucher_items_id") REFERENCES "voucher_items" ("id");
