@@ -133,3 +133,42 @@ func TestCreateSubsidiary(t *testing.T) {
 	})
 
 }
+
+func TestCreateVoucher(t *testing.T) {
+
+	repo, err := createConnectionForTest()
+
+	if err != nil {
+		t.Fatalf("can not connect to database %v", err)
+	}
+
+	t.Run("the voucher record successfully create", func(t *testing.T) {
+		code := randgenerator.GenerateRandomCode()
+		temp := make([]models.VoucherItem, 2)
+		voucher := &models.Voucher{Number: code, VoucherItems: temp}
+		err := CreateRecord(repo, voucher)
+
+		assert.NoError(t, err, "expected voucher record to be created, but got error")
+		var result models.Voucher
+		err = repo.AccountingDB.First(&result, "number = ?", voucher.Number).Error //Number is uniqe
+		assert.NoError(t, err, " can not find the inserted voucher record :")
+
+	})
+
+	t.Run("the voucher record creation fail because duplication number", func(t *testing.T) {
+
+		code := randgenerator.GenerateRandomCode()
+
+		temp := make([]models.VoucherItem, 2)
+		voucher := &models.Voucher{Number: code, VoucherItems: temp}
+		err := CreateRecord(repo, voucher)
+		assert.NoError(t, err, "expected voucher record to be created, but got error")
+
+		voucher = &models.Voucher{Number: code, VoucherItems: temp}
+		err = CreateRecord(repo, voucher)
+
+		assert.Error(t, err, "expected getting duplicate voucher number error")
+
+	})
+
+}

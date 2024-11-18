@@ -19,7 +19,7 @@ CREATE TABLE subsidiaries (
 
 CREATE TABLE "vouchers" (
   "id" SERIAL PRIMARY KEY,
-  "number" varchar,
+  "number" varchar UNIQUE,
   "created_at" TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   "updated_at" TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   "deleted_at" TIMESTAMP

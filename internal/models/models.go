@@ -27,7 +27,7 @@ type VoucherItem struct {
 
 type Voucher struct {
 	gorm.Model
-	Number       string
+	Number       string        `gorm:"unique"`
 	VoucherItems []VoucherItem `gorm:"foreignKey:VoucherID"`
 }
 
