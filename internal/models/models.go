@@ -20,7 +20,7 @@ type VoucherItem struct {
 	VoucherID uint `gorm:"not null;constraint:OnDelete:CASCADE;"`
 
 	DetailedId   uint `gorm:"not null;constraint:OnUpdate:CASCADE,OnDelete:RESTRICT;"`
-	SubsidiaryId uint `gorm:"not null;constraint:OnUpdate:CASCADE,OnDelete:RESTRICT;"`
+	SubsidiaryId uint `gorm:"constraint:OnUpdate:CASCADE,OnDelete:RESTRICT;default:null;"`
 	Debit        int64
 	Credit       int64
 }

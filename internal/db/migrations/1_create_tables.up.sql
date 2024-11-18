@@ -28,7 +28,7 @@ CREATE TABLE "vouchers" (
 CREATE TABLE "voucher_items" (
   "id" SERIAL PRIMARY KEY,
   "voucher_id" INT,
-  "detailed_id" INT,
+  "detailed_id" INT NOT NULL,
   "subsidiary_id" INT,
   "debit" INT,
   "credit" INT,
