@@ -47,3 +47,35 @@ func UpdateDetailed(db *Repositories, v *models.Detailed, id uint) error {
 
 	return nil
 }
+
+func UpdateSubsidiary(db *Repositories, v *models.Subsidiary, id uint) error {
+	var newV models.Subsidiary
+	if err := db.AccountingDB.First(&newV, id).Error; err != nil {
+		return fmt.Errorf("record not found: %w", err)
+	}
+
+	newV.Code = v.Code
+	newV.Title = v.Title
+	newV.HasDetailed = v.HasDetailed
+
+	if err := db.AccountingDB.Save(&newV).Error; err != nil {
+		return fmt.Errorf("failed to update record: %w", err)
+	}
+
+	return nil
+}
+
+func UpdateVoucher(db *Repositories, v *models.Voucher, id uint) error {
+	var newV models.Voucher
+	if err := db.AccountingDB.First(&newV, id).Error; err != nil {
+		return fmt.Errorf("record not found: %w", err)
+	}
+	newV.Number = v.Number
+	//deleted & update voucherItems handle in services
+	//just create new voucherItem here
+	newV.VoucherItems = v.VoucherItems
+	if err := db.AccountingDB.Save(&newV).Error; err != nil {
+		return fmt.Errorf("failed to update record: %w", err)
+	}
+	return nil
+}

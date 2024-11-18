@@ -193,7 +193,7 @@ func TestUpdateDetailed(t *testing.T) {
 
 		prevDetailedId := detailed.Model.ID
 		code = randgenerator.GenerateRandomCode()
-
+		title = randgenerator.GenerateRandomTitle()
 		detailed = &models.Detailed{Code: code, Title: title}
 		err := UpdateDetailed(repo, detailed, prevDetailedId)
 		assert.NoError(t, err, "expected no error")
@@ -205,6 +205,75 @@ func TestUpdateDetailed(t *testing.T) {
 		detailed := &models.Detailed{Code: code, Title: title}
 
 		err := UpdateDetailed(repo, detailed, 1_000_000)
+		assert.Error(t, err, "expected error indicate there is such id in database")
+
+	})
+}
+
+func TestUpdateSubsidiary(t *testing.T) {
+
+	repo, err := createConnectionForTest()
+
+	if err != nil {
+		t.Fatalf("can not connect to database %v", err)
+	}
+	t.Run("can update subsidiary record successfully", func(t *testing.T) {
+		code := randgenerator.GenerateRandomCode()
+		title := randgenerator.GenerateRandomTitle()
+		subsidiary := &models.Subsidiary{Code: code, Title: title, HasDetailed: false}
+		CreateRecord(repo, subsidiary)
+
+		prevSubsidiaryId := subsidiary.Model.ID
+		code = randgenerator.GenerateRandomCode()
+		title = randgenerator.GenerateRandomTitle()
+		subsidiary = &models.Subsidiary{Code: code, Title: title, HasDetailed: true}
+		err := UpdateSubsidiary(repo, subsidiary, prevSubsidiaryId)
+		assert.NoError(t, err, "expected no error")
+	})
+
+	t.Run("return error when update subsidiary record that is not in databse", func(t *testing.T) {
+		code := randgenerator.GenerateRandomCode()
+		title := randgenerator.GenerateRandomTitle()
+		subsidiary := &models.Subsidiary{Code: code, Title: title, HasDetailed: false}
+
+		err := UpdateSubsidiary(repo, subsidiary, 1_000_000)
+		assert.Error(t, err, "expected error indicate there is such id in database")
+
+	})
+}
+
+func TestUpdateVoucher(t *testing.T) {
+
+	repo, err := createConnectionForTest()
+
+	if err != nil {
+		t.Fatalf("can not connect to database %v", err)
+	}
+	t.Run("can update number field of voucher record successfully", func(t *testing.T) {
+		code := randgenerator.GenerateRandomCode()
+		temp := make([]*models.VoucherItem, 2)
+		temp[0] = &models.VoucherItem{}
+		temp[1] = &models.VoucherItem{}
+		voucher := &models.Voucher{Number: code, VoucherItems: temp}
+		CreateRecord(repo, voucher)
+		// fmt.Printf("prev Code %v\n", code)
+		prevVoucherId := voucher.Model.ID
+		code = randgenerator.GenerateRandomCode()
+		temp = append(temp, &models.VoucherItem{Credit: 13})
+		// fmt.Printf("new Code %v\n", code)
+		voucher = &models.Voucher{Number: code, VoucherItems: temp}
+		err := UpdateVoucher(repo, voucher, prevVoucherId)
+		assert.NoError(t, err, "expected no error")
+	})
+
+	t.Run("return error when update voucher record that is not in databse", func(t *testing.T) {
+		code := randgenerator.GenerateRandomCode()
+		temp := make([]*models.VoucherItem, 2)
+		temp[0] = &models.VoucherItem{}
+		temp[1] = &models.VoucherItem{}
+		voucher := &models.Voucher{Number: code, VoucherItems: temp}
+
+		err := UpdateVoucher(repo, voucher, 1_000_000)
 		assert.Error(t, err, "expected error indicate there is such id in database")
 
 	})
