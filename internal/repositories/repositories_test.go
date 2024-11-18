@@ -144,7 +144,9 @@ func TestCreateVoucher(t *testing.T) {
 
 	t.Run("the voucher record successfully create", func(t *testing.T) {
 		code := randgenerator.GenerateRandomCode()
-		temp := make([]models.VoucherItem, 2)
+		temp := make([]*models.VoucherItem, 2)
+		temp[0] = &models.VoucherItem{Credit: 1}
+		temp[1] = &models.VoucherItem{Credit: 2}
 		voucher := &models.Voucher{Number: code, VoucherItems: temp}
 		err := CreateRecord(repo, voucher)
 
@@ -159,7 +161,9 @@ func TestCreateVoucher(t *testing.T) {
 
 		code := randgenerator.GenerateRandomCode()
 
-		temp := make([]models.VoucherItem, 2)
+		temp := make([]*models.VoucherItem, 2)
+		temp[0] = &models.VoucherItem{Credit: 1}
+		temp[1] = &models.VoucherItem{Credit: 2}
 		voucher := &models.Voucher{Number: code, VoucherItems: temp}
 		err := CreateRecord(repo, voucher)
 		assert.NoError(t, err, "expected voucher record to be created, but got error")
