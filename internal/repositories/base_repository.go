@@ -65,17 +65,45 @@ func UpdateSubsidiary(db *Repositories, v *models.Subsidiary, id uint) error {
 	return nil
 }
 
-func UpdateVoucher(db *Repositories, v *models.Voucher, id uint) error {
+func UpdateVoucher(db *Repositories, v *models.Voucher, updatedItem []*models.VoucherItem, deletedItem []*models.VoucherItem, insertedItem []*models.VoucherItem, id uint) error {
 	var newV models.Voucher
 	if err := db.AccountingDB.First(&newV, id).Error; err != nil {
 		return fmt.Errorf("record not found: %w", err)
 	}
 	newV.Number = v.Number
-	//deleted & update voucherItems handle in services
-	//just create new voucherItem here
-	newV.VoucherItems = v.VoucherItems
+	newV.VoucherItems = insertedItem
+
+	for _, vi := range deletedItem {
+		db.AccountingDB.Delete(&vi)
+	}
+
+	for _, vi := range updatedItem {
+		err := updateVoucherItem(db, vi, vi.Model.ID)
+		if err != nil {
+			return fmt.Errorf("can not update voucher item : %w", err)
+		}
+	}
+
 	if err := db.AccountingDB.Save(&newV).Error; err != nil {
 		return fmt.Errorf("failed to update record: %w", err)
 	}
+	return nil
+}
+
+func updateVoucherItem(db *Repositories, v *models.VoucherItem, id uint) error {
+	var newV models.VoucherItem
+	if err := db.AccountingDB.First(&newV, id).Error; err != nil {
+		return fmt.Errorf("record not found: %w", err)
+	}
+
+	newV.Credit = v.Credit
+	newV.Debit = v.Debit
+	newV.DetailedId = v.DetailedId
+	newV.SubsidiaryId = v.SubsidiaryId
+
+	if err := db.AccountingDB.Save(&newV).Error; err != nil {
+		return fmt.Errorf("failed to update record: %w", err)
+	}
+
 	return nil
 }

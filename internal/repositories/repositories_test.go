@@ -249,20 +249,22 @@ func TestUpdateVoucher(t *testing.T) {
 	if err != nil {
 		t.Fatalf("can not connect to database %v", err)
 	}
-	t.Run("can update number field of voucher record successfully", func(t *testing.T) {
+	t.Run("can update voucher record successfully", func(t *testing.T) {
 		code := randgenerator.GenerateRandomCode()
 		temp := make([]*models.VoucherItem, 2)
-		temp[0] = &models.VoucherItem{}
+		temp[0] = &models.VoucherItem{Credit: 11}
 		temp[1] = &models.VoucherItem{}
 		voucher := &models.Voucher{Number: code, VoucherItems: temp}
 		CreateRecord(repo, voucher)
-		// fmt.Printf("prev Code %v\n", code)
+		fmt.Printf("prev Code %v\n", code)
 		prevVoucherId := voucher.Model.ID
 		code = randgenerator.GenerateRandomCode()
 		temp = append(temp, &models.VoucherItem{Credit: 13})
-		// fmt.Printf("new Code %v\n", code)
+		temp[1].Credit = 12
+
+		fmt.Printf("new Code %v\n", code)
 		voucher = &models.Voucher{Number: code, VoucherItems: temp}
-		err := UpdateVoucher(repo, voucher, prevVoucherId)
+		err := UpdateVoucher(repo, voucher, []*models.VoucherItem{temp[1]}, []*models.VoucherItem{temp[0]}, []*models.VoucherItem{temp[2]}, prevVoucherId)
 		assert.NoError(t, err, "expected no error")
 	})
 
@@ -273,7 +275,7 @@ func TestUpdateVoucher(t *testing.T) {
 		temp[1] = &models.VoucherItem{}
 		voucher := &models.Voucher{Number: code, VoucherItems: temp}
 
-		err := UpdateVoucher(repo, voucher, 1_000_000)
+		err := UpdateVoucher(repo, voucher, []*models.VoucherItem{}, []*models.VoucherItem{}, []*models.VoucherItem{}, 1_000_000)
 		assert.Error(t, err, "expected error indicate there is such id in database")
 
 	})
