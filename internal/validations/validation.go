@@ -34,7 +34,7 @@ func CheckDebitCredit(vi *models.VoucherItem) error {
 	}
 }
 
-func CheckBalance(v []models.VoucherItem) error {
+func CheckBalance(v []*models.VoucherItem) error {
 	var credits int64 = 0
 	var debits int64 = 0
 

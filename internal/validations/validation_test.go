@@ -81,6 +81,24 @@ func TestCheckDebitCredit(t *testing.T) {
 
 func TestCheckBalance(t *testing.T){
 	t.Run("return error when sum of credits and dibits is different", func(t *testing.T) {
-	
+		temp := make([]*models.VoucherItem, 3)
+		temp[0] = &models.VoucherItem{Credit: 0 , Debit: 4}
+		temp[1] = &models.VoucherItem{Credit: 2, Debit: 0}
+		temp[2] = &models.VoucherItem{Credit: 1, Debit: 0}
+
+		err := CheckBalance(temp)
+		assert.Error(t,err , "expected error indicate sum of debits and credits is different")
 	})
+
+
+	t.Run("when sum of credits and dibits is same , successfully return nil", func(t *testing.T) {
+		temp := make([]*models.VoucherItem, 3)
+		temp[0] = &models.VoucherItem{Credit: 5 , Debit: 0}
+		temp[1] = &models.VoucherItem{Credit: 0, Debit: 2}
+		temp[2] = &models.VoucherItem{Credit: 0, Debit: 3}
+
+		err := CheckBalance(temp)
+		assert.NoError(t,err , "expected no error")
+	})
+
 }
