@@ -1,6 +1,7 @@
 package validations
 
 import (
+	"accounting_system/internal/models"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -39,5 +40,47 @@ func TestCheckMaxLength(t *testing.T) {
 		maxl := 64
 		err := CheckMaxLength(s, 64)
 		assert.NoError(t, err, "Expected no error for length less than max length %d", maxl)
+	})
+}
+
+func TestCheckDebitCredit(t *testing.T) {
+	t.Run("return error if one of the debit or credit was negative", func(t *testing.T) {
+		vi := &models.VoucherItem{Debit: 12, Credit: -1}
+		err := CheckDebitCredit(vi)
+		assert.Error(t, err, "expected error indicate negative value is invalied")
+		vi = &models.VoucherItem{Debit: -2, Credit: 11}
+		err = CheckDebitCredit(vi)
+		assert.Error(t, err, "expected error indicate negative value is invalied")
+	})
+
+	t.Run("return error if both debit and credit were zero", func(t *testing.T) {
+		vi := &models.VoucherItem{Debit: 0, Credit: 0}
+		err := CheckDebitCredit(vi)
+		assert.Error(t, err, "expected error indicate both debit and credit cant be zero")
+	})
+
+	t.Run("return error if both debit and credit had positive value", func(t *testing.T) {
+		vi := &models.VoucherItem{Debit: 3, Credit: 5}
+		err := CheckDebitCredit(vi)
+		assert.Error(t, err, "expected error indicate both debit and credit cant have positive value")
+	})
+
+	t.Run("when one of them is zero and the other is positive value , successfully return nil ", func(t *testing.T) {
+		vi := &models.VoucherItem{Debit: 2, Credit: 0}
+		err := CheckDebitCredit(vi)
+		assert.NoError(t, err, "expected no error")
+
+		vi = &models.VoucherItem{Debit: 0, Credit: 3}
+		err = CheckDebitCredit(vi)
+		assert.NoError(t, err, "expected no error")
+	})
+
+}
+
+
+
+func TestCheckBalance(t *testing.T){
+	t.Run("return error when sum of credits and dibits is different", func(t *testing.T) {
+	
 	})
 }

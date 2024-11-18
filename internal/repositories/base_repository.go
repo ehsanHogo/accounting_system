@@ -23,7 +23,6 @@ func CreateRecord[T any](db *Repositories, v *T) error {
 
 	} else {
 		fmt.Println("Record created successfully")
-
 		return nil
 	}
 
