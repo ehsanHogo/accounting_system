@@ -190,11 +190,22 @@ func TestUpdateDetailed(t *testing.T) {
 		title := randgenerator.GenerateRandomTitle()
 		detailed := &models.Detailed{Code: code, Title: title}
 		CreateRecord(repo, detailed)
-		fmt.Printf("prev code : %v", code)
+
 		prevDetailedId := detailed.Model.ID
 		code = randgenerator.GenerateRandomCode()
-		fmt.Printf("new code : %v", code)
+
 		detailed = &models.Detailed{Code: code, Title: title}
-		UpdateDetailed(repo, detailed, prevDetailedId)
+		err := UpdateDetailed(repo, detailed, prevDetailedId)
+		assert.NoError(t, err, "expected no error")
+	})
+
+	t.Run("return error when update detailed record that is not in databse", func(t *testing.T) {
+		code := randgenerator.GenerateRandomCode()
+		title := randgenerator.GenerateRandomTitle()
+		detailed := &models.Detailed{Code: code, Title: title}
+
+		err := UpdateDetailed(repo, detailed, 1_000_000)
+		assert.Error(t, err, "expected error indicate there is such id in database")
+
 	})
 }
