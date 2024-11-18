@@ -3,7 +3,6 @@ package repositories
 import (
 	"accounting_system/config"
 	"accounting_system/internal/models"
-	"errors"
 	"fmt"
 	"testing"
 
@@ -38,18 +37,29 @@ func TestCreateDetailed(t *testing.T) {
 
 	})
 
-	t.Run("the record fail because duplication", func(t *testing.T) {
+	t.Run("the record fail because duplication code", func(t *testing.T) {
 		// fmt.Println("jdgfsdgh")
-		detailed := &models.Detailed{Code: "12", Title: "test"}
+		detailed := &models.Detailed{Code: "13", Title: "test13"}
 		err := CreateRecord(repo, detailed)
 		assert.NoError(t, err, "expected detailed record to be created, but got error")
 
-		detailed = &models.Detailed{Code: "12", Title: "dup"}
-		// err = CreateRecord(repo, detailed)
-		err = errors.New("sdfjksd")
-		if err != nil {
-			t.Fatalf("duplicated record : %v", err.Error())
-		}
+		detailed = &models.Detailed{Code: "13", Title: "dup"}
+		err = CreateRecord(repo, detailed)
+
+		assert.Error(t, err, "expected getting duplicate error")
+
+	})
+
+	t.Run("the record fail because duplication title", func(t *testing.T) {
+		// fmt.Println("jdgfsdgh")
+		detailed := &models.Detailed{Code: "13	", Title: "test13"}
+		err := CreateRecord(repo, detailed)
+		assert.NoError(t, err, "expected detailed record to be created, but got error")
+
+		detailed = &models.Detailed{Code: "13", Title: "dup"}
+		err = CreateRecord(repo, detailed)
+
+		assert.Error(t, err, "expected getting duplicate error")
 
 	})
 
