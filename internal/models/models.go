@@ -4,8 +4,9 @@ import "gorm.io/gorm"
 
 type Detailed struct {
 	gorm.Model
-	Code  string `gorm:"unique"`
-	Title string `gorm:"unique"`
+	Code    string `gorm:"unique"`
+	Title   string `gorm:"unique"`
+	Version uint
 }
 
 type Subsidiary struct {
@@ -13,6 +14,7 @@ type Subsidiary struct {
 	Code        string `gorm:"unique"`
 	Title       string `gorm:"unique"`
 	HasDetailed bool
+	Version     uint
 }
 
 type VoucherItem struct {
@@ -29,6 +31,7 @@ type Voucher struct {
 	gorm.Model
 	Number       string         `gorm:"unique"`
 	VoucherItems []*VoucherItem `gorm:"foreignKey:VoucherID"`
+	Version      uint
 }
 
 //creare models

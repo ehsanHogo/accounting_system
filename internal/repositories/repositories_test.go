@@ -213,6 +213,37 @@ func TestUpdateDetailed(t *testing.T) {
 
 	})
 
+	t.Run("can not update detailed record if versions were not different", func(t *testing.T) {
+		detailed := createTempDetailed()
+		CreateRecord(repo, detailed)
+		detailed.Code = randgenerator.GenerateRandomCode()
+		fmt.Printf("prev id : %v\n", detailed.Model.ID)
+		fmt.Printf("code : %v\n", detailed.Code)
+		fmt.Printf("prev version : %v\n", detailed.Version)
+		UpdateDetailed(repo, detailed, detailed.Model.ID)
+		detailed.Code = randgenerator.GenerateRandomCode()
+		err := UpdateDetailed(repo, detailed, detailed.Model.ID)
+		fmt.Printf("new version : %v\n", detailed.Version)
+		assert.Error(t, err, "expected error indicate the version is different")
+
+	})
+
+	t.Run("can update detailed record if versions were same", func(t *testing.T) {
+		detailed := createTempDetailed()
+		CreateRecord(repo, detailed)
+		detailed.Code = randgenerator.GenerateRandomCode()
+		fmt.Printf("prev id : %v\n", detailed.Model.ID)
+		fmt.Printf("code : %v\n", detailed.Code)
+		fmt.Printf("prev version : %v\n", detailed.Version)
+		UpdateDetailed(repo, detailed, detailed.Model.ID)
+		detailed, _ = ReadRecord[models.Detailed](repo, detailed.Model.ID, "detailed")
+		detailed.Code = randgenerator.GenerateRandomCode()
+		err := UpdateDetailed(repo, detailed, detailed.Model.ID)
+		fmt.Printf("new version : %v\n", detailed.Version)
+		assert.NoError(t, err, "expected no error")
+
+	})
+
 	// t.Run("return error when update detailed record that is reffrenced by some voucherItems", func(t *testing.T) {
 	// 	code := randgenerator.GenerateRandomCode()
 	// 	title := randgenerator.GenerateRandomTitle()

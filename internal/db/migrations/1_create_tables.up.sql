@@ -4,7 +4,8 @@ CREATE TABLE "detaileds" (
   "title" varchar UNIQUE,
   "created_at" timestamp DEFAULT CURRENT_TIMESTAMP,
   "updated_at" timestamp DEFAULT CURRENT_TIMESTAMP,
-  "deleted_at" TIMESTAMP
+  "deleted_at" TIMESTAMP,
+  "version" INT DEFAULT 0 NOT NULL
 );
 
 CREATE TABLE subsidiaries (
@@ -14,7 +15,8 @@ CREATE TABLE subsidiaries (
   "has_detailed" BOOLEAN,
   "created_at" TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   "updated_at" TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  "deleted_at" TIMESTAMP
+  "deleted_at" TIMESTAMP,
+  "version" INT DEFAULT 0 NOT NULL
 );
 
 CREATE TABLE "vouchers" (
@@ -22,7 +24,8 @@ CREATE TABLE "vouchers" (
   "number" varchar UNIQUE,
   "created_at" TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   "updated_at" TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  "deleted_at" TIMESTAMP
+  "deleted_at" TIMESTAMP,
+  "version" INT DEFAULT 0 NOT NULL
 );
 
 CREATE TABLE "voucher_items" (

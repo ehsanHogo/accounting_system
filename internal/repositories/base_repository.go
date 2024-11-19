@@ -57,9 +57,13 @@ func UpdateDetailed(db *Repositories, v *models.Detailed, id uint) error {
 		return fmt.Errorf("record not found: %w", err)
 	}
 
+	if v.Version != newV.Version {
+		return fmt.Errorf("can not update , the version of detailed record is different. expected version : %v", newV.Version)
+	} else {
+
 	newV.Code = v.Code
 	newV.Title = v.Title
-
+	newV.Version += 1
 	fmt.Printf("newval %v", newV)
 
 	if err := db.AccountingDB.Save(&newV).Error; err != nil {
@@ -67,6 +71,7 @@ func UpdateDetailed(db *Repositories, v *models.Detailed, id uint) error {
 	}
 
 	return nil
+	}
 }
 
 func UpdateSubsidiary(db *Repositories, v *models.Subsidiary, id uint) error {
