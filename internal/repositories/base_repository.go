@@ -109,15 +109,20 @@ func UpdateSubsidiary(db *Repositories, v *models.Subsidiary, id uint) error {
 		return fmt.Errorf("record not found: %w", err)
 	}
 
-	newV.Code = v.Code
-	newV.Title = v.Title
-	newV.HasDetailed = v.HasDetailed
+	if v.Version != newV.Version {
+		return fmt.Errorf("can not update , the version of subsidiary record is different. expected version : %v", newV.Version)
+	} else {
 
-	if err := db.AccountingDB.Save(&newV).Error; err != nil {
-		return fmt.Errorf("failed to update record: %w", err)
+		newV.Code = v.Code
+		newV.Title = v.Title
+		newV.HasDetailed = v.HasDetailed
+		newV.Version += 1
+		if err := db.AccountingDB.Save(&newV).Error; err != nil {
+			return fmt.Errorf("failed to update record: %w", err)
+		}
+
+		return nil
 	}
-
-	return nil
 }
 
 func UpdateVoucher(db *Repositories, v *models.Voucher, updatedItem []*models.VoucherItem, deletedItem []*models.VoucherItem, insertedItem []*models.VoucherItem, id uint) error {
