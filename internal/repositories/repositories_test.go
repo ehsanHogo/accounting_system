@@ -436,7 +436,7 @@ func TestDeleteVoucher(t *testing.T) {
 	})
 }
 
-func TestReadDetailedRecord(t *testing.T) {
+func TestReadRecord(t *testing.T) {
 	repo, err := createConnectionForTest()
 	if err != nil {
 		t.Fatalf("can not connect to database %v", err)
@@ -446,7 +446,7 @@ func TestReadDetailedRecord(t *testing.T) {
 		detailed := createTempDetailed()
 		CreateRecord(repo, detailed)
 
-		res, err := ReadDetailedRecord(repo, detailed.Model.ID)
+		res, err := ReadRecord[models.Detailed](repo, detailed.Model.ID, "detailed")
 		assert.NoError(t, err, "expected no error")
 		assert.Equal(t, res.Code, detailed.Code)
 		assert.Equal(t, res.Title, detailed.Title)
@@ -454,24 +454,16 @@ func TestReadDetailedRecord(t *testing.T) {
 
 	t.Run("return error when the detailed record is not in database ", func(t *testing.T) {
 
-		_, err := ReadDetailedRecord(repo, 1_000_000)
+		_, err := ReadRecord[models.Detailed](repo, 1_000_000, "detailed")
 		assert.Error(t, err, "expected  error indicate can not found the detailed record")
 
 	})
-
-}
-
-func TestReadSubsidiaryRecord(t *testing.T) {
-	repo, err := createConnectionForTest()
-	if err != nil {
-		t.Fatalf("can not connect to database %v", err)
-	}
 
 	t.Run("can read the subsidiary record successfully", func(t *testing.T) {
 		subsidiary := createTempSubsidiary()
 		CreateRecord(repo, subsidiary)
 
-		res, err := ReadSubsidiaryRecord(repo, subsidiary.Model.ID)
+		res, err := ReadRecord[models.Subsidiary](repo, subsidiary.Model.ID, "subsidiary")
 		assert.NoError(t, err, "expected no error")
 		assert.Equal(t, res.Code, subsidiary.Code)
 		assert.Equal(t, res.Title, subsidiary.Title)
@@ -480,24 +472,16 @@ func TestReadSubsidiaryRecord(t *testing.T) {
 
 	t.Run("return error when the subsidiary record is not in database ", func(t *testing.T) {
 
-		_, err := ReadSubsidiaryRecord(repo, 1_000_000)
+		_, err := ReadRecord[models.Subsidiary](repo, 1_000_000, "subsidiary")
 		assert.Error(t, err, "expected  error indicate can not found the subsidiary record")
 
 	})
-
-}
-
-func TestReadVoucherRecord(t *testing.T) {
-	repo, err := createConnectionForTest()
-	if err != nil {
-		t.Fatalf("can not connect to database %v", err)
-	}
 
 	t.Run("can read the voucher record successfully", func(t *testing.T) {
 		voucher := createTempVoucher()
 		CreateRecord(repo, voucher)
 
-		res, err := ReadVoucherRecord(repo, voucher.Model.ID)
+		res, err := ReadRecord[models.Voucher](repo, voucher.Model.ID, "voucher")
 		assert.NoError(t, err, "expected no error")
 		assert.Equal(t, res.Number, res.Number)
 
@@ -505,7 +489,7 @@ func TestReadVoucherRecord(t *testing.T) {
 
 	t.Run("return error when the voucher record is not in database ", func(t *testing.T) {
 
-		_, err := ReadVoucherRecord(repo, 1_000_000)
+		_, err := ReadRecord[models.Voucher](repo, 1_000_000, "voucher")
 		assert.Error(t, err, "expected  error indicate can not found the voucher record")
 
 	})

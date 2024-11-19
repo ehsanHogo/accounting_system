@@ -30,6 +30,27 @@ func CreateRecord[T any](db *Repositories, v *T) error {
 
 }
 
+func DeleteRecord[T any](db *Repositories, v *T) error {
+	res := db.AccountingDB.Unscoped().Delete(&v)
+
+	if res.Error != nil {
+		return fmt.Errorf("error in deleting record: %w", res.Error)
+
+	} else {
+
+		fmt.Println("Record deleted successfully")
+		return nil
+	}
+}
+
+func ReadRecord[T any](db *Repositories, id uint, genericType string) (*T, error) {
+	var res T
+	if err := db.AccountingDB.First(&res, id).Error; err != nil {
+		return nil, fmt.Errorf("%s record not found: %w", genericType, err)
+	}
+	return &res, nil
+}
+
 func UpdateDetailed(db *Repositories, v *models.Detailed, id uint) error {
 	var newV models.Detailed
 	if err := db.AccountingDB.First(&newV, id).Error; err != nil {
@@ -110,53 +131,4 @@ func updateVoucherItem(db *Repositories, v *models.VoucherItem, id uint) error {
 	}
 
 	return nil
-}
-
-func DeleteRecord[T any](db *Repositories, v *T) error {
-	res := db.AccountingDB.Unscoped().Delete(&v)
-
-	if res.Error != nil {
-		return fmt.Errorf("error in deleting record: %w", res.Error)
-
-	} else {
-
-		fmt.Println("Record deleted successfully")
-		return nil
-	}
-}
-
-func ReadDetailedRecord(db *Repositories, id uint) (*models.Detailed, error) {
-
-	var res models.Detailed
-
-	if err := db.AccountingDB.First(&res, id).Error; err != nil {
-		return nil, fmt.Errorf("detailed record not found: %w", err)
-	} else {
-		return &res, nil
-	}
-
-}
-
-func ReadSubsidiaryRecord(db *Repositories, id uint) (*models.Subsidiary, error) {
-
-	var res models.Subsidiary
-
-	if err := db.AccountingDB.First(&res, id).Error; err != nil {
-		return nil, fmt.Errorf("subsidiary record not found: %w", err)
-	} else {
-		return &res, nil
-	}
-
-}
-
-func ReadVoucherRecord(db *Repositories, id uint) (*models.Voucher, error) {
-
-	var res models.Voucher
-
-	if err := db.AccountingDB.First(&res, id).Error; err != nil {
-		return nil, fmt.Errorf("voucher record not found: %w", err)
-	} else {
-		return &res, nil
-	}
-
 }
