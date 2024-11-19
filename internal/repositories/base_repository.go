@@ -124,3 +124,39 @@ func DeleteRecord[T any](db *Repositories, v *T) error {
 		return nil
 	}
 }
+
+func ReadDetailedRecord(db *Repositories, id uint) (*models.Detailed, error) {
+
+	var res models.Detailed
+
+	if err := db.AccountingDB.First(&res, id).Error; err != nil {
+		return nil, fmt.Errorf("detailed record not found: %w", err)
+	} else {
+		return &res, nil
+	}
+
+}
+
+func ReadSubsidiaryRecord(db *Repositories, id uint) (*models.Subsidiary, error) {
+
+	var res models.Subsidiary
+
+	if err := db.AccountingDB.First(&res, id).Error; err != nil {
+		return nil, fmt.Errorf("subsidiary record not found: %w", err)
+	} else {
+		return &res, nil
+	}
+
+}
+
+func ReadVoucherRecord(db *Repositories, id uint) (*models.Voucher, error) {
+
+	var res models.Voucher
+
+	if err := db.AccountingDB.First(&res, id).Error; err != nil {
+		return nil, fmt.Errorf("voucher record not found: %w", err)
+	} else {
+		return &res, nil
+	}
+
+}
