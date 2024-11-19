@@ -1,4 +1,4 @@
 testing creation of voucherItem
 
 
-prevent updating reffrenced detailed 
+prevent updating reffrenced detailed

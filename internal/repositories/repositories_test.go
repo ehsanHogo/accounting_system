@@ -244,6 +244,19 @@ func TestUpdateDetailed(t *testing.T) {
 
 	})
 
+	t.Run("can not update detailed record if were reffrenced in some voucher items", func(t *testing.T) {
+		detailed := createTempDetailed()
+		CreateRecord(repo, detailed)
+		voucher := createTempVoucher()
+		voucher.VoucherItems = append(voucher.VoucherItems, &models.VoucherItem{DetailedId: detailed.Model.ID})
+		fmt.Printf("detialed id : %v\n", detailed.Model.ID)
+		CreateRecord(repo, voucher)
+		fmt.Printf("voucher id : %v\n", voucher.Model.ID)
+		err := UpdateDetailed(repo, detailed, detailed.Model.ID)
+
+		assert.Error(t, err, "expected error indicate violation update forign key constraint")
+	})
+
 }
 
 func TestUpdateSubsidiary(t *testing.T) {
@@ -307,6 +320,7 @@ func TestUpdateSubsidiary(t *testing.T) {
 		assert.NoError(t, err, "expected no error")
 
 	})
+
 }
 
 func TestUpdateVoucher(t *testing.T) {
