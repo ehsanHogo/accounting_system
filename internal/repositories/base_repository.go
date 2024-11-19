@@ -100,6 +100,34 @@ func DeleteSubsidiaryRecord(db *Repositories, v *models.Subsidiary) error {
 
 }
 
+func DeleteVoucherRecord(db *Repositories, v *models.Voucher) error {
+
+	var prev *models.Voucher
+	var err error
+	prev, err = ReadRecord[models.Voucher](db, v.Model.ID, "voucher")
+	if err != nil {
+		return fmt.Errorf("can not delete voucher record : %v", err)
+	} else {
+
+		if v.Version != prev.Version {
+			return errors.New("can not delete because of different version")
+		} else {
+
+			res := db.AccountingDB.Unscoped().Delete(&v)
+
+			if res.Error != nil {
+				return fmt.Errorf("error in deleting record: %w", res.Error)
+
+			} else {
+
+				fmt.Println("Record deleted successfully")
+				return nil
+			}
+		}
+	}
+
+}
+
 func ReadRecord[T any](db *Repositories, id uint, genericType string) (*T, error) {
 	var res T
 	if err := db.AccountingDB.First(&res, id).Error; err != nil {

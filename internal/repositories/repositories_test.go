@@ -573,6 +573,38 @@ func TestDeleteVoucher(t *testing.T) {
 		result := repo.AccountingDB.First(&voucher)
 		assert.Error(t, result.Error, "expected error indicate voucher record not found")
 	})
+
+	t.Run("can not delete voucher record if versions were  different", func(t *testing.T) {
+		voucher := createTempVoucher()
+		CreateRecord(repo, voucher)
+		voucher.Number = randgenerator.GenerateRandomCode()
+		fmt.Printf("prev id : %v\n", voucher.Model.ID)
+		fmt.Printf("code : %v\n", voucher.Number)
+		fmt.Printf("prev version : %v\n", voucher.Version)
+		UpdateVoucher(repo, voucher, []*models.VoucherItem{}, []*models.VoucherItem{}, []*models.VoucherItem{}, voucher.Model.ID)
+
+		err := DeleteVoucherRecord(repo, voucher)
+		fmt.Printf("new version : %v\n", voucher.Version)
+		assert.Error(t, err, "expected error indicate the versions are different")
+
+	})
+
+	t.Run("can delete voucher record if versions were same", func(t *testing.T) {
+		voucher := createTempVoucher()
+		CreateRecord(repo, voucher)
+		voucher.Number = randgenerator.GenerateRandomCode()
+		fmt.Printf("prev id : %v\n", voucher.Model.ID)
+		fmt.Printf("code : %v\n", voucher.Number)
+		fmt.Printf("prev version : %v\n", voucher.Version)
+		UpdateVoucher(repo, voucher, []*models.VoucherItem{}, []*models.VoucherItem{}, []*models.VoucherItem{}, voucher.Model.ID)
+
+		voucher, _ = ReadRecord[models.Voucher](repo, voucher.Model.ID, "voucher")
+
+		err := DeleteVoucherRecord(repo, voucher)
+		fmt.Printf("new version : %v\n", voucher.Version)
+		assert.NoError(t, err, "expected no error")
+
+	})
 }
 
 func TestReadRecord(t *testing.T) {
