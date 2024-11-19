@@ -260,7 +260,7 @@ func TestUpdateVoucher(t *testing.T) {
 		fmt.Printf("prev Code %v\n", code)
 		prevVoucherId := voucher.Model.ID
 		code = randgenerator.GenerateRandomCode()
-		temp := append(voucher.VoucherItems, &models.VoucherItem{Credit: 13, DetailedId: tempDetailedId, SubsidiaryId: tempSubsidiaryId})
+		temp := append(voucher.VoucherItems, createTempVoucherItem())
 		temp[1].Credit = 12
 
 		fmt.Printf("new Code %v\n", code)

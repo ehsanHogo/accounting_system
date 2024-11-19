@@ -107,3 +107,16 @@ func updateVoucherItem(db *Repositories, v *models.VoucherItem, id uint) error {
 
 	return nil
 }
+
+func DeleteRecord[T any](db *Repositories, v *T) error {
+	res := db.AccountingDB.Delete(&v)
+
+	if res.Error != nil {
+		return fmt.Errorf("error in deleting record: %w", res.Error)
+
+	} else {
+
+		fmt.Println("Record deleted successfully")
+		return nil
+	}
+}
