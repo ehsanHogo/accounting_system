@@ -74,7 +74,11 @@ func UpdateVoucher(db *Repositories, v *models.Voucher, updatedItem []*models.Vo
 	newV.VoucherItems = insertedItem
 
 	for _, vi := range deletedItem {
-		db.AccountingDB.Delete(&vi)
+
+		err := DeleteRecord(db, vi)
+		if err != nil {
+			return fmt.Errorf("can not update voucher item : %w", err)
+		}
 	}
 
 	for _, vi := range updatedItem {
@@ -109,7 +113,7 @@ func updateVoucherItem(db *Repositories, v *models.VoucherItem, id uint) error {
 }
 
 func DeleteRecord[T any](db *Repositories, v *T) error {
-	res := db.AccountingDB.Delete(&v)
+	res := db.AccountingDB.Unscoped().Delete(&v)
 
 	if res.Error != nil {
 		return fmt.Errorf("error in deleting record: %w", res.Error)

@@ -335,6 +335,20 @@ func TestDeleteDetailed(t *testing.T) {
 		result := repo.AccountingDB.First(&detailed)
 		assert.Error(t, result.Error, "expected error indicate detailed record not found")
 	})
+
+	t.Run("deletion detailed record fails because there is a reffrence in voucher", func(t *testing.T) {
+		detailed := createTempDetailed()
+		CreateRecord(repo, detailed)
+		voucher := &models.Voucher{Number: randgenerator.GenerateRandomCode(), VoucherItems: []*models.VoucherItem{createTempVoucherItem()}}
+		voucher.VoucherItems[0].DetailedId = detailed.Model.ID
+		CreateRecord(repo, voucher)
+		fmt.Printf("det : %v", detailed.Model.ID)
+		fmt.Printf("vi : %v", voucher.VoucherItems[0].Model.ID)
+		err := DeleteRecord(repo, detailed)
+
+		assert.Error(t, err, "expected error indicate violation forignkey constraint")
+
+	})
 }
 
 func TestDeleteSubsidiary(t *testing.T) {
@@ -373,9 +387,9 @@ func TestDeleteVoucher(t *testing.T) {
 
 		voucher := createTempVoucher()
 		CreateRecord(repo, voucher)
-
-		DeleteRecord(repo, voucher)
-
+		fmt.Printf("voucher : %v", voucher.Model.ID)
+		err := DeleteRecord(repo, voucher)
+		assert.NoError(t, err, "expected no error %v", err)
 		result := repo.AccountingDB.First(&voucher)
 		assert.Error(t, result.Error, "expected error indicate voucher record not found")
 

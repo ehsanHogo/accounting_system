@@ -40,12 +40,12 @@ CREATE TABLE "voucher_items" (
 ALTER TABLE
   "voucher_items"
 ADD
-  FOREIGN KEY ("voucher_id") REFERENCES "vouchers" ("id");
+  FOREIGN KEY ("voucher_id") REFERENCES "vouchers" ("id") ON DELETE CASCADE;
 
 ALTER TABLE
   "voucher_items"
 ADD
-  FOREIGN KEY ("detailed_id") REFERENCES "detaileds" ("id");
+  FOREIGN KEY ("detailed_id") REFERENCES "detaileds" ("id") ON DELETE RESTRICT;
 
 ALTER TABLE
   "voucher_items"
