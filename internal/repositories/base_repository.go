@@ -24,7 +24,8 @@ func CreateRecord[T any](db *Repositories, v *T) error {
 
 	res := db.AccountingDB.Create(v)
 	if res.Error != nil {
-		return fmt.Errorf("error creating record: %w", res.Error)
+		fmt.Println("here")
+		return res.Error
 
 	} else {
 

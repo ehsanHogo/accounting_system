@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/assert"
 	"gorm.io/driver/postgres"
@@ -23,12 +24,22 @@ func createConnectionForTest() (*Repositories, error) {
 		return nil, err
 	}
 
+	sqlDB, _ := db.DB()
+
+	sqlDB.SetMaxOpenConns(100)                // Limit the maximum number of open connections
+	sqlDB.SetMaxIdleConns(5)                  // Set idle connection limit
+	sqlDB.SetConnMaxLifetime(5 * time.Minute) // Limit connection lifetime
+
 	return NewConnection(db), nil
 }
 
 func TestCreateDetailed(t *testing.T) {
 
 	repo, err := createConnectionForTest()
+	defer func() {
+		sqlDB, _ := repo.AccountingDB.DB()
+		sqlDB.Close()
+	}()
 
 	if err != nil {
 		t.Fatalf("can not connect to database %v", err)
@@ -55,34 +66,18 @@ func TestCreateDetailed(t *testing.T) {
 		}()
 
 		// Generate random code and title
-		code := randgenerator.GenerateRandomCode()
-		title := randgenerator.GenerateRandomTitle()
-
 		// Create a new detailed record within the transaction
-		detailed := &models.Detailed{Code: code, Title: title}
+		detailed, err := createTempDetailed(repo)
 
-		err := errors.New("")
-		for err != nil {
+		assert.NoError(t, err, "can not create detailed record due to")
 
-			err = CreateRecord(repo, detailed)
-			if err != nil {
-				fmt.Printf("Error during record creation: %v\n", err)
-				code = randgenerator.GenerateRandomCode()
-				title = randgenerator.GenerateRandomTitle()
-				detailed = &models.Detailed{Code: code, Title: title}
-			}
-		}
-
-		fmt.Printf("Detailed ID: %v\n", detailed.Model.ID)
-		assert.NoError(t, err, "expected detailed record to be created, but got error")
+		// fmt.Printf("Detailed ID: %v\n", detailed.Model.ID)
 
 		// Query the record within the same transaction
 		var result models.Detailed
-		err = tx.First(&result, "id = ?", detailed.Model.ID).Error // Query using the transaction
-		if err != nil {
-			fmt.Printf("Error during record query: %v\n", err)
-		}
-		assert.NoError(t, err, "cannot find the inserted detailed record")
+		err = tx.First(&result, detailed.Model.ID).Error // Query using the transaction
+
+		assert.NoError(t, err, "can not find the inserted detailed record")
 	})
 
 	// t.Run("the detailed record successfully create", func(t *testing.T) {
@@ -279,23 +274,25 @@ func TestUpdateDetailed(t *testing.T) {
 	})
 
 	t.Run("can not update detailed record if versions were  different", func(t *testing.T) {
-		detailed := createTempDetailed()
-		CreateRecord(repo, detailed)
+		detailed, err := createTempDetailed(repo)
+		assert.NoError(t, err, "can not create detailed record due to")
+
 		detailed.Code = randgenerator.GenerateRandomCode()
-		fmt.Printf("prev id : %v\n", detailed.Model.ID)
-		fmt.Printf("code : %v\n", detailed.Code)
-		fmt.Printf("prev version : %v\n", detailed.Version)
+		// fmt.Printf("prev id : %v\n", detailed.Model.ID)
+		// fmt.Printf("code : %v\n", detailed.Code)
+		// fmt.Printf("prev version : %v\n", detailed.Version)
 		UpdateDetailed(repo, detailed, detailed.Model.ID)
 		detailed.Code = randgenerator.GenerateRandomCode()
-		err := UpdateDetailed(repo, detailed, detailed.Model.ID)
+		err = UpdateDetailed(repo, detailed, detailed.Model.ID)
 		fmt.Printf("new version : %v\n", detailed.Version)
 		assert.Error(t, err, "expected error indicate the versions are different")
 
 	})
 
 	t.Run("can update detailed record if versions were same", func(t *testing.T) {
-		detailed := createTempDetailed()
-		CreateRecord(repo, detailed)
+		detailed, err := createTempDetailed(repo)
+		assert.NoError(t, err, "can not create detailed record due to")
+
 		detailed.Code = randgenerator.GenerateRandomCode()
 		fmt.Printf("prev id : %v\n", detailed.Model.ID)
 		fmt.Printf("code : %v\n", detailed.Code)
@@ -303,21 +300,22 @@ func TestUpdateDetailed(t *testing.T) {
 		UpdateDetailed(repo, detailed, detailed.Model.ID)
 		detailed, _ = ReadRecord[models.Detailed](repo, detailed.Model.ID, "detailed")
 		detailed.Code = randgenerator.GenerateRandomCode()
-		err := UpdateDetailed(repo, detailed, detailed.Model.ID)
+		err = UpdateDetailed(repo, detailed, detailed.Model.ID)
 		fmt.Printf("new version : %v\n", detailed.Version)
 		assert.NoError(t, err, "expected no error")
 
 	})
 
 	t.Run("can not update detailed record if were reffrenced in some voucher items", func(t *testing.T) {
-		detailed := createTempDetailed()
-		CreateRecord(repo, detailed)
+		detailed, err := createTempDetailed(repo)
+		assert.NoError(t, err, "can not create detailed record due to")
+
 		voucher := createTempVoucher()
 		voucher.VoucherItems = append(voucher.VoucherItems, &models.VoucherItem{DetailedId: detailed.Model.ID})
 		fmt.Printf("detialed id : %v\n", detailed.Model.ID)
 		CreateRecord(repo, voucher)
 		fmt.Printf("voucher id : %v\n", voucher.Model.ID)
-		err := UpdateDetailed(repo, detailed, detailed.Model.ID)
+		err = UpdateDetailed(repo, detailed, detailed.Model.ID)
 
 		assert.Error(t, err, "expected error indicate violation update forign key constraint")
 	})
@@ -481,10 +479,22 @@ func createTempSubsidiary() *models.Subsidiary {
 	return &models.Subsidiary{Code: code, Title: title, HasDetailed: false}
 }
 
-func createTempDetailed() *models.Detailed {
-	code := randgenerator.GenerateRandomCode()
-	title := randgenerator.GenerateRandomTitle()
-	return &models.Detailed{Code: code, Title: title}
+func createTempDetailed(repo *Repositories) (*models.Detailed, error) {
+
+	detailed := &models.Detailed{Code: randgenerator.GenerateRandomCode(), Title: randgenerator.GenerateRandomTitle()}
+
+	err := errors.New("")
+	for err != nil {
+
+		err = CreateRecord(repo, detailed)
+		if err != nil {
+			fmt.Printf("Error during record creation: %v\n", err)
+
+			detailed = &models.Detailed{Code: randgenerator.GenerateRandomCode(), Title: randgenerator.GenerateRandomTitle()}
+		}
+
+	}
+	return detailed, nil
 }
 
 func TestDeleteDetailed(t *testing.T) {
@@ -494,8 +504,8 @@ func TestDeleteDetailed(t *testing.T) {
 	}
 
 	t.Run("delete detailed record seccessfully", func(t *testing.T) {
-		detailed := createTempDetailed()
-		CreateRecord(repo, detailed)
+		detailed, err := createTempDetailed(repo)
+		assert.NoError(t, err, "can not create detailed record due to")
 
 		DeleteDetailedRecord(repo, detailed)
 
@@ -505,53 +515,56 @@ func TestDeleteDetailed(t *testing.T) {
 	})
 
 	t.Run("deletion detailed record fail because record does not exist in database", func(t *testing.T) {
-		detailed := createTempDetailed()
-		DeleteDetailedRecord(repo, detailed)
+		detailed := &models.Detailed{}
 		detailed.Model.ID = 1_000_000
-		result := repo.AccountingDB.First(&detailed)
-		assert.Error(t, result.Error, "expected error indicate detailed record not found")
+		err := DeleteDetailedRecord(repo, detailed)
+		// result := repo.AccountingDB.First(&detailed)
+		assert.Error(t, err, "expected error indicate detailed record not found")
 	})
 
 	t.Run("deletion detailed record fails because there is a reffrence in some voucher items  ", func(t *testing.T) {
-		detailed := createTempDetailed()
-		CreateRecord(repo, detailed)
+		detailed, err := createTempDetailed(repo)
+		assert.NoError(t, err, "can not create detailed record due to")
+
 		voucher := &models.Voucher{Number: randgenerator.GenerateRandomCode(), VoucherItems: []*models.VoucherItem{createTempVoucherItem()}}
 		voucher.VoucherItems[0].DetailedId = detailed.Model.ID
 		CreateRecord(repo, voucher)
 		fmt.Printf("det : %v", detailed.Model.ID)
 		fmt.Printf("vi : %v", voucher.VoucherItems[0].Model.ID)
-		err := DeleteDetailedRecord(repo, detailed)
+		err = DeleteDetailedRecord(repo, detailed)
 
 		assert.Error(t, err, "expected error indicate violation forignkey constraint")
 
 	})
 
 	t.Run("can not delete detailed record if versions were  different", func(t *testing.T) {
-		detailed := createTempDetailed()
-		CreateRecord(repo, detailed)
+		detailed, err := createTempDetailed(repo)
+		assert.NoError(t, err, "can not create detailed record due to")
+
 		detailed.Code = randgenerator.GenerateRandomCode()
-		fmt.Printf("prev id : %v\n", detailed.Model.ID)
-		fmt.Printf("code : %v\n", detailed.Code)
-		fmt.Printf("prev version : %v\n", detailed.Version)
+		// fmt.Printf("prev id : %v\n", detailed.Model.ID)
+		// fmt.Printf("code : %v\n", detailed.Code)
+		// fmt.Printf("prev version : %v\n", detailed.Version)
 		UpdateDetailed(repo, detailed, detailed.Model.ID)
-		err := DeleteDetailedRecord(repo, detailed)
-		fmt.Printf("new version : %v\n", detailed.Version)
+		err = DeleteDetailedRecord(repo, detailed)
+		// fmt.Printf("new version : %v\n", detailed.Version)
 		assert.Error(t, err, "expected error indicate the versions are different")
 
 	})
 
 	t.Run("can delete detailed record if versions were same", func(t *testing.T) {
-		detailed := createTempDetailed()
-		CreateRecord(repo, detailed)
+		detailed, err := createTempDetailed(repo)
+		assert.NoError(t, err, "can not create detailed record due to")
+
 		detailed.Code = randgenerator.GenerateRandomCode()
-		fmt.Printf("prev id : %v\n", detailed.Model.ID)
-		fmt.Printf("code : %v\n", detailed.Code)
-		fmt.Printf("prev version : %v\n", detailed.Version)
+		// fmt.Printf("prev id : %v\n", detailed.Model.ID)
+		// fmt.Printf("code : %v\n", detailed.Code)
+		// fmt.Printf("prev version : %v\n", detailed.Version)
 		UpdateDetailed(repo, detailed, detailed.Model.ID)
 		detailed, _ = ReadRecord[models.Detailed](repo, detailed.Model.ID, "detailed")
 
-		err := DeleteDetailedRecord(repo, detailed)
-		fmt.Printf("new version : %v\n", detailed.Version)
+		err = DeleteDetailedRecord(repo, detailed)
+		// fmt.Printf("new version : %v\n", detailed.Version)
 		assert.NoError(t, err, "expected no error")
 
 	})
@@ -693,8 +706,8 @@ func TestReadRecord(t *testing.T) {
 	}
 
 	t.Run("can read the detailed record successfully", func(t *testing.T) {
-		detailed := createTempDetailed()
-		CreateRecord(repo, detailed)
+		detailed, err := createTempDetailed(repo)
+		assert.NoError(t, err, "can not create detailed record due to")
 
 		res, err := ReadRecord[models.Detailed](repo, detailed.Model.ID, "detailed")
 		assert.NoError(t, err, "expected no error")
