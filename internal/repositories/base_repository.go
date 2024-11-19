@@ -158,28 +158,35 @@ func UpdateVoucher(db *Repositories, v *models.Voucher, updatedItem []*models.Vo
 	if err := db.AccountingDB.First(&newV, id).Error; err != nil {
 		return fmt.Errorf("record not found: %w", err)
 	}
-	newV.Number = v.Number
-	newV.VoucherItems = insertedItem
 
-	for _, vi := range deletedItem {
+	if v.Version != newV.Version {
+		return fmt.Errorf("can not update , the version of detailed record is different. expected version : %v", newV.Version)
+	} else {
 
-		err := DeleteRecord(db, vi)
-		if err != nil {
-			return fmt.Errorf("can not update voucher item : %w", err)
+		newV.Number = v.Number
+		newV.VoucherItems = insertedItem
+		newV.Version += 1
+
+		for _, vi := range deletedItem {
+
+			err := DeleteRecord(db, vi)
+			if err != nil {
+				return fmt.Errorf("can not update voucher item : %w", err)
+			}
 		}
-	}
 
-	for _, vi := range updatedItem {
-		err := updateVoucherItem(db, vi, vi.Model.ID)
-		if err != nil {
-			return fmt.Errorf("can not update voucher item : %w", err)
+		for _, vi := range updatedItem {
+			err := updateVoucherItem(db, vi, vi.Model.ID)
+			if err != nil {
+				return fmt.Errorf("can not update voucher item : %w", err)
+			}
 		}
-	}
 
-	if err := db.AccountingDB.Save(&newV).Error; err != nil {
-		return fmt.Errorf("failed to update record: %w", err)
+		if err := db.AccountingDB.Save(&newV).Error; err != nil {
+			return fmt.Errorf("failed to update record: %w", err)
+		}
+		return nil
 	}
-	return nil
 }
 
 func updateVoucherItem(db *Repositories, v *models.VoucherItem, id uint) error {

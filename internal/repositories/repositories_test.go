@@ -340,6 +340,40 @@ func TestUpdateVoucher(t *testing.T) {
 		assert.Error(t, err, "expected error indicate there is such id in database")
 
 	})
+
+	t.Run("can not update voucher record if versions were  different", func(t *testing.T) {
+		voucher := createTempVoucher()
+		CreateRecord(repo, voucher)
+		voucher.Number = randgenerator.GenerateRandomCode()
+		fmt.Printf("prev id : %v\n", voucher.Model.ID)
+		fmt.Printf("code : %v\n", voucher.Number)
+		fmt.Printf("prev version : %v\n", voucher.Version)
+		UpdateVoucher(repo, voucher, []*models.VoucherItem{}, []*models.VoucherItem{}, []*models.VoucherItem{}, voucher.Model.ID)
+		voucher.Number = randgenerator.GenerateRandomCode()
+		err := UpdateVoucher(repo, voucher, []*models.VoucherItem{}, []*models.VoucherItem{}, []*models.VoucherItem{}, voucher.Model.ID)
+
+		fmt.Printf("new version : %v\n", voucher.Version)
+		assert.Error(t, err, "expected error indicate the versions are different")
+
+	})
+
+	t.Run("can update voucher record if versions were same", func(t *testing.T) {
+		voucher := createTempVoucher()
+		CreateRecord(repo, voucher)
+		voucher.Number = randgenerator.GenerateRandomCode()
+		fmt.Printf("prev id : %v\n", voucher.Model.ID)
+		fmt.Printf("code : %v\n", voucher.Number)
+		fmt.Printf("prev version : %v\n", voucher.Version)
+		UpdateVoucher(repo, voucher, []*models.VoucherItem{}, []*models.VoucherItem{}, []*models.VoucherItem{}, voucher.Model.ID)
+
+		voucher, _ = ReadRecord[models.Voucher](repo, voucher.Model.ID, "voucher")
+		voucher.Number = randgenerator.GenerateRandomCode()
+		err := UpdateVoucher(repo, voucher, []*models.VoucherItem{}, []*models.VoucherItem{}, []*models.VoucherItem{}, voucher.Model.ID)
+
+		fmt.Printf("new version : %v\n", voucher.Version)
+		assert.NoError(t, err, "expected no error")
+
+	})
 }
 
 func createTempVoucher() *models.Voucher {
