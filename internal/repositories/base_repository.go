@@ -2,6 +2,7 @@ package repositories
 
 import (
 	"accounting_system/internal/models"
+	"errors"
 	"fmt"
 
 	"gorm.io/gorm"
@@ -43,6 +44,34 @@ func DeleteRecord[T any](db *Repositories, v *T) error {
 	}
 }
 
+func DeleteDetailedRecord(db *Repositories, v *models.Detailed) error {
+
+	var prev *models.Detailed
+	var err error
+	prev, err = ReadRecord[models.Detailed](db, v.Model.ID, "detailed")
+	if err != nil {
+		return fmt.Errorf("can not delete detailed record : %v", err)
+	} else {
+
+		if v.Version != prev.Version {
+			return errors.New("can not delete because of different version")
+		} else {
+
+			res := db.AccountingDB.Unscoped().Delete(&v)
+
+			if res.Error != nil {
+				return fmt.Errorf("error in deleting record: %w", res.Error)
+
+			} else {
+
+				fmt.Println("Record deleted successfully")
+				return nil
+			}
+		}
+	}
+
+}
+
 func ReadRecord[T any](db *Repositories, id uint, genericType string) (*T, error) {
 	var res T
 	if err := db.AccountingDB.First(&res, id).Error; err != nil {
@@ -61,16 +90,16 @@ func UpdateDetailed(db *Repositories, v *models.Detailed, id uint) error {
 		return fmt.Errorf("can not update , the version of detailed record is different. expected version : %v", newV.Version)
 	} else {
 
-	newV.Code = v.Code
-	newV.Title = v.Title
-	newV.Version += 1
-	fmt.Printf("newval %v", newV)
+		newV.Code = v.Code
+		newV.Title = v.Title
+		newV.Version += 1
+		fmt.Printf("newval %v", newV)
 
-	if err := db.AccountingDB.Save(&newV).Error; err != nil {
-		return fmt.Errorf("failed to update record: %w", err)
-	}
+		if err := db.AccountingDB.Save(&newV).Error; err != nil {
+			return fmt.Errorf("failed to update record: %w", err)
+		}
 
-	return nil
+		return nil
 	}
 }
 

@@ -213,7 +213,7 @@ func TestUpdateDetailed(t *testing.T) {
 
 	})
 
-	t.Run("can not update detailed record if versions were not different", func(t *testing.T) {
+	t.Run("can not update detailed record if versions were  different", func(t *testing.T) {
 		detailed := createTempDetailed()
 		CreateRecord(repo, detailed)
 		detailed.Code = randgenerator.GenerateRandomCode()
@@ -224,7 +224,7 @@ func TestUpdateDetailed(t *testing.T) {
 		detailed.Code = randgenerator.GenerateRandomCode()
 		err := UpdateDetailed(repo, detailed, detailed.Model.ID)
 		fmt.Printf("new version : %v\n", detailed.Version)
-		assert.Error(t, err, "expected error indicate the version is different")
+		assert.Error(t, err, "expected error indicate the versions are different")
 
 	})
 
@@ -244,23 +244,6 @@ func TestUpdateDetailed(t *testing.T) {
 
 	})
 
-	// t.Run("return error when update detailed record that is reffrenced by some voucherItems", func(t *testing.T) {
-	// 	code := randgenerator.GenerateRandomCode()
-	// 	title := randgenerator.GenerateRandomTitle()
-	// 	detailed := &models.Detailed{Code: code, Title: title}
-	// 	CreateRecord(repo, detailed)
-
-	// 	voucher := &models.Voucher{Number: randgenerator.GenerateRandomCode(), VoucherItems: []*models.VoucherItem{createTempVoucherItem()}}
-	// 	voucher.VoucherItems[0].DetailedId = detailed.Model.ID
-	// 	CreateRecord(repo, voucher)
-	// 	detailed.Code = randgenerator.GenerateRandomCode()
-	// 	fmt.Printf("detailed : %v", detailed.Model.ID)
-	// 	fmt.Printf("detailed : %v", detailed.Code)
-	// 	fmt.Printf("vi : %v", voucher.VoucherItems[0].Model.ID)
-	// 	err := UpdateDetailed(repo, detailed, detailed.Model.ID)
-	// 	assert.Error(t, err, "expected error indicate there are some reffrence from voucherItems")
-
-	// })
 }
 
 func TestUpdateSubsidiary(t *testing.T) {
@@ -370,7 +353,7 @@ func TestDeleteDetailed(t *testing.T) {
 		detailed := createTempDetailed()
 		CreateRecord(repo, detailed)
 
-		DeleteRecord(repo, detailed)
+		DeleteDetailedRecord(repo, detailed)
 
 		result := repo.AccountingDB.First(&detailed)
 		assert.Error(t, result.Error, "expected error indicate detailed record not found")
@@ -379,7 +362,7 @@ func TestDeleteDetailed(t *testing.T) {
 
 	t.Run("deletion detailed record fail because record does not exist in database", func(t *testing.T) {
 		detailed := createTempDetailed()
-		DeleteRecord(repo, detailed)
+		DeleteDetailedRecord(repo, detailed)
 		detailed.Model.ID = 1_000_000
 		result := repo.AccountingDB.First(&detailed)
 		assert.Error(t, result.Error, "expected error indicate detailed record not found")
@@ -393,9 +376,39 @@ func TestDeleteDetailed(t *testing.T) {
 		CreateRecord(repo, voucher)
 		fmt.Printf("det : %v", detailed.Model.ID)
 		fmt.Printf("vi : %v", voucher.VoucherItems[0].Model.ID)
-		err := DeleteRecord(repo, detailed)
+		err := DeleteDetailedRecord(repo, detailed)
 
 		assert.Error(t, err, "expected error indicate violation forignkey constraint")
+
+	})
+
+	t.Run("can not delete detailed record if versions were  different", func(t *testing.T) {
+		detailed := createTempDetailed()
+		CreateRecord(repo, detailed)
+		detailed.Code = randgenerator.GenerateRandomCode()
+		fmt.Printf("prev id : %v\n", detailed.Model.ID)
+		fmt.Printf("code : %v\n", detailed.Code)
+		fmt.Printf("prev version : %v\n", detailed.Version)
+		UpdateDetailed(repo, detailed, detailed.Model.ID)
+		err := DeleteDetailedRecord(repo, detailed)
+		fmt.Printf("new version : %v\n", detailed.Version)
+		assert.Error(t, err, "expected error indicate the versions are different")
+
+	})
+
+	t.Run("can delete detailed record if versions were same", func(t *testing.T) {
+		detailed := createTempDetailed()
+		CreateRecord(repo, detailed)
+		detailed.Code = randgenerator.GenerateRandomCode()
+		fmt.Printf("prev id : %v\n", detailed.Model.ID)
+		fmt.Printf("code : %v\n", detailed.Code)
+		fmt.Printf("prev version : %v\n", detailed.Version)
+		UpdateDetailed(repo, detailed, detailed.Model.ID)
+		detailed, _ = ReadRecord[models.Detailed](repo, detailed.Model.ID, "detailed")
+
+		err := DeleteDetailedRecord(repo, detailed)
+		fmt.Printf("new version : %v\n", detailed.Version)
+		assert.NoError(t, err, "expected no error")
 
 	})
 }
