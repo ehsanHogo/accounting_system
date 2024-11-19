@@ -19,6 +19,9 @@ func NewConnection(db *gorm.DB) *Repositories {
 }
 
 func CreateRecord[T any](db *Repositories, v *T) error {
+
+	// Create record
+
 	res := db.AccountingDB.Create(v)
 	if res.Error != nil {
 		return fmt.Errorf("error creating record: %w", res.Error)
@@ -31,7 +34,7 @@ func CreateRecord[T any](db *Repositories, v *T) error {
 
 }
 
-func DeleteRecord[T any](db *Repositories, v *T) error {
+func DeleteVoucherItemRecord[T any](db *Repositories, v *T) error {
 	res := db.AccountingDB.Unscoped().Delete(&v)
 
 	if res.Error != nil {
@@ -42,6 +45,7 @@ func DeleteRecord[T any](db *Repositories, v *T) error {
 		fmt.Println("Record deleted successfully")
 		return nil
 	}
+
 }
 
 func DeleteDetailedRecord(db *Repositories, v *models.Detailed) error {
@@ -190,6 +194,7 @@ func UpdateSubsidiary(db *Repositories, v *models.Subsidiary, id uint) error {
 }
 
 func UpdateVoucher(db *Repositories, v *models.Voucher, updatedItem []*models.VoucherItem, deletedItem []*models.VoucherItem, insertedItem []*models.VoucherItem, id uint) error {
+
 	var newV models.Voucher
 	if err := db.AccountingDB.First(&newV, id).Error; err != nil {
 		return fmt.Errorf("record not found: %w", err)
@@ -205,7 +210,7 @@ func UpdateVoucher(db *Repositories, v *models.Voucher, updatedItem []*models.Vo
 
 		for _, vi := range deletedItem {
 
-			err := DeleteRecord(db, vi)
+			err := DeleteVoucherItemRecord(db, vi)
 			if err != nil {
 				return fmt.Errorf("can not update voucher item : %w", err)
 			}

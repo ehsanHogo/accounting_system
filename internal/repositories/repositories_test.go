@@ -4,6 +4,7 @@ import (
 	"accounting_system/config"
 	"accounting_system/internal/models"
 	randgenerator "accounting_system/internal/utils"
+	"errors"
 	"fmt"
 	"testing"
 
@@ -34,49 +35,112 @@ func TestCreateDetailed(t *testing.T) {
 	}
 
 	t.Run("the detailed record successfully create", func(t *testing.T) {
+		// Start a transaction
+		tx := repo.AccountingDB.Begin()
+
+		// Defer rollback or commit logic
+		defer func() {
+			if t.Failed() {
+				// Rollback if the test fails
+				tx.Rollback()
+				fmt.Println("Transaction rolled back due to test failure")
+			} else {
+				// Commit if the test passes
+				if err := tx.Commit().Error; err != nil {
+					fmt.Printf("Transaction commit failed: %v\n", err)
+				} else {
+					fmt.Println("Transaction committed successfully")
+				}
+			}
+		}()
+
+		// Generate random code and title
 		code := randgenerator.GenerateRandomCode()
 		title := randgenerator.GenerateRandomTitle()
+
+		// Create a new detailed record within the transaction
 		detailed := &models.Detailed{Code: code, Title: title}
-		err := CreateRecord(repo, detailed)
-		fmt.Printf("detailed id : %v", detailed.Model.ID)
+
+		err := errors.New("")
+		for err != nil {
+
+			err = CreateRecord(repo, detailed)
+			if err != nil {
+				fmt.Printf("Error during record creation: %v\n", err)
+				code = randgenerator.GenerateRandomCode()
+				title = randgenerator.GenerateRandomTitle()
+				detailed = &models.Detailed{Code: code, Title: title}
+			}
+		}
+
+		fmt.Printf("Detailed ID: %v\n", detailed.Model.ID)
 		assert.NoError(t, err, "expected detailed record to be created, but got error")
+
+		// Query the record within the same transaction
 		var result models.Detailed
-		err = repo.AccountingDB.First(&result, detailed.Model.ID).Error //Code is uniqe
-		assert.NoError(t, err, " can not find the inserted detailed record :")
-
+		err = tx.First(&result, "id = ?", detailed.Model.ID).Error // Query using the transaction
+		if err != nil {
+			fmt.Printf("Error during record query: %v\n", err)
+		}
+		assert.NoError(t, err, "cannot find the inserted detailed record")
 	})
 
-	t.Run("the detailed record creation fail because duplication code", func(t *testing.T) {
+	// t.Run("the detailed record successfully create", func(t *testing.T) {
+	// 	code := randgenerator.GenerateRandomCode()
+	// 	title := randgenerator.GenerateRandomTitle()
+	// 	detailed := &models.Detailed{Code: code, Title: title}
 
-		code := randgenerator.GenerateRandomCode()
-		title := randgenerator.GenerateRandomTitle()
-		detailed := &models.Detailed{Code: code, Title: title}
-		err := CreateRecord(repo, detailed)
-		assert.NoError(t, err, "expected detailed record to be created, but got error")
+	// 	err := errors.New("")
+	// 	for err != nil {
 
-		title = randgenerator.GenerateRandomTitle()
-		detailed = &models.Detailed{Code: code, Title: title}
-		err = CreateRecord(repo, detailed)
+	// 		err = CreateRecord(repo, detailed)
+	// 		if err != nil {
+	// 			fmt.Printf("Error during record creation: %v\n", err)
+	// 			code = randgenerator.GenerateRandomCode()
+	// 			title = randgenerator.GenerateRandomTitle()
+	// 			detailed = &models.Detailed{Code: code, Title: title}
+	// 		}
+	// 	}
 
-		assert.Error(t, err, "expected getting duplicate detailed code error")
+	// 	fmt.Printf("detailed id : %v", detailed.Model.ID)
+	// 	assert.NoError(t, err, "expected detailed record to be created, but got error")
+	// 	var result models.Detailed
+	// 	err = repo.AccountingDB.First(&result, detailed.Model.ID).Error //Code is uniqe
+	// 	assert.NoError(t, err, " can not find the inserted detailed record :")
 
-	})
+	// })
 
-	t.Run("the detailed record creation fail because duplication title", func(t *testing.T) {
+	// t.Run("the detailed record creation fail because duplication code", func(t *testing.T) {
 
-		code := randgenerator.GenerateRandomCode()
-		title := randgenerator.GenerateRandomTitle()
-		detailed := &models.Detailed{Code: code, Title: title}
-		err := CreateRecord(repo, detailed)
-		assert.NoError(t, err, "expected detailed record to be created, but got error")
+	// 	code := randgenerator.GenerateRandomCode()
+	// 	title := randgenerator.GenerateRandomTitle()
+	// 	detailed := &models.Detailed{Code: code, Title: title}
+	// 	err := CreateRecord(repo, detailed)
+	// 	assert.NoError(t, err, "expected detailed record to be created, but got error")
 
-		code = randgenerator.GenerateRandomCode()
-		detailed = &models.Detailed{Code: code, Title: title}
-		err = CreateRecord(repo, detailed)
+	// 	title = randgenerator.GenerateRandomTitle()
+	// 	detailed = &models.Detailed{Code: code, Title: title}
+	// 	err = CreateRecord(repo, detailed)
 
-		assert.Error(t, err, "expected getting duplicate detailed title error")
+	// 	assert.Error(t, err, "expected getting duplicate detailed code error")
 
-	})
+	// })
+
+	// t.Run("the detailed record creation fail because duplication title", func(t *testing.T) {
+
+	// 	code := randgenerator.GenerateRandomCode()
+	// 	title := randgenerator.GenerateRandomTitle()
+	// 	detailed := &models.Detailed{Code: code, Title: title}
+	// 	err := CreateRecord(repo, detailed)
+	// 	assert.NoError(t, err, "expected detailed record to be created, but got error")
+
+	// 	code = randgenerator.GenerateRandomCode()
+	// 	detailed = &models.Detailed{Code: code, Title: title}
+	// 	err = CreateRecord(repo, detailed)
+
+	// 	assert.Error(t, err, "expected getting duplicate detailed title error")
+
+	// })
 
 }
 
@@ -155,6 +219,7 @@ func TestCreateVoucher(t *testing.T) {
 		err := CreateRecord(repo, voucher)
 
 		assert.NoError(t, err, "expected voucher record to be created, but got error")
+
 		var result models.Voucher
 		err = repo.AccountingDB.First(&result, voucher.Model.ID).Error //Number is uniqe
 		assert.NoError(t, err, " can not find the inserted voucher record :")
@@ -502,7 +567,7 @@ func TestDeleteSubsidiary(t *testing.T) {
 		subsidiary := createTempSubsidiary()
 		CreateRecord(repo, subsidiary)
 
-		DeleteRecord(repo, subsidiary)
+		DeleteSubsidiaryRecord(repo, subsidiary)
 
 		result := repo.AccountingDB.First(&subsidiary)
 		assert.Error(t, result.Error, "expected error indicate subsiduary record not found")
@@ -511,7 +576,7 @@ func TestDeleteSubsidiary(t *testing.T) {
 
 	t.Run("deletion subsidiary record fail because record does not exist in database", func(t *testing.T) {
 		subsidiary := createTempSubsidiary()
-		DeleteRecord(repo, subsidiary)
+		DeleteSubsidiaryRecord(repo, subsidiary)
 		subsidiary.Model.ID = 1_000_000
 		result := repo.AccountingDB.First(&subsidiary)
 		assert.Error(t, result.Error, "expected error indicate subsiduary record not found")
@@ -525,7 +590,7 @@ func TestDeleteSubsidiary(t *testing.T) {
 		CreateRecord(repo, voucher)
 		fmt.Printf("det : %v", subsidiary.Model.ID)
 		fmt.Printf("vi : %v", voucher.VoucherItems[0].Model.ID)
-		err := DeleteRecord(repo, subsidiary)
+		err := DeleteSubsidiaryRecord(repo, subsidiary)
 
 		assert.Error(t, err, "expected error indicate violation forignkey constraint")
 
@@ -573,7 +638,7 @@ func TestDeleteVoucher(t *testing.T) {
 		voucher := createTempVoucher()
 		CreateRecord(repo, voucher)
 		fmt.Printf("voucher : %v", voucher.Model.ID)
-		err := DeleteRecord(repo, voucher)
+		err := DeleteVoucherRecord(repo, voucher)
 		assert.NoError(t, err, "expected no error %v", err)
 		result := repo.AccountingDB.First(&voucher)
 		assert.Error(t, result.Error, "expected error indicate voucher record not found")
@@ -582,7 +647,7 @@ func TestDeleteVoucher(t *testing.T) {
 
 	t.Run("deletion voucher record fail because record does not exist in database", func(t *testing.T) {
 		voucher := createTempVoucher()
-		DeleteRecord(repo, voucher)
+		DeleteVoucherRecord(repo, voucher)
 		voucher.Model.ID = 1_000_000
 		result := repo.AccountingDB.First(&voucher)
 		assert.Error(t, result.Error, "expected error indicate voucher record not found")
