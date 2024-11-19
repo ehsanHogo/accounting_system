@@ -482,6 +482,36 @@ func TestDeleteSubsidiary(t *testing.T) {
 		assert.Error(t, err, "expected error indicate violation forignkey constraint")
 
 	})
+
+	t.Run("can not delete subsidiary record if versions were  different", func(t *testing.T) {
+		subsidiary := createTempSubsidiary()
+		CreateRecord(repo, subsidiary)
+		subsidiary.Code = randgenerator.GenerateRandomCode()
+		fmt.Printf("prev id : %v\n", subsidiary.Model.ID)
+		fmt.Printf("code : %v\n", subsidiary.Code)
+		fmt.Printf("prev version : %v\n", subsidiary.Version)
+		UpdateSubsidiary(repo, subsidiary, subsidiary.Model.ID)
+		err := DeleteSubsidiaryRecord(repo, subsidiary)
+		fmt.Printf("new version : %v\n", subsidiary.Version)
+		assert.Error(t, err, "expected error indicate the versions are different")
+
+	})
+
+	t.Run("can delete subsidiary record if versions were same", func(t *testing.T) {
+		subsidiary := createTempSubsidiary()
+		CreateRecord(repo, subsidiary)
+		subsidiary.Code = randgenerator.GenerateRandomCode()
+		fmt.Printf("prev id : %v\n", subsidiary.Model.ID)
+		fmt.Printf("code : %v\n", subsidiary.Code)
+		fmt.Printf("prev version : %v\n", subsidiary.Version)
+		UpdateSubsidiary(repo, subsidiary, subsidiary.Model.ID)
+		subsidiary, _ = ReadRecord[models.Subsidiary](repo, subsidiary.Model.ID, "subsidiary")
+
+		err := DeleteSubsidiaryRecord(repo, subsidiary)
+		fmt.Printf("new version : %v\n", subsidiary.Version)
+		assert.NoError(t, err, "expected no error")
+
+	})
 }
 
 func TestDeleteVoucher(t *testing.T) {
