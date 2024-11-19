@@ -254,12 +254,12 @@ func TestUpdateVoucher(t *testing.T) {
 		t.Fatalf("can not connect to database %v", err)
 	}
 	t.Run("can update voucher record successfully", func(t *testing.T) {
-		code := randgenerator.GenerateRandomCode()
-		voucher := createTempVoucher(code)
+		// code := randgenerator.GenerateRandomCode()
+		voucher := createTempVoucher()
 		CreateRecord(repo, voucher)
-		fmt.Printf("prev Code %v\n", code)
+		fmt.Printf("prev Code %v\n", voucher.Number)
 		prevVoucherId := voucher.Model.ID
-		code = randgenerator.GenerateRandomCode()
+		code := randgenerator.GenerateRandomCode()
 		temp := append(voucher.VoucherItems, createTempVoucherItem())
 		temp[1].Credit = 12
 
@@ -270,9 +270,8 @@ func TestUpdateVoucher(t *testing.T) {
 	})
 
 	t.Run("return error when update voucher record that is not in databse", func(t *testing.T) {
-		code := randgenerator.GenerateRandomCode()
 
-		voucher := createTempVoucher(code)
+		voucher := createTempVoucher()
 
 		err := UpdateVoucher(repo, voucher, []*models.VoucherItem{}, []*models.VoucherItem{}, []*models.VoucherItem{}, 1_000_000)
 		assert.Error(t, err, "expected error indicate there is such id in database")
@@ -280,7 +279,9 @@ func TestUpdateVoucher(t *testing.T) {
 	})
 }
 
-func createTempVoucher(number string) *models.Voucher {
+func createTempVoucher() *models.Voucher {
+
+	number := randgenerator.GenerateRandomCode()
 	var tempDetailedId uint = 2
 	var tempSubsidiaryId uint = 4
 
@@ -296,4 +297,95 @@ func createTempVoucherItem() *models.VoucherItem {
 	var tempSubsidiaryId uint = 4
 
 	return &models.VoucherItem{DetailedId: tempDetailedId, SubsidiaryId: tempSubsidiaryId}
+}
+
+func createTempSubsidiary() *models.Subsidiary {
+	code := randgenerator.GenerateRandomCode()
+	title := randgenerator.GenerateRandomTitle()
+	return &models.Subsidiary{Code: code, Title: title, HasDetailed: false}
+}
+
+func createTempDetailed() *models.Detailed {
+	code := randgenerator.GenerateRandomCode()
+	title := randgenerator.GenerateRandomTitle()
+	return &models.Detailed{Code: code, Title: title}
+}
+
+func TestDeleteDetailed(t *testing.T) {
+	repo, err := createConnectionForTest()
+	if err != nil {
+		t.Fatalf("can not connect to database %v", err)
+	}
+
+	t.Run("delete detailed record seccessfully", func(t *testing.T) {
+		detailed := createTempDetailed()
+		CreateRecord(repo, detailed)
+
+		DeleteRecord(repo, detailed)
+
+		result := repo.AccountingDB.First(&detailed)
+		assert.Error(t, result.Error, "expected error indicate detailed record not found")
+
+	})
+
+	t.Run("deletion detailed record fail because record does not exist in database", func(t *testing.T) {
+		detailed := createTempDetailed()
+		DeleteRecord(repo, detailed)
+		detailed.Model.ID = 1_000_000
+		result := repo.AccountingDB.First(&detailed)
+		assert.Error(t, result.Error, "expected error indicate detailed record not found")
+	})
+}
+
+func TestDeleteSubsidiary(t *testing.T) {
+	repo, err := createConnectionForTest()
+	if err != nil {
+		t.Fatalf("can not connect to database %v", err)
+	}
+
+	t.Run("delete subsidiary record seccessfully", func(t *testing.T) {
+		subsidiary := createTempSubsidiary()
+		CreateRecord(repo, subsidiary)
+
+		DeleteRecord(repo, subsidiary)
+
+		result := repo.AccountingDB.First(&subsidiary)
+		assert.Error(t, result.Error, "expected error indicate subsiduary record not found")
+
+	})
+
+	t.Run("deletion subsidiary record fail because record does not exist in database", func(t *testing.T) {
+		subsidiary := createTempSubsidiary()
+		DeleteRecord(repo, subsidiary)
+		subsidiary.Model.ID = 1_000_000
+		result := repo.AccountingDB.First(&subsidiary)
+		assert.Error(t, result.Error, "expected error indicate subsiduary record not found")
+	})
+}
+
+func TestDeleteVoucher(t *testing.T) {
+	repo, err := createConnectionForTest()
+	if err != nil {
+		t.Fatalf("can not connect to database %v", err)
+	}
+
+	t.Run("delete voucher record seccessfully", func(t *testing.T) {
+
+		voucher := createTempVoucher()
+		CreateRecord(repo, voucher)
+
+		DeleteRecord(repo, voucher)
+
+		result := repo.AccountingDB.First(&voucher)
+		assert.Error(t, result.Error, "expected error indicate voucher record not found")
+
+	})
+
+	t.Run("deletion voucher record fail because record does not exist in database", func(t *testing.T) {
+		voucher := createTempVoucher()
+		DeleteRecord(repo, voucher)
+		voucher.Model.ID = 1_000_000
+		result := repo.AccountingDB.First(&voucher)
+		assert.Error(t, result.Error, "expected error indicate voucher record not found")
+	})
 }
