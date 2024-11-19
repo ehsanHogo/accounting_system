@@ -1,1 +1,4 @@
 the voucher id in voucherItem set by db (from Voucher primary key)  
+
+
+preventing updating detailed if reffrenced is hanled in code becaulse onupdate restrict only applly to id column

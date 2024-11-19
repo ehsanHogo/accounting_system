@@ -45,7 +45,7 @@ ADD
 ALTER TABLE
   "voucher_items"
 ADD
-  FOREIGN KEY ("detailed_id") REFERENCES "detaileds" ("id") ON DELETE RESTRICT;
+  FOREIGN KEY ("detailed_id") REFERENCES "detaileds" ("id") ON DELETE RESTRICT ON UPDATE RESTRICT;
 
 ALTER TABLE
   "voucher_items"

@@ -212,6 +212,24 @@ func TestUpdateDetailed(t *testing.T) {
 		assert.Error(t, err, "expected error indicate there is such id in database")
 
 	})
+
+	// t.Run("return error when update detailed record that is reffrenced by some voucherItems", func(t *testing.T) {
+	// 	code := randgenerator.GenerateRandomCode()
+	// 	title := randgenerator.GenerateRandomTitle()
+	// 	detailed := &models.Detailed{Code: code, Title: title}
+	// 	CreateRecord(repo, detailed)
+
+	// 	voucher := &models.Voucher{Number: randgenerator.GenerateRandomCode(), VoucherItems: []*models.VoucherItem{createTempVoucherItem()}}
+	// 	voucher.VoucherItems[0].DetailedId = detailed.Model.ID
+	// 	CreateRecord(repo, voucher)
+	// 	detailed.Code = randgenerator.GenerateRandomCode()
+	// 	fmt.Printf("detailed : %v", detailed.Model.ID)
+	// 	fmt.Printf("detailed : %v", detailed.Code)
+	// 	fmt.Printf("vi : %v", voucher.VoucherItems[0].Model.ID)
+	// 	err := UpdateDetailed(repo, detailed, detailed.Model.ID)
+	// 	assert.Error(t, err, "expected error indicate there are some reffrence from voucherItems")
+
+	// })
 }
 
 func TestUpdateSubsidiary(t *testing.T) {
