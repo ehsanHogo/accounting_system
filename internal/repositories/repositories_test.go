@@ -262,25 +262,24 @@ func TestUpdateSubsidiary(t *testing.T) {
 		t.Fatalf("can not connect to database %v", err)
 	}
 	t.Run("can update subsidiary record successfully", func(t *testing.T) {
-		code := randgenerator.GenerateRandomCode()
-		title := randgenerator.GenerateRandomTitle()
-		subsidiary := &models.Subsidiary{Code: code, Title: title, HasDetailed: false}
-		CreateRecord(repo, subsidiary)
+
+		subsidiary, err := createTempSubsidiary(repo)
+		assert.NoError(t, err, "can not create subsidiary record")
 
 		prevSubsidiaryId := subsidiary.Model.ID
-		code = randgenerator.GenerateRandomCode()
-		title = randgenerator.GenerateRandomTitle()
+		code := generateUniqeCode[models.Subsidiary](repo, "code")
+		title := generateUniqeTitle[models.Subsidiary](repo)
+
 		subsidiary = &models.Subsidiary{Code: code, Title: title, HasDetailed: true}
-		err := UpdateSubsidiary(repo, subsidiary, prevSubsidiaryId)
+		err = UpdateSubsidiary(repo, subsidiary, prevSubsidiaryId)
 		assert.NoError(t, err, "expected no error")
 	})
 
 	t.Run("return error when update subsidiary record that is not in databse", func(t *testing.T) {
-		code := randgenerator.GenerateRandomCode()
-		title := randgenerator.GenerateRandomTitle()
-		subsidiary := &models.Subsidiary{Code: code, Title: title, HasDetailed: false}
+		subsidiary, err := createTempSubsidiary(repo)
+		assert.NoError(t, err, "can not create subsidiary record")
 
-		err := UpdateSubsidiary(repo, subsidiary, 1_000_000)
+		err = UpdateSubsidiary(repo, subsidiary, 1_000_000)
 		assert.Error(t, err, "expected error indicate there is such id in database")
 
 	})
@@ -289,12 +288,12 @@ func TestUpdateSubsidiary(t *testing.T) {
 		subsidiary, err := createTempSubsidiary(repo)
 		assert.NoError(t, err, "can not create subsidiary record due to")
 
-		subsidiary.Code = randgenerator.GenerateRandomCode()
+		subsidiary.Code = generateUniqeCode[models.Subsidiary](repo, "code")
 		// fmt.Printf("prev id : %v\n", subsidiary.Model.ID)
 		// fmt.Printf("code : %v\n", subsidiary.Code)
 		// fmt.Printf("prev version : %v\n", subsidiary.Version)
 		UpdateSubsidiary(repo, subsidiary, subsidiary.Model.ID)
-		subsidiary.Code = randgenerator.GenerateRandomCode()
+		subsidiary.Code = generateUniqeCode[models.Subsidiary](repo, "code")
 		err = UpdateSubsidiary(repo, subsidiary, subsidiary.Model.ID)
 		// fmt.Printf("new version : %v\n", subsidiary.Version)
 		assert.Error(t, err, "expected error indicate the versions are different")
@@ -304,13 +303,14 @@ func TestUpdateSubsidiary(t *testing.T) {
 	t.Run("can update subsidiary record if versions were same", func(t *testing.T) {
 		subsidiary, err := createTempSubsidiary(repo)
 		assert.NoError(t, err, "can not create subsidiary record due to")
-		subsidiary.Code = randgenerator.GenerateRandomCode()
+
+		subsidiary.Code = generateUniqeCode[models.Subsidiary](repo, "code")
 		// fmt.Printf("prev id : %v\n", subsidiary.Model.ID)
 		// fmt.Printf("code : %v\n", subsidiary.Code)
 		// fmt.Printf("prev version : %v\n", subsidiary.Version)
 		UpdateSubsidiary(repo, subsidiary, subsidiary.Model.ID)
 		subsidiary, _ = ReadRecord[models.Subsidiary](repo, subsidiary.Model.ID, "subsidiary")
-		subsidiary.Code = randgenerator.GenerateRandomCode()
+		subsidiary.Code = generateUniqeCode[models.Subsidiary](repo, "code")
 		err = UpdateSubsidiary(repo, subsidiary, subsidiary.Model.ID)
 		// fmt.Printf("new version : %v\n", subsidiary.Version)
 		assert.NoError(t, err, "expected no error")
