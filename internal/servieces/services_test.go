@@ -89,7 +89,7 @@ func TestInsertDetailed(t *testing.T) {
 	})
 }
 
-func TestUpdateDetailed(t *testing.T) {
+func TestInsertSubsidiary(t *testing.T) {
 
 	repo, err := createConnectionForTest()
 	defer func() {
@@ -100,79 +100,137 @@ func TestUpdateDetailed(t *testing.T) {
 		t.Fatalf("can not connect to database %v", err)
 	}
 
-	t.Run("can update detailed successfully", func(t *testing.T) {
-		detailed := &models.Detailed{Code: generateUniqeCode[models.Detailed](repo, "code"), Title: generateUniqeTitle[models.Detailed](repo)}
-		err := InsertDetailed(repo, detailed)
-		assert.NoError(t, err, "can not insert detailed record")
+	t.Run("can insert subsidiary record successfully", func(t *testing.T) {
+		subsidiary := &models.Subsidiary{Code: generateUniqeCode[models.Subsidiary](repo, "code"), Title: generateUniqeTitle[models.Subsidiary](repo)}
 
-		fetchDetailed, err := repositories.ReadRecord[models.Detailed](repo, detailed.Model.ID)
-		assert.NoError(t, err, "expected no error when reading detailed record ")
-		fetchDetailed.Code = generateUniqeCode[models.Detailed](repo, "code")
-		err = UpdateDetailed(repo, fetchDetailed)
-		assert.NoError(t, err, "expected no error when  updating detailed record")
-		checkUpdated, err := repositories.ReadRecord[models.Detailed](repo, fetchDetailed.Model.ID)
-		assert.NoError(t, err, "expected no error when reading detailed record ")
-		assert.Equal(t, fetchDetailed.Code, checkUpdated.Code)
+		err := InsertSubsidiary(repo, subsidiary)
+
+		assert.NoError(t, err, "expected no error when inserting subsidiary")
 	})
 
-	t.Run("can not update detailed due to empty title", func(t *testing.T) {
-		detailed := &models.Detailed{Code: generateUniqeCode[models.Detailed](repo, "code"), Title: generateUniqeTitle[models.Detailed](repo)}
-		err := InsertDetailed(repo, detailed)
-		assert.NoError(t, err, "can not insert detailed record")
+	t.Run("can not insert subsidiary record with empty code", func(t *testing.T) {
+		subsidiary := &models.Subsidiary{Title: generateUniqeTitle[models.Subsidiary](repo)}
 
-		fetchDetailed, err := repositories.ReadRecord[models.Detailed](repo, detailed.Model.ID)
-		assert.NoError(t, err, "expected no error when reading detailed record ")
-		fetchDetailed.Title = ""
-		err = UpdateDetailed(repo, fetchDetailed)
+		err := InsertSubsidiary(repo, subsidiary)
+
+		assert.Error(t, err, "expected error indicate empty code not allowed")
+	})
+
+	t.Run("can not insert subsidiary record with empty title", func(t *testing.T) {
+		subsidiary := &models.Subsidiary{Code: generateUniqeCode[models.Subsidiary](repo, "code")}
+
+		err := InsertSubsidiary(repo, subsidiary)
+
+		assert.Error(t, err, "expected error indicate empty title not allowed")
+	})
+
+	t.Run("can not insert subsidiary record with code length greater than 64", func(t *testing.T) {
+		subsidiary := &models.Subsidiary{Title: generateUniqeTitle[models.Subsidiary](repo)}
+		s := "1"
+		for i := 0; i < 70; i++ {
+			subsidiary.Code += s
+		}
+		err := InsertSubsidiary(repo, subsidiary)
+
+		assert.Error(t, err, "expected error indicate code length should not be greater than 64 ")
+	})
+
+	t.Run("can not insert subsidiary record with title length greater than 64", func(t *testing.T) {
+		subsidiary := &models.Subsidiary{Code: generateUniqeCode[models.Subsidiary](repo, "code")}
+		s := "a"
+		for i := 0; i < 70; i++ {
+			subsidiary.Title += s
+		}
+		err := InsertSubsidiary(repo, subsidiary)
+
+		assert.Error(t, err, "expected error indicate title length should not be greater than 64 ")
+	})
+}
+
+func TestUpdateSubsidiary(t *testing.T) {
+
+	repo, err := createConnectionForTest()
+	defer func() {
+		sqlDB, _ := repo.AccountingDB.DB()
+		sqlDB.Close()
+	}()
+	if err != nil {
+		t.Fatalf("can not connect to database %v", err)
+	}
+
+	t.Run("can update subsidiary successfully", func(t *testing.T) {
+		subsidiary := &models.Subsidiary{Code: generateUniqeCode[models.Subsidiary](repo, "code"), Title: generateUniqeTitle[models.Subsidiary](repo)}
+		err := InsertSubsidiary(repo, subsidiary)
+		assert.NoError(t, err, "can not insert subsidiary record")
+
+		fetchSubsidiary, err := repositories.ReadRecord[models.Subsidiary](repo, subsidiary.Model.ID)
+		assert.NoError(t, err, "expected no error when reading subsidiary record ")
+		fetchSubsidiary.Code = generateUniqeCode[models.Subsidiary](repo, "code")
+		err = UpdateSubsidiary(repo, fetchSubsidiary)
+		assert.NoError(t, err, "expected no error when  updating subsidiary record")
+		checkUpdated, err := repositories.ReadRecord[models.Subsidiary](repo, fetchSubsidiary.Model.ID)
+		assert.NoError(t, err, "expected no error when reading subsidiary record ")
+		assert.Equal(t, fetchSubsidiary.Code, checkUpdated.Code)
+	})
+
+	t.Run("can not update subsidiary due to empty title", func(t *testing.T) {
+		subsidiary := &models.Subsidiary{Code: generateUniqeCode[models.Subsidiary](repo, "code"), Title: generateUniqeTitle[models.Subsidiary](repo)}
+		err := InsertSubsidiary(repo, subsidiary)
+		assert.NoError(t, err, "can not insert subsidiary record")
+
+		fetchSubsidiary, err := repositories.ReadRecord[models.Subsidiary](repo, subsidiary.Model.ID)
+		assert.NoError(t, err, "expected no error when reading subsidiary record ")
+		fetchSubsidiary.Title = ""
+		err = UpdateSubsidiary(repo, fetchSubsidiary)
 		assert.Error(t, err, "expected error indicate empty code is not allowed")
 
 	})
 
-	t.Run("can not update detailed due to empty code", func(t *testing.T) {
-		detailed := &models.Detailed{Code: generateUniqeCode[models.Detailed](repo, "code"), Title: generateUniqeTitle[models.Detailed](repo)}
-		err := InsertDetailed(repo, detailed)
-		assert.NoError(t, err, "can not insert detailed record")
+	t.Run("can not update subsidiary due to empty code", func(t *testing.T) {
+		subsidiary := &models.Subsidiary{Code: generateUniqeCode[models.Subsidiary](repo, "code"), Title: generateUniqeTitle[models.Subsidiary](repo)}
+		err := InsertSubsidiary(repo, subsidiary)
+		assert.NoError(t, err, "can not insert subsidiary record")
 
-		fetchDetailed, err := repositories.ReadRecord[models.Detailed](repo, detailed.Model.ID)
-		assert.NoError(t, err, "expected no error when reading detailed record ")
-		fetchDetailed.Code = ""
-		err = UpdateDetailed(repo, fetchDetailed)
+		fetchSubsidiary, err := repositories.ReadRecord[models.Subsidiary](repo, subsidiary.Model.ID)
+		assert.NoError(t, err, "expected no error when reading subsidiary record ")
+		fetchSubsidiary.Code = ""
+		err = UpdateSubsidiary(repo, fetchSubsidiary)
 		assert.Error(t, err, "expected error indicate empty title is not allowed")
 
 	})
 
-	t.Run("can not update detailed when  code length is greater than 64", func(t *testing.T) {
-		detailed := &models.Detailed{Code: generateUniqeCode[models.Detailed](repo, "code"), Title: generateUniqeTitle[models.Detailed](repo)}
-		err := InsertDetailed(repo, detailed)
-		assert.NoError(t, err, "can not insert detailed record")
+	t.Run("can not update subsidiary when  code length is greater than 64", func(t *testing.T) {
+		subsidiary := &models.Subsidiary{Code: generateUniqeCode[models.Subsidiary](repo, "code"), Title: generateUniqeTitle[models.Subsidiary](repo)}
+		err := InsertSubsidiary(repo, subsidiary)
+		assert.NoError(t, err, "can not insert subsidiary record")
 
-		fetchDetailed, err := repositories.ReadRecord[models.Detailed](repo, detailed.Model.ID)
-		assert.NoError(t, err, "expected no error when reading detailed record ")
+		fetchSubsidiary, err := repositories.ReadRecord[models.Subsidiary](repo, subsidiary.Model.ID)
+		assert.NoError(t, err, "expected no error when reading subsidiary record ")
 		s := "1"
-		fetchDetailed.Code = ""
+		fetchSubsidiary.Code = ""
 		for i := 0; i < 70; i++ {
-			fetchDetailed.Code += s
+			fetchSubsidiary.Code += s
 		}
 
-		err = UpdateDetailed(repo, fetchDetailed)
+		err = UpdateSubsidiary(repo, fetchSubsidiary)
 		assert.Error(t, err, "expected error indicate code length should not be greater than 64 ")
 
 	})
 
-	t.Run("can not update detailed when  title length is greater than 64", func(t *testing.T) {
-		detailed := &models.Detailed{Code: generateUniqeCode[models.Detailed](repo, "code"), Title: generateUniqeTitle[models.Detailed](repo)}
-		err := InsertDetailed(repo, detailed)
-		assert.NoError(t, err, "can not insert detailed record")
+	t.Run("can not update subsidiary when  title length is greater than 64", func(t *testing.T) {
+		subsidiary := &models.Subsidiary{Code: generateUniqeCode[models.Subsidiary](repo, "code"), Title: generateUniqeTitle[models.Subsidiary](repo)}
+		err := InsertSubsidiary(repo, subsidiary)
+		assert.NoError(t, err, "can not insert subsidiary record")
 
-		fetchDetailed, err := repositories.ReadRecord[models.Detailed](repo, detailed.Model.ID)
-		assert.NoError(t, err, "expected no error when reading detailed record ")
+		fetchSubsidiary, err := repositories.ReadRecord[models.Subsidiary](repo, subsidiary.Model.ID)
+		assert.NoError(t, err, "expected no error when reading subsidiary record ")
 		s := "a"
-		fetchDetailed.Code = ""
+		fetchSubsidiary.Code = ""
 		for i := 0; i < 70; i++ {
-			fetchDetailed.Code += s
+			fetchSubsidiary.Code += s
 		}
 
-		err = UpdateDetailed(repo, fetchDetailed)
+		err = UpdateSubsidiary(repo, fetchSubsidiary)
 		assert.Error(t, err, "expected error indicate title length should not be greater than 64 ")
 
 	})
