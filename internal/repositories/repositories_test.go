@@ -495,11 +495,9 @@ func TestDeleteSubsidiary(t *testing.T) {
 	t.Run("deletion subsidiary record fails because there is a reffrence in some voucher items  ", func(t *testing.T) {
 		subsidiary, err := createTempSubsidiary(repo)
 		assert.NoError(t, err, "can not create subsidiary record due to")
-		newVoucherItem, err := createTempVoucherItem(repo)
+
+		_, err = createTempVoucher(repo, 0, subsidiary.Model.ID)
 		assert.NoError(t, err, "can not create voucher item record")
-		voucher := &models.Voucher{Number: randgenerator.GenerateRandomCode(), VoucherItems: []*models.VoucherItem{newVoucherItem}}
-		voucher.VoucherItems[0].SubsidiaryId = subsidiary.Model.ID
-		CreateRecord(repo, voucher)
 		// fmt.Printf("det : %v", subsidiary.Model.ID)
 		// fmt.Printf("vi : %v", voucher.VoucherItems[0].Model.ID)
 		err = DeleteSubsidiaryRecord(repo, subsidiary)
@@ -512,11 +510,12 @@ func TestDeleteSubsidiary(t *testing.T) {
 		subsidiary, err := createTempSubsidiary(repo)
 		assert.NoError(t, err, "can not create subsidiary record due to")
 
-		subsidiary.Code = randgenerator.GenerateRandomCode()
+		subsidiary.Code = generateUniqeCode[models.Subsidiary](repo, "code")
 		// fmt.Printf("prev id : %v\n", subsidiary.Model.ID)
 		// fmt.Printf("code : %v\n", subsidiary.Code)
 		// fmt.Printf("prev version : %v\n", subsidiary.Version)
-		UpdateSubsidiary(repo, subsidiary, subsidiary.Model.ID)
+		err = UpdateSubsidiary(repo, subsidiary, subsidiary.Model.ID)
+		assert.NoError(t, err, "can not update subsidiary record ")
 		err = DeleteSubsidiaryRecord(repo, subsidiary)
 		// fmt.Printf("new version : %v\n", subsidiary.Version)
 		assert.Error(t, err, "expected error indicate the versions are different")
@@ -527,7 +526,7 @@ func TestDeleteSubsidiary(t *testing.T) {
 		subsidiary, err := createTempSubsidiary(repo)
 		assert.NoError(t, err, "can not create subsidiary record due to")
 
-		subsidiary.Code = randgenerator.GenerateRandomCode()
+		subsidiary.Code =  generateUniqeCode[models.Subsidiary](repo, "code")
 		// fmt.Printf("prev id : %v\n", subsidiary.Model.ID)
 		// fmt.Printf("code : %v\n", subsidiary.Code)
 		// fmt.Printf("prev version : %v\n", subsidiary.Version)
@@ -687,13 +686,23 @@ func createTempVoucher(repo *Repositories, IDs ...uint) (*models.Voucher, error)
 		temp[2] = &models.VoucherItem{DetailedId: detailed.Model.ID, Debit: 250}
 	} else {
 		temp = make([]*models.VoucherItem, 2)
-		subsidiary, err := createTempSubsidiary(repo)
-		if err != nil {
-			return nil, err
-		}
 
-		temp[0] = &models.VoucherItem{DetailedId: IDs[0], Credit: 500}
-		temp[1] = &models.VoucherItem{DetailedId: IDs[0], SubsidiaryId: subsidiary.Model.ID, Debit: 500}
+		if len(IDs) == 1 {
+			subsidiary, err := createTempSubsidiary(repo)
+			if err != nil {
+				return nil, err
+			}
+			temp[0] = &models.VoucherItem{DetailedId: IDs[0], Credit: 500}
+			temp[1] = &models.VoucherItem{DetailedId: IDs[0], SubsidiaryId: subsidiary.Model.ID, Debit: 500}
+		} else {
+			detailed, err := createTempDetailed(repo)
+			if err != nil {
+				return nil, err
+			}
+			temp[0] = &models.VoucherItem{DetailedId: detailed.Model.ID, Credit: 500}
+			temp[1] = &models.VoucherItem{DetailedId: detailed.Model.ID, SubsidiaryId: IDs[1], Debit: 500}
+
+		}
 
 	}
 
