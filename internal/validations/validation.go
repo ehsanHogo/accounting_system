@@ -52,3 +52,34 @@ func CheckBalance(v []*models.VoucherItem) error {
 	}
 }
 
+
+
+
+func ChackCodeValidation(c string)error{
+	err := CheckEmpty(c)
+	if err != nil{
+		return err
+	}
+
+	err = CheckMaxLength(c, 64)
+	if err != nil{
+		return err
+	}
+
+	return nil
+}
+
+
+func CheckTitleValidaion(t string) error{
+	err := CheckEmpty(t)
+	if err != nil{
+		return err
+	}
+
+	err = CheckMaxLength(t, 64)
+	if err != nil{
+		return err
+	}
+
+	return nil
+}

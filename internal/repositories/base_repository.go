@@ -72,7 +72,7 @@ func DeleteDetailedRecord(db *Repositories, v *models.Detailed) error {
 
 	var prev *models.Detailed
 	var err error
-	prev, err = ReadRecord[models.Detailed](db, v.Model.ID, "detailed")
+	prev, err = ReadRecord[models.Detailed](db, v.Model.ID)
 	if err != nil {
 		return fmt.Errorf("can not delete detailed record : %v", err)
 	} else {
@@ -100,7 +100,7 @@ func DeleteSubsidiaryRecord(db *Repositories, v *models.Subsidiary) error {
 
 	var prev *models.Subsidiary
 	var err error
-	prev, err = ReadRecord[models.Subsidiary](db, v.Model.ID, "subsidiary")
+	prev, err = ReadRecord[models.Subsidiary](db, v.Model.ID)
 	if err != nil {
 		return fmt.Errorf("can not delete subsidiary record : %v", err)
 	} else {
@@ -128,7 +128,7 @@ func DeleteVoucherRecord(db *Repositories, v *models.Voucher) error {
 
 	var prev *models.Voucher
 	var err error
-	prev, err = ReadRecord[models.Voucher](db, v.Model.ID, "voucher")
+	prev, err = ReadRecord[models.Voucher](db, v.Model.ID)
 	if err != nil {
 		return fmt.Errorf("can not delete voucher record : %v", err)
 	} else {
@@ -152,8 +152,38 @@ func DeleteVoucherRecord(db *Repositories, v *models.Voucher) error {
 
 }
 
-func ReadRecord[T any](db *Repositories, id uint, genericType string) (*T, error) {
+func ReadRecord[T any](db *Repositories, id uint) (*T, error) {
 	var res T
+	var genericType string
+	switch any(res).(type) {
+	case models.Detailed:
+		genericType = "detailed"
+	case models.Subsidiary:
+		genericType = "subsidiary"
+
+	case models.Voucher:
+		genericType = "voucher"
+
+	case models.VoucherItem:
+		genericType = "voucherItem"
+	default:
+		genericType = ""
+	}
+
+	// fmt.Println("generic")
+	// fmt.Println(genericType)
+	// typeMap := map[any]string{
+	// 	models.Detailed{}:    "detailed",
+	// 	models.Subsidiary{}:  "subsidiary",
+	// 	models.Voucher{}:     "voucher",
+	// 	models.VoucherItem{}: "voucherItem",
+	// }
+
+	// genericType, ok := typeMap[any(res)]
+	// if !ok {
+	// 	return nil, fmt.Errorf("unsupported type for ReadRecord")
+	// }
+
 	if err := db.AccountingDB.First(&res, id).Error; err != nil {
 		return nil, fmt.Errorf("%s record not found: %w", genericType, err)
 	}
