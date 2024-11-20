@@ -3,8 +3,8 @@ package repositories
 import (
 	"accounting_system/config"
 	"accounting_system/internal/models"
+
 	randgenerator "accounting_system/internal/utils"
-	"errors"
 	"fmt"
 	"testing"
 	"time"
@@ -32,7 +32,6 @@ func createConnectionForTest() (*Repositories, error) {
 
 	return NewConnection(db), nil
 }
-
 func TestCreateDetailed(t *testing.T) {
 
 	repo, err := createConnectionForTest()
@@ -147,16 +146,10 @@ func TestCreateVoucher(t *testing.T) {
 
 	t.Run("the voucher record successfully create", func(t *testing.T) {
 
-		var tempDetailedId uint = 2
-		var tempSubsidiaryId uint
-		code := randgenerator.GenerateRandomCode()
-		temp := make([]*models.VoucherItem, 2)
-		temp[0] = &models.VoucherItem{Credit: 1, DetailedId: tempDetailedId, SubsidiaryId: tempSubsidiaryId}
-		temp[1] = &models.VoucherItem{Credit: 2, DetailedId: tempDetailedId, SubsidiaryId: tempSubsidiaryId}
-		voucher := &models.Voucher{Number: code, VoucherItems: temp}
-		err := CreateRecord(repo, voucher)
+		voucher, err := createTempVoucher(repo)
+		assert.NoError(t, err, "can not create voucher record")
 
-		assert.NoError(t, err, "expected voucher record to be created, but got error")
+		// assert.NoError(t, err, "expected voucher record to be created, but got error")
 
 		var result models.Voucher
 		err = repo.AccountingDB.First(&result, voucher.Model.ID).Error //Number is uniqe
@@ -165,18 +158,10 @@ func TestCreateVoucher(t *testing.T) {
 	})
 
 	t.Run("the voucher record creation fail because duplication number", func(t *testing.T) {
-		var tempDetailedId uint = 2
-		var tempSubsidiaryId uint = 4
-		code := randgenerator.GenerateRandomCode()
+		voucher, err := createTempVoucher(repo)
 
-		temp := make([]*models.VoucherItem, 2)
-		temp[0] = &models.VoucherItem{Credit: 1, DetailedId: tempDetailedId, SubsidiaryId: tempSubsidiaryId}
-		temp[1] = &models.VoucherItem{Credit: 2, DetailedId: tempDetailedId, SubsidiaryId: tempSubsidiaryId}
-		voucher := &models.Voucher{Number: code, VoucherItems: temp}
-		err := CreateRecord(repo, voucher)
-		assert.NoError(t, err, "expected voucher record to be created, but got error")
+		assert.NoError(t, err, "can not create voucehr record")
 
-		voucher = &models.Voucher{Number: code, VoucherItems: temp}
 		err = CreateRecord(repo, voucher)
 
 		assert.Error(t, err, "expected getting duplicate voucher number error")
@@ -193,17 +178,16 @@ func TestUpdateDetailed(t *testing.T) {
 		t.Fatalf("can not connect to database %v", err)
 	}
 	t.Run("can update detailed record successfully", func(t *testing.T) {
-		code := randgenerator.GenerateRandomCode()
-		title := randgenerator.GenerateRandomTitle()
-		detailed := &models.Detailed{Code: code, Title: title}
-		CreateRecord(repo, detailed)
+
+		detailed, err := createTempDetailed(repo)
+		assert.NoError(t, err, "can not create detailed record")
 
 		prevDetailedId := detailed.Model.ID
-		code = randgenerator.GenerateRandomCode()
-		title = randgenerator.GenerateRandomTitle()
-		detailed = &models.Detailed{Code: code, Title: title}
-		err := UpdateDetailed(repo, detailed, prevDetailedId)
-		assert.NoError(t, err, "expected no error")
+		detailed.Code = generateUniqeCode[models.Detailed](repo, "code")
+		detailed.Title = generateUniqeTitle[models.Detailed](repo)
+		// detailed = &models.Detailed{Code: code, Title: title}
+		err = UpdateDetailed(repo, detailed, prevDetailedId)
+		assert.NoError(t, err, "can not update detailed record")
 	})
 
 	t.Run("return error when update detailed record that is not in databse", func(t *testing.T) {
@@ -220,14 +204,16 @@ func TestUpdateDetailed(t *testing.T) {
 		detailed, err := createTempDetailed(repo)
 		assert.NoError(t, err, "can not create detailed record due to")
 
-		detailed.Code = randgenerator.GenerateRandomCode()
+		detailed.Code = generateUniqeCode[models.Detailed](repo, "code")
 		// fmt.Printf("prev id : %v\n", detailed.Model.ID)
 		// fmt.Printf("code : %v\n", detailed.Code)
 		// fmt.Printf("prev version : %v\n", detailed.Version)
-		UpdateDetailed(repo, detailed, detailed.Model.ID)
-		detailed.Code = randgenerator.GenerateRandomCode()
 		err = UpdateDetailed(repo, detailed, detailed.Model.ID)
-		fmt.Printf("new version : %v\n", detailed.Version)
+		assert.NoError(t, err, "can not update detailed record")
+
+		detailed.Code = generateUniqeCode[models.Detailed](repo, "code")
+		err = UpdateDetailed(repo, detailed, detailed.Model.ID)
+		// fmt.Printf("new version : %v\n", detailed.Version)
 		assert.Error(t, err, "expected error indicate the versions are different")
 
 	})
@@ -236,13 +222,15 @@ func TestUpdateDetailed(t *testing.T) {
 		detailed, err := createTempDetailed(repo)
 		assert.NoError(t, err, "can not create detailed record due to")
 
-		detailed.Code = randgenerator.GenerateRandomCode()
-		fmt.Printf("prev id : %v\n", detailed.Model.ID)
-		fmt.Printf("code : %v\n", detailed.Code)
-		fmt.Printf("prev version : %v\n", detailed.Version)
-		UpdateDetailed(repo, detailed, detailed.Model.ID)
+		detailed.Code = generateUniqeCode[models.Detailed](repo, "code")
+		// fmt.Printf("prev id : %v\n", detailed.Model.ID)
+		// fmt.Printf("code : %v\n", detailed.Code)
+		// fmt.Printf("prev version : %v\n", detailed.Version)
+		err = UpdateDetailed(repo, detailed, detailed.Model.ID)
+		assert.NoError(t, err, "can not update detailed record")
+
 		detailed, _ = ReadRecord[models.Detailed](repo, detailed.Model.ID, "detailed")
-		detailed.Code = randgenerator.GenerateRandomCode()
+		detailed.Code = generateUniqeCode[models.Detailed](repo, "code")
 		err = UpdateDetailed(repo, detailed, detailed.Model.ID)
 		fmt.Printf("new version : %v\n", detailed.Version)
 		assert.NoError(t, err, "expected no error")
@@ -252,14 +240,15 @@ func TestUpdateDetailed(t *testing.T) {
 	t.Run("can not update detailed record if were reffrenced in some voucher items", func(t *testing.T) {
 		detailed, err := createTempDetailed(repo)
 		assert.NoError(t, err, "can not create detailed record due to")
-
-		voucher := createTempVoucher()
-		voucher.VoucherItems = append(voucher.VoucherItems, &models.VoucherItem{DetailedId: detailed.Model.ID})
+		fmt.Println("in me ")
 		fmt.Printf("detialed id : %v\n", detailed.Model.ID)
-		CreateRecord(repo, voucher)
-		fmt.Printf("voucher id : %v\n", voucher.Model.ID)
-		err = UpdateDetailed(repo, detailed, detailed.Model.ID)
+		_, err = createTempVoucher(repo, detailed.Model.ID)
 
+		fmt.Printf("detialed id : %v\n", detailed.Model.ID)
+		assert.NoError(t, err, "can not create voucher record")
+		// fmt.Printf("voucher id : %v\n", voucher.Model.ID)
+		detailed.Code = generateUniqeCode[models.Detailed](repo, "code")
+		err = UpdateDetailed(repo, detailed, detailed.Model.ID)
 		assert.Error(t, err, "expected error indicate violation update forign key constraint")
 	})
 
@@ -339,117 +328,68 @@ func TestUpdateVoucher(t *testing.T) {
 	}
 	t.Run("can update voucher record successfully", func(t *testing.T) {
 		// code := randgenerator.GenerateRandomCode()
-		voucher := createTempVoucher()
-		CreateRecord(repo, voucher)
-		fmt.Printf("prev Code %v\n", voucher.Number)
+		voucher, err := createTempVoucher(repo)
+		assert.NoError(t, err, "can not create voucher record")
+
+		// fmt.Printf("prev Code %v\n", voucher.Number)
 		prevVoucherId := voucher.Model.ID
 		code := randgenerator.GenerateRandomCode()
 		temp := append(voucher.VoucherItems, createTempVoucherItem())
 		temp[1].Credit = 12
 
-		fmt.Printf("new Code %v\n", code)
+		// fmt.Printf("new Code %v\n", code)
 		voucher = &models.Voucher{Number: code, VoucherItems: temp}
-		err := UpdateVoucher(repo, voucher, []*models.VoucherItem{temp[1]}, []*models.VoucherItem{temp[0]}, []*models.VoucherItem{temp[2]}, prevVoucherId)
-		assert.NoError(t, err, "expected no error")
+		err = UpdateVoucher(repo, voucher, []*models.VoucherItem{temp[1]}, []*models.VoucherItem{temp[0]}, []*models.VoucherItem{temp[2]}, prevVoucherId)
+		assert.NoError(t, err, "can not update voucher ")
 	})
 
 	t.Run("return error when update voucher record that is not in databse", func(t *testing.T) {
 
-		voucher := createTempVoucher()
-
+		voucher := &models.Voucher{}
+		voucher.Model.ID = 1_000_000
 		err := UpdateVoucher(repo, voucher, []*models.VoucherItem{}, []*models.VoucherItem{}, []*models.VoucherItem{}, 1_000_000)
 		assert.Error(t, err, "expected error indicate there is such id in database")
 
 	})
 
 	t.Run("can not update voucher record if versions were  different", func(t *testing.T) {
-		voucher := createTempVoucher()
-		CreateRecord(repo, voucher)
-		voucher.Number = randgenerator.GenerateRandomCode()
-		fmt.Printf("prev id : %v\n", voucher.Model.ID)
-		fmt.Printf("code : %v\n", voucher.Number)
-		fmt.Printf("prev version : %v\n", voucher.Version)
-		UpdateVoucher(repo, voucher, []*models.VoucherItem{}, []*models.VoucherItem{}, []*models.VoucherItem{}, voucher.Model.ID)
-		voucher.Number = randgenerator.GenerateRandomCode()
-		err := UpdateVoucher(repo, voucher, []*models.VoucherItem{}, []*models.VoucherItem{}, []*models.VoucherItem{}, voucher.Model.ID)
+		voucher, err := createTempVoucher(repo)
+		assert.NoError(t, err, "can not create voucher record")
 
-		fmt.Printf("new version : %v\n", voucher.Version)
+		voucher.Number = randgenerator.GenerateRandomCode()
+		// fmt.Printf("prev id : %v\n", voucher.Model.ID)
+		// fmt.Printf("code : %v\n", voucher.Number)
+		// fmt.Printf("prev version : %v\n", voucher.Version)
+		err = UpdateVoucher(repo, voucher, []*models.VoucherItem{}, []*models.VoucherItem{}, []*models.VoucherItem{}, voucher.Model.ID)
+		assert.NoError(t, err, "can not update voucher record")
+
+		voucher.Number = randgenerator.GenerateRandomCode()
+		err = UpdateVoucher(repo, voucher, []*models.VoucherItem{}, []*models.VoucherItem{}, []*models.VoucherItem{}, voucher.Model.ID)
+
+		// fmt.Printf("new version : %v\n", voucher.Version)
 		assert.Error(t, err, "expected error indicate the versions are different")
 
 	})
 
 	t.Run("can update voucher record if versions were same", func(t *testing.T) {
-		voucher := createTempVoucher()
-		CreateRecord(repo, voucher)
+		voucher, err := createTempVoucher(repo)
+		assert.NoError(t, err, "can not create voucher record")
+
 		voucher.Number = randgenerator.GenerateRandomCode()
-		fmt.Printf("prev id : %v\n", voucher.Model.ID)
-		fmt.Printf("code : %v\n", voucher.Number)
-		fmt.Printf("prev version : %v\n", voucher.Version)
-		UpdateVoucher(repo, voucher, []*models.VoucherItem{}, []*models.VoucherItem{}, []*models.VoucherItem{}, voucher.Model.ID)
+		// fmt.Printf("prev id : %v\n", voucher.Model.ID)
+		// fmt.Printf("code : %v\n", voucher.Number)
+		// fmt.Printf("prev version : %v\n", voucher.Version)
+		err = UpdateVoucher(repo, voucher, []*models.VoucherItem{}, []*models.VoucherItem{}, []*models.VoucherItem{}, voucher.Model.ID)
+		assert.NoError(t, err, "can not update voucher record")
 
 		voucher, _ = ReadRecord[models.Voucher](repo, voucher.Model.ID, "voucher")
 		voucher.Number = randgenerator.GenerateRandomCode()
-		err := UpdateVoucher(repo, voucher, []*models.VoucherItem{}, []*models.VoucherItem{}, []*models.VoucherItem{}, voucher.Model.ID)
+		err = UpdateVoucher(repo, voucher, []*models.VoucherItem{}, []*models.VoucherItem{}, []*models.VoucherItem{}, voucher.Model.ID)
 
-		fmt.Printf("new version : %v\n", voucher.Version)
+		// fmt.Printf("new version : %v\n", voucher.Version)
 		assert.NoError(t, err, "expected no error")
 
 	})
-}
-
-func createTempVoucher() *models.Voucher {
-
-	number := randgenerator.GenerateRandomCode()
-	var tempDetailedId uint = 2
-	var tempSubsidiaryId uint = 4
-
-	temp := make([]*models.VoucherItem, 2)
-	temp[0] = &models.VoucherItem{DetailedId: tempDetailedId, SubsidiaryId: tempSubsidiaryId}
-	temp[1] = &models.VoucherItem{DetailedId: tempDetailedId, SubsidiaryId: tempSubsidiaryId}
-
-	return &models.Voucher{Number: number, VoucherItems: temp}
-}
-
-func createTempVoucherItem() *models.VoucherItem {
-	var tempDetailedId uint = 2
-	var tempSubsidiaryId uint = 4
-
-	return &models.VoucherItem{DetailedId: tempDetailedId, SubsidiaryId: tempSubsidiaryId}
-}
-
-func createTempSubsidiary(repo *Repositories) (*models.Subsidiary, error) {
-	subsidiary := &models.Subsidiary{Code: randgenerator.GenerateRandomCode(), Title: randgenerator.GenerateRandomTitle(), HasDetailed: false}
-
-	err := errors.New("")
-	for err != nil {
-
-		err = CreateRecord(repo, subsidiary)
-		if err != nil {
-			fmt.Printf("Error during record creation: %v\n", err)
-
-			subsidiary = &models.Subsidiary{Code: randgenerator.GenerateRandomCode(), Title: randgenerator.GenerateRandomTitle(), HasDetailed: false}
-		}
-
-	}
-	return subsidiary, nil
-}
-
-func createTempDetailed(repo *Repositories) (*models.Detailed, error) {
-
-	detailed := &models.Detailed{Code: randgenerator.GenerateRandomCode(), Title: randgenerator.GenerateRandomTitle()}
-
-	err := errors.New("")
-	for err != nil {
-
-		err = CreateRecord(repo, detailed)
-		if err != nil {
-			fmt.Printf("Error during record creation: %v\n", err)
-
-			detailed = &models.Detailed{Code: randgenerator.GenerateRandomCode(), Title: randgenerator.GenerateRandomTitle()}
-		}
-
-	}
-	return detailed, nil
 }
 
 func TestDeleteDetailed(t *testing.T) {
@@ -607,10 +547,11 @@ func TestDeleteVoucher(t *testing.T) {
 
 	t.Run("delete voucher record seccessfully", func(t *testing.T) {
 
-		voucher := createTempVoucher()
-		CreateRecord(repo, voucher)
-		fmt.Printf("voucher : %v", voucher.Model.ID)
-		err := DeleteVoucherRecord(repo, voucher)
+		voucher, err := createTempVoucher(repo)
+		assert.NoError(t, err, "can not create voucher record")
+
+		// fmt.Printf("voucher : %v", voucher.Model.ID)
+		err = DeleteVoucherRecord(repo, voucher)
 		assert.NoError(t, err, "expected no error %v", err)
 		result := repo.AccountingDB.First(&voucher)
 		assert.Error(t, result.Error, "expected error indicate voucher record not found")
@@ -618,41 +559,44 @@ func TestDeleteVoucher(t *testing.T) {
 	})
 
 	t.Run("deletion voucher record fail because record does not exist in database", func(t *testing.T) {
-		voucher := createTempVoucher()
-		DeleteVoucherRecord(repo, voucher)
+		voucher := &models.Voucher{}
 		voucher.Model.ID = 1_000_000
-		result := repo.AccountingDB.First(&voucher)
-		assert.Error(t, result.Error, "expected error indicate voucher record not found")
+		err = DeleteVoucherRecord(repo, voucher)
+		assert.Error(t, err, "expected error indicate there is not such record in data base")
+
 	})
 
 	t.Run("can not delete voucher record if versions were  different", func(t *testing.T) {
-		voucher := createTempVoucher()
-		CreateRecord(repo, voucher)
-		voucher.Number = randgenerator.GenerateRandomCode()
-		fmt.Printf("prev id : %v\n", voucher.Model.ID)
-		fmt.Printf("code : %v\n", voucher.Number)
-		fmt.Printf("prev version : %v\n", voucher.Version)
-		UpdateVoucher(repo, voucher, []*models.VoucherItem{}, []*models.VoucherItem{}, []*models.VoucherItem{}, voucher.Model.ID)
+		voucher, err := createTempVoucher(repo)
+		assert.NoError(t, err, "can not create voucher record")
 
-		err := DeleteVoucherRecord(repo, voucher)
-		fmt.Printf("new version : %v\n", voucher.Version)
+		voucher.Number = randgenerator.GenerateRandomCode()
+		// fmt.Printf("prev id : %v\n", voucher.Model.ID)
+		// fmt.Printf("code : %v\n", voucher.Number)
+		// fmt.Printf("prev version : %v\n", voucher.Version)
+		err = UpdateVoucher(repo, voucher, []*models.VoucherItem{}, []*models.VoucherItem{}, []*models.VoucherItem{}, voucher.Model.ID)
+		assert.NoError(t, err, "can not update voucher record")
+
+		err = DeleteVoucherRecord(repo, voucher)
+		// fmt.Printf("new version : %v\n", voucher.Version)
 		assert.Error(t, err, "expected error indicate the versions are different")
 
 	})
 
 	t.Run("can delete voucher record if versions were same", func(t *testing.T) {
-		voucher := createTempVoucher()
-		CreateRecord(repo, voucher)
-		voucher.Number = randgenerator.GenerateRandomCode()
-		fmt.Printf("prev id : %v\n", voucher.Model.ID)
-		fmt.Printf("code : %v\n", voucher.Number)
-		fmt.Printf("prev version : %v\n", voucher.Version)
-		UpdateVoucher(repo, voucher, []*models.VoucherItem{}, []*models.VoucherItem{}, []*models.VoucherItem{}, voucher.Model.ID)
+		voucher, err := createTempVoucher(repo)
+		assert.NoError(t, err, "can not create voucher record")
 
+		voucher.Number = randgenerator.GenerateRandomCode()
+		// fmt.Printf("prev id : %v\n", voucher.Model.ID)
+		// fmt.Printf("code : %v\n", voucher.Number)
+		// fmt.Printf("prev version : %v\n", voucher.Version)
+		err = UpdateVoucher(repo, voucher, []*models.VoucherItem{}, []*models.VoucherItem{}, []*models.VoucherItem{}, voucher.Model.ID)
+		assert.NoError(t, err, "can not update voucher record")
 		voucher, _ = ReadRecord[models.Voucher](repo, voucher.Model.ID, "voucher")
 
-		err := DeleteVoucherRecord(repo, voucher)
-		fmt.Printf("new version : %v\n", voucher.Version)
+		err = DeleteVoucherRecord(repo, voucher)
+		// fmt.Printf("new version : %v\n", voucher.Version)
 		assert.NoError(t, err, "expected no error")
 
 	})
@@ -700,8 +644,8 @@ func TestReadRecord(t *testing.T) {
 	})
 
 	t.Run("can read the voucher record successfully", func(t *testing.T) {
-		voucher := createTempVoucher()
-		CreateRecord(repo, voucher)
+		voucher, err := createTempVoucher(repo)
+		assert.NoError(t, err, "can not create voucher record")
 
 		res, err := ReadRecord[models.Voucher](repo, voucher.Model.ID, "voucher")
 		assert.NoError(t, err, "expected no error")
@@ -716,4 +660,119 @@ func TestReadRecord(t *testing.T) {
 
 	})
 
+}
+
+func createTempVoucher(repo *Repositories, IDs ...uint) (*models.Voucher, error) {
+	temp := make([]*models.VoucherItem, 3)
+	if len(IDs) == 0 {
+
+		detailed, err := createTempDetailed(repo)
+		if err != nil {
+			return nil, err
+		}
+
+		subsidiary, err := createTempSubsidiary(repo)
+		if err != nil {
+			return nil, err
+		}
+
+		temp[0] = &models.VoucherItem{DetailedId: detailed.Model.ID, SubsidiaryId: subsidiary.Model.ID, Credit: 500}
+
+		temp[1] = &models.VoucherItem{DetailedId: detailed.Model.ID, SubsidiaryId: subsidiary.Model.ID, Debit: 250}
+
+		temp[2] = &models.VoucherItem{DetailedId: detailed.Model.ID, Debit: 250}
+	} else {
+		temp = make([]*models.VoucherItem, 2)
+		subsidiary, err := createTempSubsidiary(repo)
+		if err != nil {
+			return nil, err
+		}
+
+		temp[0] = &models.VoucherItem{DetailedId: IDs[0], Credit: 500}
+		temp[1] = &models.VoucherItem{DetailedId: IDs[0], SubsidiaryId: subsidiary.Model.ID, Debit: 500}
+
+	}
+
+	number := generateUniqeCode[models.Voucher](repo, "number")
+	voucher := &models.Voucher{Number: number, VoucherItems: temp}
+
+	// err := errors.New("")
+	// for err != nil {
+
+	err := CreateRecord(repo, voucher)
+	if err != nil {
+		return nil, fmt.Errorf("Error during record creation: %v\n", err)
+
+	}
+
+	// }
+
+	return voucher, nil
+}
+
+func createTempVoucherItem() *models.VoucherItem {
+	var tempDetailedId uint = 2
+	var tempSubsidiaryId uint = 4
+
+	return &models.VoucherItem{DetailedId: tempDetailedId, SubsidiaryId: tempSubsidiaryId}
+}
+
+func createTempSubsidiary(repo *Repositories) (*models.Subsidiary, error) {
+	subsidiary := &models.Subsidiary{Code: generateUniqeCode[models.Subsidiary](repo, "code"), Title: generateUniqeTitle[models.Subsidiary](repo), HasDetailed: false}
+
+	err := CreateRecord(repo, subsidiary)
+	if err != nil {
+		return nil, fmt.Errorf("Error during record creation: %v\n", err)
+
+	}
+
+	return subsidiary, nil
+}
+
+func createTempDetailed(repo *Repositories) (*models.Detailed, error) {
+
+	detailed := &models.Detailed{Code: generateUniqeCode[models.Detailed](repo, "code"), Title: generateUniqeTitle[models.Detailed](repo)}
+
+	// err := errors.New("")
+	// for err != nil {
+
+	err := CreateRecord(repo, detailed)
+	if err != nil {
+		return nil, fmt.Errorf("Error during record creation: %v\n", err)
+
+	}
+
+	return detailed, nil
+
+	// }
+}
+
+func generateUniqeCode[T any](repo *Repositories, columnName string) string {
+	code := randgenerator.GenerateRandomCode()
+	for {
+		exist := FindRecord[T](repo, code, columnName)
+
+		if exist {
+			code = randgenerator.GenerateRandomCode()
+		} else {
+			break
+		}
+	}
+
+	return code
+}
+
+func generateUniqeTitle[T any](repo *Repositories) string {
+	title := randgenerator.GenerateRandomTitle()
+	for {
+		exist := FindRecord[T](repo, title, "title")
+
+		if exist {
+			title = randgenerator.GenerateRandomTitle()
+		} else {
+			break
+		}
+	}
+
+	return title
 }

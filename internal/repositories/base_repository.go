@@ -18,6 +18,25 @@ func NewConnection(db *gorm.DB) *Repositories {
 	}
 }
 
+// func CreateConnectionForTest() (*Repositories, error) {
+// 	dbUrl, err := config.SetupConfig()
+// 	if err != nil {
+// 		return nil, err
+// 	}
+// 	db, err := gorm.Open(postgres.Open(dbUrl), &gorm.Config{})
+// 	if err != nil {
+// 		return nil, err
+// 	}
+
+// 	sqlDB, _ := db.DB()
+
+// 	sqlDB.SetMaxOpenConns(100)                // Limit the maximum number of open connections
+// 	sqlDB.SetMaxIdleConns(5)                  // Set idle connection limit
+// 	sqlDB.SetConnMaxLifetime(5 * time.Minute) // Limit connection lifetime
+
+// 	return NewConnection(db), nil
+// }
+
 func CreateRecord[T any](db *Repositories, v *T) error {
 
 	// Create record
@@ -247,4 +266,12 @@ func updateVoucherItem(db *Repositories, v *models.VoucherItem, id uint) error {
 	}
 
 	return nil
+}
+
+func FindRecord[T any, U any](db *Repositories, val U, columnName string) bool {
+	var res T
+	if err := db.AccountingDB.First(&res, fmt.Sprintf("%s = ?", columnName), val).Error; err != nil {
+		return false
+	}
+	return true
 }

@@ -13,10 +13,9 @@ func GenerateRandomCode() string {
 	for i := 0; i < length; i++ {
 		result[i] = numbers[r.Intn(len(numbers))]
 	}
+
 	return string(result)
 }
-
-
 
 func GenerateRandomTitle() string {
 	r := rand.New(rand.NewSource(time.Now().UnixNano())) // Create a local random generator
@@ -26,7 +25,6 @@ func GenerateRandomTitle() string {
 	for i := 0; i < length; i++ {
 		result[i] = letters[r.Intn(len(letters))]
 	}
+
 	return string(result)
 }
-
-
