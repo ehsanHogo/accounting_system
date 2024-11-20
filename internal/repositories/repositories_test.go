@@ -333,8 +333,10 @@ func TestUpdateVoucher(t *testing.T) {
 
 		// fmt.Printf("prev Code %v\n", voucher.Number)
 		prevVoucherId := voucher.Model.ID
-		code := randgenerator.GenerateRandomCode()
-		temp := append(voucher.VoucherItems, createTempVoucherItem())
+		code := generateUniqeCode[models.Voucher](repo, "number")
+		newVoucherItem, err := createTempVoucherItem(repo)
+		assert.NoError(t, err, "can not create voucher item record")
+		temp := append(voucher.VoucherItems, newVoucherItem)
 		temp[1].Credit = 12
 
 		// fmt.Printf("new Code %v\n", code)
@@ -356,14 +358,14 @@ func TestUpdateVoucher(t *testing.T) {
 		voucher, err := createTempVoucher(repo)
 		assert.NoError(t, err, "can not create voucher record")
 
-		voucher.Number = randgenerator.GenerateRandomCode()
+		voucher.Number = generateUniqeCode[models.Voucher](repo, "number")
 		// fmt.Printf("prev id : %v\n", voucher.Model.ID)
 		// fmt.Printf("code : %v\n", voucher.Number)
 		// fmt.Printf("prev version : %v\n", voucher.Version)
 		err = UpdateVoucher(repo, voucher, []*models.VoucherItem{}, []*models.VoucherItem{}, []*models.VoucherItem{}, voucher.Model.ID)
 		assert.NoError(t, err, "can not update voucher record")
 
-		voucher.Number = randgenerator.GenerateRandomCode()
+		voucher.Number = generateUniqeCode[models.Voucher](repo, "number")
 		err = UpdateVoucher(repo, voucher, []*models.VoucherItem{}, []*models.VoucherItem{}, []*models.VoucherItem{}, voucher.Model.ID)
 
 		// fmt.Printf("new version : %v\n", voucher.Version)
@@ -375,7 +377,7 @@ func TestUpdateVoucher(t *testing.T) {
 		voucher, err := createTempVoucher(repo)
 		assert.NoError(t, err, "can not create voucher record")
 
-		voucher.Number = randgenerator.GenerateRandomCode()
+		voucher.Number = generateUniqeCode[models.Voucher](repo, "number")
 		// fmt.Printf("prev id : %v\n", voucher.Model.ID)
 		// fmt.Printf("code : %v\n", voucher.Number)
 		// fmt.Printf("prev version : %v\n", voucher.Version)
@@ -383,7 +385,7 @@ func TestUpdateVoucher(t *testing.T) {
 		assert.NoError(t, err, "can not update voucher record")
 
 		voucher, _ = ReadRecord[models.Voucher](repo, voucher.Model.ID, "voucher")
-		voucher.Number = randgenerator.GenerateRandomCode()
+		voucher.Number = generateUniqeCode[models.Voucher](repo, "number")
 		err = UpdateVoucher(repo, voucher, []*models.VoucherItem{}, []*models.VoucherItem{}, []*models.VoucherItem{}, voucher.Model.ID)
 
 		// fmt.Printf("new version : %v\n", voucher.Version)
@@ -420,8 +422,10 @@ func TestDeleteDetailed(t *testing.T) {
 	t.Run("deletion detailed record fails because there is a reffrence in some voucher items  ", func(t *testing.T) {
 		detailed, err := createTempDetailed(repo)
 		assert.NoError(t, err, "can not create detailed record due to")
+		newVoucherItem, err := createTempVoucherItem(repo)
+		assert.NoError(t, err, "can not create voucher item record")
 
-		voucher := &models.Voucher{Number: randgenerator.GenerateRandomCode(), VoucherItems: []*models.VoucherItem{createTempVoucherItem()}}
+		voucher := &models.Voucher{Number: randgenerator.GenerateRandomCode(), VoucherItems: []*models.VoucherItem{newVoucherItem}}
 		voucher.VoucherItems[0].DetailedId = detailed.Model.ID
 		CreateRecord(repo, voucher)
 		fmt.Printf("det : %v", detailed.Model.ID)
@@ -492,8 +496,9 @@ func TestDeleteSubsidiary(t *testing.T) {
 	t.Run("deletion subsidiary record fails because there is a reffrence in some voucher items  ", func(t *testing.T) {
 		subsidiary, err := createTempSubsidiary(repo)
 		assert.NoError(t, err, "can not create subsidiary record due to")
-
-		voucher := &models.Voucher{Number: randgenerator.GenerateRandomCode(), VoucherItems: []*models.VoucherItem{createTempVoucherItem()}}
+		newVoucherItem, err := createTempVoucherItem(repo)
+		assert.NoError(t, err, "can not create voucher item record")
+		voucher := &models.Voucher{Number: randgenerator.GenerateRandomCode(), VoucherItems: []*models.VoucherItem{newVoucherItem}}
 		voucher.VoucherItems[0].SubsidiaryId = subsidiary.Model.ID
 		CreateRecord(repo, voucher)
 		// fmt.Printf("det : %v", subsidiary.Model.ID)
@@ -710,11 +715,18 @@ func createTempVoucher(repo *Repositories, IDs ...uint) (*models.Voucher, error)
 	return voucher, nil
 }
 
-func createTempVoucherItem() *models.VoucherItem {
-	var tempDetailedId uint = 2
-	var tempSubsidiaryId uint = 4
+func createTempVoucherItem(repo *Repositories) (*models.VoucherItem, error) {
+	detailed, err := createTempDetailed(repo)
+	if err != nil {
+		return nil, err
+	}
 
-	return &models.VoucherItem{DetailedId: tempDetailedId, SubsidiaryId: tempSubsidiaryId}
+	subsidiary, err := createTempSubsidiary(repo)
+	if err != nil {
+		return nil, err
+	}
+
+	return &models.VoucherItem{DetailedId: detailed.Model.ID, SubsidiaryId: subsidiary.Model.ID, Debit: 250}, nil
 }
 
 func createTempSubsidiary(repo *Repositories) (*models.Subsidiary, error) {
