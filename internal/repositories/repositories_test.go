@@ -404,7 +404,8 @@ func TestDeleteDetailed(t *testing.T) {
 		detailed, err := createTempDetailed(repo)
 		assert.NoError(t, err, "can not create detailed record due to")
 
-		DeleteDetailedRecord(repo, detailed)
+		err = DeleteDetailedRecord(repo, detailed)
+		assert.NoError(t, err, "can not delete detailed record")
 
 		result := repo.AccountingDB.First(&detailed)
 		assert.Error(t, result.Error, "expected error indicate detailed record not found")
@@ -422,12 +423,9 @@ func TestDeleteDetailed(t *testing.T) {
 	t.Run("deletion detailed record fails because there is a reffrence in some voucher items  ", func(t *testing.T) {
 		detailed, err := createTempDetailed(repo)
 		assert.NoError(t, err, "can not create detailed record due to")
-		newVoucherItem, err := createTempVoucherItem(repo)
-		assert.NoError(t, err, "can not create voucher item record")
 
-		voucher := &models.Voucher{Number: randgenerator.GenerateRandomCode(), VoucherItems: []*models.VoucherItem{newVoucherItem}}
-		voucher.VoucherItems[0].DetailedId = detailed.Model.ID
-		CreateRecord(repo, voucher)
+		voucher, err := createTempVoucher(repo, detailed.Model.ID)
+		assert.NoError(t, err, "can not create detailed record ")
 		fmt.Printf("det : %v", detailed.Model.ID)
 		fmt.Printf("vi : %v", voucher.VoucherItems[0].Model.ID)
 		err = DeleteDetailedRecord(repo, detailed)
@@ -440,7 +438,7 @@ func TestDeleteDetailed(t *testing.T) {
 		detailed, err := createTempDetailed(repo)
 		assert.NoError(t, err, "can not create detailed record due to")
 
-		detailed.Code = randgenerator.GenerateRandomCode()
+		detailed.Code = generateUniqeCode[models.Detailed](repo, "code")
 		// fmt.Printf("prev id : %v\n", detailed.Model.ID)
 		// fmt.Printf("code : %v\n", detailed.Code)
 		// fmt.Printf("prev version : %v\n", detailed.Version)
@@ -455,11 +453,12 @@ func TestDeleteDetailed(t *testing.T) {
 		detailed, err := createTempDetailed(repo)
 		assert.NoError(t, err, "can not create detailed record due to")
 
-		detailed.Code = randgenerator.GenerateRandomCode()
+		detailed.Code = generateUniqeCode[models.Detailed](repo, "code")
 		// fmt.Printf("prev id : %v\n", detailed.Model.ID)
 		// fmt.Printf("code : %v\n", detailed.Code)
 		// fmt.Printf("prev version : %v\n", detailed.Version)
-		UpdateDetailed(repo, detailed, detailed.Model.ID)
+		err = UpdateDetailed(repo, detailed, detailed.Model.ID)
+		assert.NoError(t, err, "can not update detailed record ")
 		detailed, _ = ReadRecord[models.Detailed](repo, detailed.Model.ID, "detailed")
 
 		err = DeleteDetailedRecord(repo, detailed)
