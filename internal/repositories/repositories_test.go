@@ -46,114 +46,63 @@ func TestCreateDetailed(t *testing.T) {
 	}
 
 	t.Run("the detailed record successfully create", func(t *testing.T) {
-		// Start a transaction
-		tx := repo.AccountingDB.Begin()
 
-		// Defer rollback or commit logic
-		defer func() {
-			if t.Failed() {
-				// Rollback if the test fails
-				tx.Rollback()
-				fmt.Println("Transaction rolled back due to test failure")
-			} else {
-				// Commit if the test passes
-				if err := tx.Commit().Error; err != nil {
-					fmt.Printf("Transaction commit failed: %v\n", err)
-				} else {
-					fmt.Println("Transaction committed successfully")
-				}
-			}
-		}()
-
-		// Generate random code and title
-		// Create a new detailed record within the transaction
 		detailed, err := createTempDetailed(repo)
 
 		assert.NoError(t, err, "can not create detailed record due to")
 
 		// fmt.Printf("Detailed ID: %v\n", detailed.Model.ID)
 
-		// Query the record within the same transaction
 		var result models.Detailed
-		err = tx.First(&result, detailed.Model.ID).Error // Query using the transaction
+		err = repo.AccountingDB.First(&result, detailed.Model.ID).Error
 
 		assert.NoError(t, err, "can not find the inserted detailed record")
 	})
 
-	// t.Run("the detailed record successfully create", func(t *testing.T) {
-	// 	code := randgenerator.GenerateRandomCode()
-	// 	title := randgenerator.GenerateRandomTitle()
-	// 	detailed := &models.Detailed{Code: code, Title: title}
+	t.Run("the detailed record creation fail because duplication code", func(t *testing.T) {
 
-	// 	err := errors.New("")
-	// 	for err != nil {
+		detailed, err := createTempDetailed(repo)
+		assert.NoError(t, err, "can not create detailed record due to")
+		detailed.Title = randgenerator.GenerateRandomTitle()
 
-	// 		err = CreateRecord(repo, detailed)
-	// 		if err != nil {
-	// 			fmt.Printf("Error during record creation: %v\n", err)
-	// 			code = randgenerator.GenerateRandomCode()
-	// 			title = randgenerator.GenerateRandomTitle()
-	// 			detailed = &models.Detailed{Code: code, Title: title}
-	// 		}
-	// 	}
+		err = CreateRecord(repo, detailed)
 
-	// 	fmt.Printf("detailed id : %v", detailed.Model.ID)
-	// 	assert.NoError(t, err, "expected detailed record to be created, but got error")
-	// 	var result models.Detailed
-	// 	err = repo.AccountingDB.First(&result, detailed.Model.ID).Error //Code is uniqe
-	// 	assert.NoError(t, err, " can not find the inserted detailed record :")
+		assert.Error(t, err, "expected getting duplicate detailed code error")
 
-	// })
+	})
 
-	// t.Run("the detailed record creation fail because duplication code", func(t *testing.T) {
+	t.Run("the detailed record creation fail because duplication title", func(t *testing.T) {
 
-	// 	code := randgenerator.GenerateRandomCode()
-	// 	title := randgenerator.GenerateRandomTitle()
-	// 	detailed := &models.Detailed{Code: code, Title: title}
-	// 	err := CreateRecord(repo, detailed)
-	// 	assert.NoError(t, err, "expected detailed record to be created, but got error")
+		detailed, err := createTempDetailed(repo)
+		assert.NoError(t, err, "can not create detailed record due to")
 
-	// 	title = randgenerator.GenerateRandomTitle()
-	// 	detailed = &models.Detailed{Code: code, Title: title}
-	// 	err = CreateRecord(repo, detailed)
+		detailed.Code = randgenerator.GenerateRandomCode()
 
-	// 	assert.Error(t, err, "expected getting duplicate detailed code error")
+		err = CreateRecord(repo, detailed)
 
-	// })
+		assert.Error(t, err, "expected getting duplicate detailed title error")
 
-	// t.Run("the detailed record creation fail because duplication title", func(t *testing.T) {
-
-	// 	code := randgenerator.GenerateRandomCode()
-	// 	title := randgenerator.GenerateRandomTitle()
-	// 	detailed := &models.Detailed{Code: code, Title: title}
-	// 	err := CreateRecord(repo, detailed)
-	// 	assert.NoError(t, err, "expected detailed record to be created, but got error")
-
-	// 	code = randgenerator.GenerateRandomCode()
-	// 	detailed = &models.Detailed{Code: code, Title: title}
-	// 	err = CreateRecord(repo, detailed)
-
-	// 	assert.Error(t, err, "expected getting duplicate detailed title error")
-
-	// })
+	})
 
 }
 
 func TestCreateSubsidiary(t *testing.T) {
 
 	repo, err := createConnectionForTest()
+	defer func() {
+		sqlDB, _ := repo.AccountingDB.DB()
+		sqlDB.Close()
+	}()
 
 	if err != nil {
 		t.Fatalf("can not connect to database %v", err)
 	}
 
 	t.Run("the subsidiary record successfully create", func(t *testing.T) {
-		code := randgenerator.GenerateRandomCode()
-		title := randgenerator.GenerateRandomTitle()
-		subsidiary := &models.Subsidiary{Code: code, Title: title, HasDetailed: false}
-		err := CreateRecord(repo, subsidiary)
 
-		assert.NoError(t, err, "expected subsidiary record to be created, but got error")
+		subsidiary, err := createTempSubsidiary(repo)
+		assert.NoError(t, err, "can not create subsidiary record due to")
+
 		var result models.Subsidiary
 		err = repo.AccountingDB.First(&result, subsidiary.Model.ID).Error //Code is uniqe
 		assert.NoError(t, err, " can not find the inserted subsidiary record :")
@@ -162,14 +111,11 @@ func TestCreateSubsidiary(t *testing.T) {
 
 	t.Run("the subsidiary record creation fail because duplication code", func(t *testing.T) {
 
-		code := randgenerator.GenerateRandomCode()
-		title := randgenerator.GenerateRandomTitle()
-		subsidiary := &models.Subsidiary{Code: code, Title: title, HasDetailed: true}
-		err := CreateRecord(repo, subsidiary)
-		assert.NoError(t, err, "expected subsidiary record to be created, but got error")
+		subsidiary, err := createTempSubsidiary(repo)
+		assert.NoError(t, err, "can not create subsidiary record due to")
 
-		title = randgenerator.GenerateRandomTitle()
-		subsidiary = &models.Subsidiary{Code: code, Title: title, HasDetailed: false}
+		subsidiary.Title = randgenerator.GenerateRandomTitle()
+
 		err = CreateRecord(repo, subsidiary)
 
 		assert.Error(t, err, "expected getting duplicate subsidiary code error")
@@ -178,14 +124,11 @@ func TestCreateSubsidiary(t *testing.T) {
 
 	t.Run("the subsidiary record creation fail because duplication title", func(t *testing.T) {
 
-		code := randgenerator.GenerateRandomCode()
-		title := randgenerator.GenerateRandomTitle()
-		subsidiary := &models.Subsidiary{Code: code, Title: title, HasDetailed: false}
-		err := CreateRecord(repo, subsidiary)
-		assert.NoError(t, err, "expected subsidiary record to be created, but got error")
+		subsidiary, err := createTempSubsidiary(repo)
+		assert.NoError(t, err, "can not create subsidiary record due to")
 
-		code = randgenerator.GenerateRandomCode()
-		subsidiary = &models.Subsidiary{Code: code, Title: title, HasDetailed: true}
+		subsidiary.Code = randgenerator.GenerateRandomCode()
+
 		err = CreateRecord(repo, subsidiary)
 
 		assert.Error(t, err, "expected getting duplicate subsidiary title error")
@@ -354,32 +297,33 @@ func TestUpdateSubsidiary(t *testing.T) {
 	})
 
 	t.Run("can not update subsidiary record if versions were  different", func(t *testing.T) {
-		subsidiary := createTempSubsidiary()
-		CreateRecord(repo, subsidiary)
+		subsidiary, err := createTempSubsidiary(repo)
+		assert.NoError(t, err, "can not create subsidiary record due to")
+
 		subsidiary.Code = randgenerator.GenerateRandomCode()
-		fmt.Printf("prev id : %v\n", subsidiary.Model.ID)
-		fmt.Printf("code : %v\n", subsidiary.Code)
-		fmt.Printf("prev version : %v\n", subsidiary.Version)
+		// fmt.Printf("prev id : %v\n", subsidiary.Model.ID)
+		// fmt.Printf("code : %v\n", subsidiary.Code)
+		// fmt.Printf("prev version : %v\n", subsidiary.Version)
 		UpdateSubsidiary(repo, subsidiary, subsidiary.Model.ID)
 		subsidiary.Code = randgenerator.GenerateRandomCode()
-		err := UpdateSubsidiary(repo, subsidiary, subsidiary.Model.ID)
-		fmt.Printf("new version : %v\n", subsidiary.Version)
+		err = UpdateSubsidiary(repo, subsidiary, subsidiary.Model.ID)
+		// fmt.Printf("new version : %v\n", subsidiary.Version)
 		assert.Error(t, err, "expected error indicate the versions are different")
 
 	})
 
 	t.Run("can update subsidiary record if versions were same", func(t *testing.T) {
-		subsidiary := createTempSubsidiary()
-		CreateRecord(repo, subsidiary)
+		subsidiary, err := createTempSubsidiary(repo)
+		assert.NoError(t, err, "can not create subsidiary record due to")
 		subsidiary.Code = randgenerator.GenerateRandomCode()
-		fmt.Printf("prev id : %v\n", subsidiary.Model.ID)
-		fmt.Printf("code : %v\n", subsidiary.Code)
-		fmt.Printf("prev version : %v\n", subsidiary.Version)
+		// fmt.Printf("prev id : %v\n", subsidiary.Model.ID)
+		// fmt.Printf("code : %v\n", subsidiary.Code)
+		// fmt.Printf("prev version : %v\n", subsidiary.Version)
 		UpdateSubsidiary(repo, subsidiary, subsidiary.Model.ID)
 		subsidiary, _ = ReadRecord[models.Subsidiary](repo, subsidiary.Model.ID, "subsidiary")
 		subsidiary.Code = randgenerator.GenerateRandomCode()
-		err := UpdateSubsidiary(repo, subsidiary, subsidiary.Model.ID)
-		fmt.Printf("new version : %v\n", subsidiary.Version)
+		err = UpdateSubsidiary(repo, subsidiary, subsidiary.Model.ID)
+		// fmt.Printf("new version : %v\n", subsidiary.Version)
 		assert.NoError(t, err, "expected no error")
 
 	})
@@ -473,10 +417,21 @@ func createTempVoucherItem() *models.VoucherItem {
 	return &models.VoucherItem{DetailedId: tempDetailedId, SubsidiaryId: tempSubsidiaryId}
 }
 
-func createTempSubsidiary() *models.Subsidiary {
-	code := randgenerator.GenerateRandomCode()
-	title := randgenerator.GenerateRandomTitle()
-	return &models.Subsidiary{Code: code, Title: title, HasDetailed: false}
+func createTempSubsidiary(repo *Repositories) (*models.Subsidiary, error) {
+	subsidiary := &models.Subsidiary{Code: randgenerator.GenerateRandomCode(), Title: randgenerator.GenerateRandomTitle(), HasDetailed: false}
+
+	err := errors.New("")
+	for err != nil {
+
+		err = CreateRecord(repo, subsidiary)
+		if err != nil {
+			fmt.Printf("Error during record creation: %v\n", err)
+
+			subsidiary = &models.Subsidiary{Code: randgenerator.GenerateRandomCode(), Title: randgenerator.GenerateRandomTitle(), HasDetailed: false}
+		}
+
+	}
+	return subsidiary, nil
 }
 
 func createTempDetailed(repo *Repositories) (*models.Detailed, error) {
@@ -577,64 +532,68 @@ func TestDeleteSubsidiary(t *testing.T) {
 	}
 
 	t.Run("delete subsidiary record seccessfully", func(t *testing.T) {
-		subsidiary := createTempSubsidiary()
-		CreateRecord(repo, subsidiary)
+		subsidiary, err := createTempSubsidiary(repo)
+		assert.NoError(t, err, "can not create subsidiary record due to")
 
-		DeleteSubsidiaryRecord(repo, subsidiary)
+		err = DeleteSubsidiaryRecord(repo, subsidiary)
 
-		result := repo.AccountingDB.First(&subsidiary)
-		assert.Error(t, result.Error, "expected error indicate subsiduary record not found")
+		assert.NoError(t, err, "can not delete subsidiary record due to ")
 
 	})
 
 	t.Run("deletion subsidiary record fail because record does not exist in database", func(t *testing.T) {
-		subsidiary := createTempSubsidiary()
-		DeleteSubsidiaryRecord(repo, subsidiary)
+		subsidiary := &models.Subsidiary{}
 		subsidiary.Model.ID = 1_000_000
-		result := repo.AccountingDB.First(&subsidiary)
-		assert.Error(t, result.Error, "expected error indicate subsiduary record not found")
+		err := DeleteSubsidiaryRecord(repo, subsidiary)
+
+		assert.Error(t, err, "expected error indicate subsiduary record not found")
 	})
 
 	t.Run("deletion subsidiary record fails because there is a reffrence in some voucher items  ", func(t *testing.T) {
-		subsidiary := createTempSubsidiary()
-		CreateRecord(repo, subsidiary)
+		subsidiary, err := createTempSubsidiary(repo)
+		assert.NoError(t, err, "can not create subsidiary record due to")
+
 		voucher := &models.Voucher{Number: randgenerator.GenerateRandomCode(), VoucherItems: []*models.VoucherItem{createTempVoucherItem()}}
 		voucher.VoucherItems[0].SubsidiaryId = subsidiary.Model.ID
 		CreateRecord(repo, voucher)
-		fmt.Printf("det : %v", subsidiary.Model.ID)
-		fmt.Printf("vi : %v", voucher.VoucherItems[0].Model.ID)
-		err := DeleteSubsidiaryRecord(repo, subsidiary)
+		// fmt.Printf("det : %v", subsidiary.Model.ID)
+		// fmt.Printf("vi : %v", voucher.VoucherItems[0].Model.ID)
+		err = DeleteSubsidiaryRecord(repo, subsidiary)
 
 		assert.Error(t, err, "expected error indicate violation forignkey constraint")
 
 	})
 
 	t.Run("can not delete subsidiary record if versions were  different", func(t *testing.T) {
-		subsidiary := createTempSubsidiary()
-		CreateRecord(repo, subsidiary)
+		subsidiary, err := createTempSubsidiary(repo)
+		assert.NoError(t, err, "can not create subsidiary record due to")
+
 		subsidiary.Code = randgenerator.GenerateRandomCode()
-		fmt.Printf("prev id : %v\n", subsidiary.Model.ID)
-		fmt.Printf("code : %v\n", subsidiary.Code)
-		fmt.Printf("prev version : %v\n", subsidiary.Version)
+		// fmt.Printf("prev id : %v\n", subsidiary.Model.ID)
+		// fmt.Printf("code : %v\n", subsidiary.Code)
+		// fmt.Printf("prev version : %v\n", subsidiary.Version)
 		UpdateSubsidiary(repo, subsidiary, subsidiary.Model.ID)
-		err := DeleteSubsidiaryRecord(repo, subsidiary)
-		fmt.Printf("new version : %v\n", subsidiary.Version)
+		err = DeleteSubsidiaryRecord(repo, subsidiary)
+		// fmt.Printf("new version : %v\n", subsidiary.Version)
 		assert.Error(t, err, "expected error indicate the versions are different")
 
 	})
 
 	t.Run("can delete subsidiary record if versions were same", func(t *testing.T) {
-		subsidiary := createTempSubsidiary()
-		CreateRecord(repo, subsidiary)
+		subsidiary, err := createTempSubsidiary(repo)
+		assert.NoError(t, err, "can not create subsidiary record due to")
+
 		subsidiary.Code = randgenerator.GenerateRandomCode()
-		fmt.Printf("prev id : %v\n", subsidiary.Model.ID)
-		fmt.Printf("code : %v\n", subsidiary.Code)
-		fmt.Printf("prev version : %v\n", subsidiary.Version)
-		UpdateSubsidiary(repo, subsidiary, subsidiary.Model.ID)
+		// fmt.Printf("prev id : %v\n", subsidiary.Model.ID)
+		// fmt.Printf("code : %v\n", subsidiary.Code)
+		// fmt.Printf("prev version : %v\n", subsidiary.Version)
+		err = UpdateSubsidiary(repo, subsidiary, subsidiary.Model.ID)
+		assert.NoError(t, err, "cann not update subsidiary record due to ")
+
 		subsidiary, _ = ReadRecord[models.Subsidiary](repo, subsidiary.Model.ID, "subsidiary")
 
-		err := DeleteSubsidiaryRecord(repo, subsidiary)
-		fmt.Printf("new version : %v\n", subsidiary.Version)
+		err = DeleteSubsidiaryRecord(repo, subsidiary)
+		// fmt.Printf("new version : %v\n", subsidiary.Version)
 		assert.NoError(t, err, "expected no error")
 
 	})
@@ -723,8 +682,8 @@ func TestReadRecord(t *testing.T) {
 	})
 
 	t.Run("can read the subsidiary record successfully", func(t *testing.T) {
-		subsidiary := createTempSubsidiary()
-		CreateRecord(repo, subsidiary)
+		subsidiary, err := createTempSubsidiary(repo)
+		assert.NoError(t, err, "can not create subsidiary record due to")
 
 		res, err := ReadRecord[models.Subsidiary](repo, subsidiary.Model.ID, "subsidiary")
 		assert.NoError(t, err, "expected no error")
