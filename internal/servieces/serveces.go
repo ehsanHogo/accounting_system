@@ -38,37 +38,39 @@ func UpdateDetailed(db *repositories.Repositories, d *models.Detailed) error {
 	if err != nil {
 		return fmt.Errorf("title validation fail due to : %v", err)
 	}
-	var prevDetailed *models.Detailed
-	prevDetailed, err = repositories.ReadRecord[models.Detailed](db, d.Model.ID)
 
+	err = repositories.UpdateDetailed(db, d, d.Model.ID)
 	if err != nil {
-		return err
-	}
-
-	if prevDetailed.Version == d.Version {
-
-		repositories.UpdateDetailed(db, d, d.Model.ID)
-		return nil
+		return fmt.Errorf("can not update : %v", err)
 	} else {
-		return fmt.Errorf("the version is different : %v", err)
+
+		return nil
 	}
 
 }
 
 func DeleteDetailed(db *repositories.Repositories, d *models.Detailed) error {
-	var prevDetailed *models.Detailed
-	prevDetailed, err := repositories.ReadRecord[models.Detailed](db, d.Model.ID)
 
+	err := repositories.DeleteDetailedRecord(db, d)
 	if err != nil {
-		return err
-	}
-
-	if prevDetailed.Version == d.Version {
-
-		repositories.DeleteDetailedRecord(db, d)
-		return nil
+		return fmt.Errorf("can not delete : %v", err)
 	} else {
-		return fmt.Errorf("the version is different : %v", err)
+
+		return nil
 	}
 
 }
+
+func ReadDetailed(db *repositories.Repositories, d *models.Detailed) (*models.Detailed, error) {
+
+	res, err := repositories.ReadRecord[models.Detailed](db, d.Model.ID)
+	if err != nil {
+		return nil, fmt.Errorf("can not read : %v", err)
+	} else {
+
+		return res, nil
+	}
+}
+
+
+
