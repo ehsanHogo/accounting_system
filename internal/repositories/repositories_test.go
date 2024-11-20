@@ -326,7 +326,7 @@ func TestUpdateVoucher(t *testing.T) {
 	if err != nil {
 		t.Fatalf("can not connect to database %v", err)
 	}
-	t.Run("can update voucher record successfully", func(t *testing.T) {
+	t.Run("can update voucher number record successfully", func(t *testing.T) {
 		// code := randgenerator.GenerateRandomCode()
 		voucher, err := createTempVoucher(repo)
 		assert.NoError(t, err, "can not create voucher record")
@@ -334,15 +334,44 @@ func TestUpdateVoucher(t *testing.T) {
 		// fmt.Printf("prev Code %v\n", voucher.Number)
 		prevVoucherId := voucher.Model.ID
 		code := generateUniqeCode[models.Voucher](repo, "number")
+
+		// fmt.Printf("new Code %v\n", code)
+		voucher.Number = code
+		err = UpdateVoucher(repo, voucher, []*models.VoucherItem{}, []*models.VoucherItem{}, []*models.VoucherItem{}, prevVoucherId)
+		assert.NoError(t, err, "can not update voucher ")
+	})
+
+	t.Run("can update voucher record successfully by updating , deleting and creating voucherItems ", func(t *testing.T) {
+		// code := randgenerator.GenerateRandomCode()
+		voucher, err := createTempVoucher(repo)
+		assert.NoError(t, err, "can not create voucher record")
+
+		// fmt.Printf("prev Code %v\n", voucher.Number)
+		prevVoucherId := voucher.Model.ID
+
 		newVoucherItem, err := createTempVoucherItem(repo)
 		assert.NoError(t, err, "can not create voucher item record")
 		temp := append(voucher.VoucherItems, newVoucherItem)
 		temp[1].Credit = 12
 
-		// fmt.Printf("new Code %v\n", code)
-		voucher = &models.Voucher{Number: code, VoucherItems: temp}
 		err = UpdateVoucher(repo, voucher, []*models.VoucherItem{temp[1]}, []*models.VoucherItem{temp[0]}, []*models.VoucherItem{temp[2]}, prevVoucherId)
+
+		// fmt.Printf("new Code %v\n", code)
 		assert.NoError(t, err, "can not update voucher ")
+		_, err = ReadRecord[models.VoucherItem](repo, voucher.VoucherItems[0].Model.ID, "voucherItem")
+		assert.Error(t, err, "expected error indicate voucher item not found")
+
+		_, err = ReadRecord[models.VoucherItem](repo, voucher.VoucherItems[1].Model.ID, "voucherItem")
+		assert.NoError(t, err, "expexted no error when reading the voucherItem record")
+		// assert.Equal(t, voucher.VoucherItems[1].DetailedId, newVoucherItem.DetailedId)
+		// assert.Equal(t, voucher.VoucherItems[1].SubsidiaryId, newVoucherItem.SubsidiaryId)
+		// assert.Equal(t, voucher.VoucherItems[1].Debit, newVoucherItem.Debit)
+		// assert.Equal(t, voucher.VoucherItems[1].Credit, newVoucherItem.Credit)
+		// assert.Equal(t, voucher.VoucherItems[1].VoucherID, newVoucherItem.VoucherID)
+
+		_, err = ReadRecord[models.VoucherItem](repo, voucher.VoucherItems[2].Model.ID, "voucherItem")
+		assert.NoError(t, err, "expexted no error when reading the voucherItem record")
+
 	})
 
 	t.Run("return error when update voucher record that is not in databse", func(t *testing.T) {
