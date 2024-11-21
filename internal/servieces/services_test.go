@@ -236,6 +236,43 @@ func TestUpdateSubsidiary(t *testing.T) {
 	})
 }
 
+
+
+
+func TestInsertVoucher(t *testing.T){
+	repo, err := createConnectionForTest()
+	defer func() {
+		sqlDB, _ := repo.AccountingDB.DB()
+		sqlDB.Close()
+	}()
+	if err != nil {
+		t.Fatalf("can not connect to database %v", err)
+	}
+
+
+
+	t.Run("can insert voucher successfully", func(t *testing.T) {
+			 
+	})
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 func generateUniqeCode[T any](repo *repositories.Repositories, columnName string) string {
 	code := randgenerator.GenerateRandomCode()
 	for {

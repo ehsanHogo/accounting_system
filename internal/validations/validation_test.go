@@ -46,59 +46,83 @@ func TestCheckMaxLength(t *testing.T) {
 func TestCheckDebitCredit(t *testing.T) {
 	t.Run("return error if one of the debit or credit was negative", func(t *testing.T) {
 		vi := &models.VoucherItem{Debit: 12, Credit: -1}
-		err := CheckDebitCredit(vi)
+		err := CheckDebitCredit(vi.Credit, vi.Debit)
 		assert.Error(t, err, "expected error indicate negative value is invalied")
 		vi = &models.VoucherItem{Debit: -2, Credit: 11}
-		err = CheckDebitCredit(vi)
+		err = CheckDebitCredit(vi.Credit, vi.Debit)
 		assert.Error(t, err, "expected error indicate negative value is invalied")
 	})
 
 	t.Run("return error if both debit and credit were zero", func(t *testing.T) {
 		vi := &models.VoucherItem{Debit: 0, Credit: 0}
-		err := CheckDebitCredit(vi)
+		err := CheckDebitCredit(vi.Credit, vi.Debit)
 		assert.Error(t, err, "expected error indicate both debit and credit cant be zero")
 	})
 
 	t.Run("return error if both debit and credit had positive value", func(t *testing.T) {
 		vi := &models.VoucherItem{Debit: 3, Credit: 5}
-		err := CheckDebitCredit(vi)
+		err := CheckDebitCredit(vi.Credit, vi.Debit)
 		assert.Error(t, err, "expected error indicate both debit and credit cant have positive value")
 	})
 
 	t.Run("when one of them is zero and the other is positive value , successfully return nil ", func(t *testing.T) {
 		vi := &models.VoucherItem{Debit: 2, Credit: 0}
-		err := CheckDebitCredit(vi)
+		err := CheckDebitCredit(vi.Credit, vi.Debit)
 		assert.NoError(t, err, "expected no error")
 
 		vi = &models.VoucherItem{Debit: 0, Credit: 3}
-		err = CheckDebitCredit(vi)
+		err = CheckDebitCredit(vi.Credit, vi.Debit)
 		assert.NoError(t, err, "expected no error")
 	})
 
 }
 
-
-
-func TestCheckBalance(t *testing.T){
+func TestCheckBalance(t *testing.T) {
 	t.Run("return error when sum of credits and dibits is different", func(t *testing.T) {
 		temp := make([]*models.VoucherItem, 3)
-		temp[0] = &models.VoucherItem{Credit: 0 , Debit: 4}
+		temp[0] = &models.VoucherItem{Credit: 0, Debit: 4}
 		temp[1] = &models.VoucherItem{Credit: 2, Debit: 0}
 		temp[2] = &models.VoucherItem{Credit: 1, Debit: 0}
 
 		err := CheckBalance(temp)
-		assert.Error(t,err , "expected error indicate sum of debits and credits is different")
+		assert.Error(t, err, "expected error indicate sum of debits and credits is different")
 	})
-
 
 	t.Run("when sum of credits and dibits is same , successfully return nil", func(t *testing.T) {
 		temp := make([]*models.VoucherItem, 3)
-		temp[0] = &models.VoucherItem{Credit: 5 , Debit: 0}
+		temp[0] = &models.VoucherItem{Credit: 5, Debit: 0}
 		temp[1] = &models.VoucherItem{Credit: 0, Debit: 2}
 		temp[2] = &models.VoucherItem{Credit: 0, Debit: 3}
 
 		err := CheckBalance(temp)
-		assert.NoError(t,err , "expected no error")
+		assert.NoError(t, err, "expected no error")
 	})
 
+}
+
+func TestCheckVoucherItemsLength(t *testing.T) {
+	t.Run("the length of voucher item is valied", func(t *testing.T) {
+		temp := make([]*models.VoucherItem, 3)
+		temp[0] = &models.VoucherItem{Credit: 5, Debit: 0}
+		temp[1] = &models.VoucherItem{Credit: 0, Debit: 2}
+		temp[2] = &models.VoucherItem{Credit: 0, Debit: 3}
+
+		err := CheckVoucherItemsLength(len(temp))
+		assert.NoError(t, err, "ecpected no error in length of voucher item list")
+	})
+
+	t.Run("the length of voucher item is invalied due to length of less than 2", func(t *testing.T) {
+		temp := make([]*models.VoucherItem, 1)
+		temp[0] = &models.VoucherItem{Credit: 5, Debit: 0}
+
+		err := CheckVoucherItemsLength(len(temp))
+		assert.Error(t, err, "ecpected error indicate length of voucher items cant be less than 2")
+	})
+
+	t.Run("the length of voucher item is invalied due to length of greater than 500", func(t *testing.T) {
+		temp := make([]*models.VoucherItem, 501)
+
+		err := CheckVoucherItemsLength(len(temp))
+		assert.Error(t, err, "ecpected error indicate length of voucher items cant be greater than 500")
+	})
 }
