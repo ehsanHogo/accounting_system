@@ -343,17 +343,18 @@ func checkHasDetailed(repo *repositories.Repositories, vi []*models.VoucherItem)
 			return fmt.Errorf("can not read subsidiary record : %v", err.Error)
 		}
 
+		fmt.Println("id s : ")
+		fmt.Println(subsidiary.HasDetailed)
+		fmt.Println(v.DetailedId)
+		fmt.Println(v.ID)
 		if subsidiary.HasDetailed {
 			if v.DetailedId == 0 {
 				return fmt.Errorf("can not have empty detailed when subsidiary has detailed")
-			} else {
-				return nil
 			}
 		} else {
-			if v.DetailedId == 0 {
-				return nil
-			} else {
+			if v.DetailedId != 0 {
 				return fmt.Errorf("can not have detailed when subsidiary does not have detailed")
+
 			}
 		}
 	}
