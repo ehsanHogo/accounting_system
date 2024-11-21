@@ -213,7 +213,7 @@ func DeleteSubsidiaryValidation(db *repositories.Repositories, d *models.Subsidi
 	}
 }
 
-func InsertVoucherValidation(d *models.Voucher) error {
+func InsertVoucherValidation(db *repositories.Repositories, d *models.Voucher) error {
 
 	err := ChackCodeValidation(d.Number)
 
@@ -238,6 +238,12 @@ func InsertVoucherValidation(d *models.Voucher) error {
 	err = CheckVoucherItemsLength(len(d.VoucherItems))
 	if err != nil {
 		return fmt.Errorf("length of voucher items is invalied due to : %v", err)
+	}
+
+	err = checkHasDetailed(db, d.VoucherItems)
+
+	if err != nil {
+		return fmt.Errorf("there are invalied voucher items due to : %v", err)
 	}
 
 	return nil

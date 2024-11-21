@@ -58,30 +58,30 @@ func TestCreateDetailed(t *testing.T) {
 		assert.NoError(t, err, "can not find the inserted detailed record")
 	})
 
-	t.Run("the detailed record creation fail because duplication code", func(t *testing.T) {
+	// t.Run("the detailed record creation fail because duplication code", func(t *testing.T) {
 
-		detailed, err := createTempDetailed(repo)
-		assert.NoError(t, err, "can not create detailed record due to")
-		detailed.Title = randgenerator.GenerateRandomTitle()
+	// 	detailed, err := createTempDetailed(repo)
+	// 	assert.NoError(t, err, "can not create detailed record due to")
+	// 	detailed.Title = randgenerator.GenerateRandomTitle()
 
-		err = CreateRecord(repo, detailed)
+	// 	err = CreateRecord(repo, detailed)
 
-		assert.Error(t, err, "expected getting duplicate detailed code error")
+	// 	assert.Error(t, err, "expected getting duplicate detailed code error")
 
-	})
+	// })
 
-	t.Run("the detailed record creation fail because duplication title", func(t *testing.T) {
+	// t.Run("the detailed record creation fail because duplication title", func(t *testing.T) {
 
-		detailed, err := createTempDetailed(repo)
-		assert.NoError(t, err, "can not create detailed record due to")
+	// 	detailed, err := createTempDetailed(repo)
+	// 	assert.NoError(t, err, "can not create detailed record due to")
 
-		detailed.Code = randgenerator.GenerateRandomCode()
+	// 	detailed.Code = randgenerator.GenerateRandomCode()
 
-		err = CreateRecord(repo, detailed)
+	// 	err = CreateRecord(repo, detailed)
 
-		assert.Error(t, err, "expected getting duplicate detailed title error")
+	// 	assert.Error(t, err, "expected getting duplicate detailed title error")
 
-	})
+	// })
 
 }
 
@@ -108,31 +108,31 @@ func TestCreateSubsidiary(t *testing.T) {
 
 	})
 
-	t.Run("the subsidiary record creation fail because duplication code", func(t *testing.T) {
+	// t.Run("the subsidiary record creation fail because duplication code", func(t *testing.T) {
 
-		subsidiary, err := createTempSubsidiary(repo)
-		assert.NoError(t, err, "can not create subsidiary record due to")
+	// 	subsidiary, err := createTempSubsidiary(repo)
+	// 	assert.NoError(t, err, "can not create subsidiary record due to")
 
-		subsidiary.Title = randgenerator.GenerateRandomTitle()
+	// 	subsidiary.Title = randgenerator.GenerateRandomTitle()
 
-		err = CreateRecord(repo, subsidiary)
+	// 	err = CreateRecord(repo, subsidiary)
 
-		assert.Error(t, err, "expected getting duplicate subsidiary code error")
+	// 	assert.Error(t, err, "expected getting duplicate subsidiary code error")
 
-	})
+	// })
 
-	t.Run("the subsidiary record creation fail because duplication title", func(t *testing.T) {
+	// t.Run("the subsidiary record creation fail because duplication title", func(t *testing.T) {
 
-		subsidiary, err := createTempSubsidiary(repo)
-		assert.NoError(t, err, "can not create subsidiary record due to")
+	// 	subsidiary, err := createTempSubsidiary(repo)
+	// 	assert.NoError(t, err, "can not create subsidiary record due to")
 
-		subsidiary.Code = randgenerator.GenerateRandomCode()
+	// 	subsidiary.Code = randgenerator.GenerateRandomCode()
 
-		err = CreateRecord(repo, subsidiary)
+	// 	err = CreateRecord(repo, subsidiary)
 
-		assert.Error(t, err, "expected getting duplicate subsidiary title error")
+	// 	assert.Error(t, err, "expected getting duplicate subsidiary title error")
 
-	})
+	// })
 
 }
 

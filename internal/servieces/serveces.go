@@ -137,7 +137,7 @@ func ReadSubsidiary(db *repositories.Repositories, id uint) (*models.Subsidiary,
 
 func InsertVoucher(db *repositories.Repositories, d *models.Voucher) error {
 
-	err := validations.InsertVoucherValidation(d)
+	err := validations.InsertVoucherValidation(db, d)
 
 	if err != nil {
 		return fmt.Errorf("can not insert voucher due to validation failure: %v", err)
