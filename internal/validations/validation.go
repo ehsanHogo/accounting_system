@@ -155,8 +155,18 @@ func InsertSubsidiaryValidation(d *models.Subsidiary) error {
 	return nil
 }
 
-func UpdateSubsidiaryValidation(d *models.Subsidiary) error {
-	err := ChackCodeValidation(d.Code)
+func UpdateSubsidiaryValidation(repo *repositories.Repositories, d *models.Subsidiary) error {
+	prevSubsidiary, err := repositories.ReadRecord[models.Subsidiary](repo, d.Model.ID)
+	if err != nil {
+		return fmt.Errorf("update validation fail due to absence of subsidiary id in database  : %v", err)
+	}
+
+	if d.Version != prevSubsidiary.Version {
+		return fmt.Errorf("delete validation fail due to different versions , expected version = %d , got : %d", prevSubsidiary.Version, d.Version)
+
+	}
+
+	err = ChackCodeValidation(d.Code)
 
 	if err != nil {
 		return fmt.Errorf("code validation fail due to  : %v", err)

@@ -91,7 +91,7 @@ func InsertSubsidiary(db *repositories.Repositories, d *models.Subsidiary) error
 }
 
 func UpdateSubsidiary(db *repositories.Repositories, d *models.Subsidiary) error {
-	err := validations.UpdateSubsidiaryValidation(d)
+	err := validations.UpdateSubsidiaryValidation(db, d)
 
 	if err != nil {
 		return fmt.Errorf("can not update subsidiary due to validation failure : %v", err)

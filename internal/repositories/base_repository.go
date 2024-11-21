@@ -206,7 +206,7 @@ func UpdateDetailed(db *Repositories, v *models.Detailed, id uint) error {
 	newV.Version += 1
 	fmt.Printf("newval %v", newV)
 
-	if err := db.AccountingDB.Save(&newV).Error; err != nil {
+	if err := db.AccountingDB.Model(&newV).Where("id = ?", v.Model.ID).Updates(newV).Error; err != nil {
 		return fmt.Errorf("can not  update record due to : %v", err)
 	}
 
@@ -220,24 +220,26 @@ func UpdateDetailed(db *Repositories, v *models.Detailed, id uint) error {
 
 func UpdateSubsidiary(db *Repositories, v *models.Subsidiary, id uint) error {
 	var newV models.Subsidiary
-	if err := db.AccountingDB.First(&newV, id).Error; err != nil {
-		return fmt.Errorf("record not found: %w", err)
+	// if err := db.AccountingDB.First(&newV, id).Error; err != nil {
+	// 	return fmt.Errorf("record not found: %w", err)
+	// }
+
+	// if v.Version != newV.Version {
+	// 	return fmt.Errorf("can not update , the version of subsidiary record is different. expected version : %v", newV.Version)
+	// } else {
+
+	newV.Code = v.Code
+	newV.Title = v.Title
+	newV.HasDetailed = v.HasDetailed
+	newV.Version += 1
+	// db.AccountingDB.Save(&newV).Error
+
+	if err := db.AccountingDB.Model(&newV).Where("id = ?", v.Model.ID).Updates(newV).Error; err != nil {
+		return fmt.Errorf("can not update subsidiary record due to : %v", err)
 	}
-
-	if v.Version != newV.Version {
-		return fmt.Errorf("can not update , the version of subsidiary record is different. expected version : %v", newV.Version)
-	} else {
-
-		newV.Code = v.Code
-		newV.Title = v.Title
-		newV.HasDetailed = v.HasDetailed
-		newV.Version += 1
-		if err := db.AccountingDB.Save(&newV).Error; err != nil {
-			return fmt.Errorf("failed to update record: %w", err)
-		}
-
-		return nil
-	}
+	fmt.Println("update successfully here ")
+	return nil
+	// }
 }
 
 func UpdateVoucher(db *Repositories, v *models.Voucher, updatedItem []*models.VoucherItem, deletedItem []*models.VoucherItem, insertedItem []*models.VoucherItem, id uint) error {
