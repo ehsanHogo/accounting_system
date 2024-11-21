@@ -43,8 +43,8 @@ func CreateRecord[T any](db *Repositories, v *T) error {
 
 	res := db.AccountingDB.Create(v)
 	if res.Error != nil {
-		fmt.Println("here")
-		return res.Error
+
+		return fmt.Errorf("can not create record due to : %v", res.Error)
 
 	} else {
 
@@ -58,7 +58,7 @@ func DeleteVoucherItemRecord[T any](db *Repositories, v *T) error {
 	res := db.AccountingDB.Unscoped().Delete(&v)
 
 	if res.Error != nil {
-		return fmt.Errorf("error in deleting record: %w", res.Error)
+		return fmt.Errorf("can not delete record due to: %v", res.Error)
 
 	} else {
 
@@ -70,29 +70,29 @@ func DeleteVoucherItemRecord[T any](db *Repositories, v *T) error {
 
 func DeleteDetailedRecord(db *Repositories, v *models.Detailed) error {
 
-	var prev *models.Detailed
-	var err error
-	prev, err = ReadRecord[models.Detailed](db, v.Model.ID)
-	if err != nil {
-		return fmt.Errorf("can not delete detailed record : %v", err)
+	// var prev *models.Detailed
+	// var err error
+	// prev, err := ReadRecord[models.Detailed](db, v.Model.ID)
+	// if err != nil {
+	// 	return fmt.Errorf("can not delete detailed record : %v", err)
+	// } else {
+
+	// if v.Version != prev.Version {
+	// 	return errors.New("can not delete because of different version")
+	// } else {
+
+	res := db.AccountingDB.Unscoped().Delete(&v)
+
+	if res.Error != nil {
+		return fmt.Errorf("can not  delete detailed record due to : %v", res.Error)
+
 	} else {
 
-		if v.Version != prev.Version {
-			return errors.New("can not delete because of different version")
-		} else {
-
-			res := db.AccountingDB.Unscoped().Delete(&v)
-
-			if res.Error != nil {
-				return fmt.Errorf("error in deleting record: %w", res.Error)
-
-			} else {
-
-				fmt.Println("Record deleted successfully")
-				return nil
-			}
-		}
+		fmt.Println("Record deleted successfully")
+		return nil
 	}
+	// }
+	// }
 
 }
 
@@ -135,19 +135,19 @@ func DeleteVoucherRecord(db *Repositories, v *models.Voucher) error {
 
 		if v.Version != prev.Version {
 			return errors.New("can not delete because of different version")
+		}
+
+		res := db.AccountingDB.Unscoped().Delete(&v)
+
+		if res.Error != nil {
+			return fmt.Errorf("error in deleting record: %w", res.Error)
+
 		} else {
 
-			res := db.AccountingDB.Unscoped().Delete(&v)
-
-			if res.Error != nil {
-				return fmt.Errorf("error in deleting record: %w", res.Error)
-
-			} else {
-
-				fmt.Println("Record deleted successfully")
-				return nil
-			}
+			fmt.Println("Record deleted successfully")
+			return nil
 		}
+		// }
 	}
 
 }

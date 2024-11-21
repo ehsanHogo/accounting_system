@@ -105,6 +105,22 @@ func DetailedValidation(d *models.Detailed) error {
 	return nil
 }
 
+func DeleteDetailedValidation(db *repositories.Repositories, d *models.Detailed) error {
+
+	// var prevDetailed *models.Detailed
+	// var err error
+	prevDetailed, err := repositories.ReadRecord[models.Detailed](db, d.Model.ID)
+	if err != nil {
+		return fmt.Errorf("delete validation fail due to absence of detailed id in database  : %v", err)
+	}
+
+	if d.Version == prevDetailed.Version {
+		return nil
+	} else {
+		return fmt.Errorf("delete validation fail due to different versions , expected version = %d , got : %d", prevDetailed.Version, d.Version)
+	}
+}
+
 func SubsidiaryValidation(d *models.Subsidiary) error {
 	err := ChackCodeValidation(d.Code)
 

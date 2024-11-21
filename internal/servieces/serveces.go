@@ -43,8 +43,14 @@ func UpdateDetailed(db *repositories.Repositories, d *models.Detailed) error {
 }
 
 func DeleteDetailed(db *repositories.Repositories, d *models.Detailed) error {
+	err := validations.DeleteDetailedValidation(db, d)
 
-	err := repositories.DeleteDetailedRecord(db, d)
+	if err != nil {
+		return fmt.Errorf("can not delete detailed due to validation failure : %v", err)
+	}
+
+	err = repositories.DeleteDetailedRecord(db, d)
+
 	if err != nil {
 		return fmt.Errorf("can not delete detailed due to database operation failure: %v", err)
 	} else {
