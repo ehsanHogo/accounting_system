@@ -171,6 +171,69 @@ func TestUpdateDetailed(t *testing.T) {
 
 		assert.Error(t, err, "expected error indicate title length should not be greater than 64 ")
 	})
+
+	t.Run("can not update detailed record that is not in databse", func(t *testing.T) {
+		code := randgenerator.GenerateRandomCode()
+		title := randgenerator.GenerateRandomTitle()
+		detailed := &models.Detailed{Code: code, Title: title}
+		detailed.Model.ID = 1_000_000
+		err := UpdateDetailed(repo, detailed)
+		assert.Error(t, err, "expected error indicate there is such id in database")
+
+	})
+
+	t.Run("can not update detailed record if versions were  different", func(t *testing.T) {
+		detailed, err := createTempDetailed(repo)
+		assert.NoError(t, err, "can not create detailed record due to")
+
+		detailed.Code = generateUniqeCode[models.Detailed](repo, "code")
+		// fmt.Printf("prev id : %v\n", detailed.Model.ID)
+		// fmt.Printf("code : %v\n", detailed.Code)
+		// fmt.Printf("prev version : %v\n", detailed.Version)
+		err = UpdateDetailed(repo, detailed)
+		assert.NoError(t, err, "expected no error while updating")
+
+		detailed.Code = generateUniqeCode[models.Detailed](repo, "code")
+		err = UpdateDetailed(repo, detailed)
+		// fmt.Printf("new version : %v\n", detailed.Version)
+		assert.Error(t, err, "expected error indicate the versions are different")
+
+	})
+
+	t.Run("can update detailed record if versions were same", func(t *testing.T) {
+		detailed, err := createTempDetailed(repo)
+		assert.NoError(t, err, "can not create detailed record due to")
+
+		detailed.Code = generateUniqeCode[models.Detailed](repo, "code")
+		// fmt.Printf("prev id : %v\n", detailed.Model.ID)
+		// fmt.Printf("code : %v\n", detailed.Code)
+		// fmt.Printf("prev version : %v\n", detailed.Version)
+		err = UpdateDetailed(repo, detailed)
+		assert.NoError(t, err, "can not update detailed record")
+
+		detailed, _ = repositories.ReadRecord[models.Detailed](repo, detailed.Model.ID)
+		detailed.Code = generateUniqeCode[models.Detailed](repo, "code")
+		err = UpdateDetailed(repo, detailed)
+		fmt.Printf("new version : %v\n", detailed.Version)
+		assert.NoError(t, err, "expected no error")
+
+	})
+
+	t.Run("can not update detailed record if were reffrenced in some voucher items", func(t *testing.T) {
+		detailed, err := createTempDetailed(repo)
+		assert.NoError(t, err, "can not create detailed record due to")
+		fmt.Println("in me ")
+		fmt.Printf("detialed id : %v\n", detailed.Model.ID)
+		_, err = createTempVoucher(repo, detailed.Model.ID)
+
+		fmt.Printf("detialed id : %v\n", detailed.Model.ID)
+		assert.NoError(t, err, "can not create voucher record")
+		// fmt.Printf("voucher id : %v\n", voucher.Model.ID)
+		detailed.Code = generateUniqeCode[models.Detailed](repo, "code")
+		err = UpdateDetailed(repo, detailed)
+		assert.Error(t, err, "expected error indicate violation update forign key constraint")
+	})
+
 }
 
 func TestDeleteDetailed(t *testing.T) {
