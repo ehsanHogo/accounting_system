@@ -398,67 +398,108 @@ func TestUpdateSubsidiary(t *testing.T) {
 		assert.Equal(t, fetchSubsidiary.Code, checkUpdated.Code)
 	})
 
-	// t.Run("can not update subsidiary due to empty title", func(t *testing.T) {
-	// 	subsidiary := &models.Subsidiary{Code: generateUniqeCode[models.Subsidiary](repo, "code"), Title: generateUniqeTitle[models.Subsidiary](repo)}
-	// 	err := InsertSubsidiary(repo, subsidiary)
-	// 	assert.NoError(t, err, "can not insert subsidiary record")
+	t.Run("can not update subsidiary due to empty title", func(t *testing.T) {
+		subsidiary, err := createTempSubsidiary(repo)
+		assert.NoError(t, err, "can not insert subsidiary record")
 
-	// 	fetchSubsidiary, err := repositories.ReadRecord[models.Subsidiary](repo, subsidiary.Model.ID)
-	// 	assert.NoError(t, err, "expected no error when reading subsidiary record ")
-	// 	fetchSubsidiary.Title = ""
-	// 	err = UpdateSubsidiary(repo, fetchSubsidiary)
-	// 	assert.Error(t, err, "expected error indicate empty code is not allowed")
+		fetchSubsidiary, err := repositories.ReadRecord[models.Subsidiary](repo, subsidiary.Model.ID)
+		assert.NoError(t, err, "expected no error when reading subsidiary record ")
+		fetchSubsidiary.Title = ""
+		err = UpdateSubsidiary(repo, fetchSubsidiary)
+		assert.Error(t, err, "expected error indicate empty code is not allowed")
 
-	// })
+	})
 
-	// t.Run("can not update subsidiary due to empty code", func(t *testing.T) {
-	// 	subsidiary := &models.Subsidiary{Code: generateUniqeCode[models.Subsidiary](repo, "code"), Title: generateUniqeTitle[models.Subsidiary](repo)}
-	// 	err := InsertSubsidiary(repo, subsidiary)
-	// 	assert.NoError(t, err, "can not insert subsidiary record")
+	t.Run("can not update subsidiary due to empty code", func(t *testing.T) {
+		subsidiary, err := createTempSubsidiary(repo)
+		assert.NoError(t, err, "can not insert subsidiary record")
 
-	// 	fetchSubsidiary, err := repositories.ReadRecord[models.Subsidiary](repo, subsidiary.Model.ID)
-	// 	assert.NoError(t, err, "expected no error when reading subsidiary record ")
-	// 	fetchSubsidiary.Code = ""
-	// 	err = UpdateSubsidiary(repo, fetchSubsidiary)
-	// 	assert.Error(t, err, "expected error indicate empty title is not allowed")
+		fetchSubsidiary, err := repositories.ReadRecord[models.Subsidiary](repo, subsidiary.Model.ID)
+		assert.NoError(t, err, "expected no error when reading subsidiary record ")
+		fetchSubsidiary.Code = ""
+		err = UpdateSubsidiary(repo, fetchSubsidiary)
+		assert.Error(t, err, "expected error indicate empty title is not allowed")
 
-	// })
+	})
 
-	// t.Run("can not update subsidiary when  code length is greater than 64", func(t *testing.T) {
-	// 	subsidiary := &models.Subsidiary{Code: generateUniqeCode[models.Subsidiary](repo, "code"), Title: generateUniqeTitle[models.Subsidiary](repo)}
-	// 	err := InsertSubsidiary(repo, subsidiary)
-	// 	assert.NoError(t, err, "can not insert subsidiary record")
+	t.Run("can not update subsidiary when  code length is greater than 64", func(t *testing.T) {
+		subsidiary, err := createTempSubsidiary(repo)
+		assert.NoError(t, err, "can not insert subsidiary record")
 
-	// 	fetchSubsidiary, err := repositories.ReadRecord[models.Subsidiary](repo, subsidiary.Model.ID)
-	// 	assert.NoError(t, err, "expected no error when reading subsidiary record ")
-	// 	s := "1"
-	// 	fetchSubsidiary.Code = ""
-	// 	for i := 0; i < 70; i++ {
-	// 		fetchSubsidiary.Code += s
-	// 	}
+		fetchSubsidiary, err := repositories.ReadRecord[models.Subsidiary](repo, subsidiary.Model.ID)
+		assert.NoError(t, err, "expected no error when reading subsidiary record ")
+		s := "1"
+		fetchSubsidiary.Code = ""
+		for i := 0; i < 70; i++ {
+			fetchSubsidiary.Code += s
+		}
 
-	// 	err = UpdateSubsidiary(repo, fetchSubsidiary)
-	// 	assert.Error(t, err, "expected error indicate code length should not be greater than 64 ")
+		err = UpdateSubsidiary(repo, fetchSubsidiary)
+		assert.Error(t, err, "expected error indicate code length should not be greater than 64 ")
 
-	// })
+	})
 
-	// t.Run("can not update subsidiary when  title length is greater than 64", func(t *testing.T) {
-	// 	subsidiary := &models.Subsidiary{Code: generateUniqeCode[models.Subsidiary](repo, "code"), Title: generateUniqeTitle[models.Subsidiary](repo)}
-	// 	err := InsertSubsidiary(repo, subsidiary)
-	// 	assert.NoError(t, err, "can not insert subsidiary record")
+	t.Run("can not update subsidiary when  title length is greater than 64", func(t *testing.T) {
+		subsidiary, err := createTempSubsidiary(repo)
+		assert.NoError(t, err, "can not insert subsidiary record")
 
-	// 	fetchSubsidiary, err := repositories.ReadRecord[models.Subsidiary](repo, subsidiary.Model.ID)
-	// 	assert.NoError(t, err, "expected no error when reading subsidiary record ")
-	// 	s := "a"
-	// 	fetchSubsidiary.Code = ""
-	// 	for i := 0; i < 70; i++ {
-	// 		fetchSubsidiary.Code += s
-	// 	}
+		fetchSubsidiary, err := repositories.ReadRecord[models.Subsidiary](repo, subsidiary.Model.ID)
+		assert.NoError(t, err, "expected no error when reading subsidiary record ")
+		s := "a"
+		fetchSubsidiary.Code = ""
+		for i := 0; i < 70; i++ {
+			fetchSubsidiary.Code += s
+		}
 
-	// 	err = UpdateSubsidiary(repo, fetchSubsidiary)
-	// 	assert.Error(t, err, "expected error indicate title length should not be greater than 64 ")
+		err = UpdateSubsidiary(repo, fetchSubsidiary)
+		assert.Error(t, err, "expected error indicate title length should not be greater than 64 ")
 
-	// })
+	})
+
+	t.Run("return error when update subsidiary record that is not in databse", func(t *testing.T) {
+		subsidiary, err := createTempSubsidiary(repo)
+		assert.NoError(t, err, "can not create subsidiary record")
+		subsidiary.Model.ID = 1_000_000
+		err = UpdateSubsidiary(repo, subsidiary)
+		assert.Error(t, err, "expected error indicate there is such id in database")
+
+	})
+
+	t.Run("can not update subsidiary record if versions were  different", func(t *testing.T) {
+		subsidiary, err := createTempSubsidiary(repo)
+		assert.NoError(t, err, "can not create subsidiary record due to")
+
+		subsidiary.Code = generateUniqeCode[models.Subsidiary](repo, "code")
+		// fmt.Printf("prev id : %v\n", subsidiary.Model.ID)
+		// fmt.Printf("code : %v\n", subsidiary.Code)
+		// fmt.Printf("prev version : %v\n", subsidiary.Version)
+		err = UpdateSubsidiary(repo, subsidiary)
+
+		subsidiary.Code = generateUniqeCode[models.Subsidiary](repo, "code")
+		err = UpdateSubsidiary(repo, subsidiary)
+		assert.Error(t, err, "expected no error while updating subsidiary")
+		// fmt.Printf("new version : %v\n", subsidiary.Version)
+		assert.Error(t, err, "expected error indicate the versions are different")
+
+	})
+
+	t.Run("can update subsidiary record if versions were same", func(t *testing.T) {
+		subsidiary, err := createTempSubsidiary(repo)
+		assert.NoError(t, err, "can not create subsidiary record due to")
+
+		subsidiary.Code = generateUniqeCode[models.Subsidiary](repo, "code")
+		// fmt.Printf("prev id : %v\n", subsidiary.Model.ID)
+		// fmt.Printf("code : %v\n", subsidiary.Code)
+		// fmt.Printf("prev version : %v\n", subsidiary.Version)
+		UpdateSubsidiary(repo, subsidiary)
+		subsidiary, _ = repositories.ReadRecord[models.Subsidiary](repo, subsidiary.Model.ID)
+		subsidiary.Code = generateUniqeCode[models.Subsidiary](repo, "code")
+		err = UpdateSubsidiary(repo, subsidiary)
+		// fmt.Printf("new version : %v\n", subsidiary.Version)
+		assert.NoError(t, err, "expected no error")
+
+	})
+
 }
 
 func TestInsertVoucher(t *testing.T) {
