@@ -1,6 +1,7 @@
 package randgenerator
 
 import (
+	"accounting_system/internal/repositories"
 	"math/rand"
 	"time"
 )
@@ -27,4 +28,34 @@ func GenerateRandomTitle() string {
 	}
 
 	return string(result)
+}
+
+func GenerateUniqeCode[T any](repo *repositories.Repositories, columnName string) string {
+	code := GenerateRandomCode()
+	for {
+		exist := repositories.FindRecord[T](repo, code, columnName)
+
+		if exist {
+			code = GenerateRandomCode()
+		} else {
+			break
+		}
+	}
+
+	return code
+}
+
+func GenerateUniqeTitle[T any](repo *repositories.Repositories) string {
+	title := GenerateRandomTitle()
+	for {
+		exist := repositories.FindRecord[T](repo, title, "title")
+
+		if exist {
+			title = GenerateRandomTitle()
+		} else {
+			break
+		}
+	}
+
+	return title
 }
