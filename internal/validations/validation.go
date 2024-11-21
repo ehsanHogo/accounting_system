@@ -251,7 +251,15 @@ func InsertVoucherValidation(db *repositories.Repositories, d *models.Voucher) e
 
 func UpdateVoucherValidation(db *repositories.Repositories, d *models.Voucher, updatedItem []*models.VoucherItem, deletedItem []*models.VoucherItem, insertedItem []*models.VoucherItem) error {
 
-	err := ChackCodeValidation(d.Number)
+	prevVoucher, err := repositories.ReadRecord[models.Voucher](db, d.Model.ID)
+	if err != nil {
+		return fmt.Errorf("delete validation fail due to absence of subsidiary id in database  : %v", err)
+	}
+
+	if prevVoucher.Version != d.Version {
+		return fmt.Errorf("update validation fail due to different versions , expected version = %d , got : %d", prevVoucher.Version, d.Version)
+	}
+	err = ChackCodeValidation(d.Number)
 
 	if err != nil {
 		return fmt.Errorf("number validation fail due to : %v", err)
@@ -312,7 +320,8 @@ func UpdateVoucherValidation(db *repositories.Repositories, d *models.Voucher, u
 	}
 
 	newVoucherItems = append(newVoucherItems, insertedItem...)
-
+	fmt.Println("lenjndsjf")
+	fmt.Println(len(newVoucherItems))
 	err = CheckVoucherItemsLength(len(newVoucherItems))
 
 	if err != nil {
@@ -331,16 +340,21 @@ func UpdateVoucherValidation(db *repositories.Repositories, d *models.Voucher, u
 		return fmt.Errorf("there are invalied voucher items due to : %v", err)
 	}
 
+	// var prevVoucher models.Voucher
+	// if err := db.AccountingDB.First(&prevVoucher, d.Model.ID).Error; err != nil {
+	// 	return fmt.Errorf("record not found: %w", err)
+	// }
+
 	return nil
 }
 
 func checkHasDetailed(repo *repositories.Repositories, vi []*models.VoucherItem) error {
 	var subsidiary *models.Subsidiary
 	for _, v := range vi {
-		err := repo.AccountingDB.First(&subsidiary, v.SubsidiaryId)
-
-		if err.Error != nil {
-			return fmt.Errorf("can not read subsidiary record : %v", err.Error)
+		err := repo.AccountingDB.First(&subsidiary, v.SubsidiaryId).Error
+		fmt.Println(err)
+		if err != nil {
+			return fmt.Errorf("can not read subsidiary record %v : %v", v.SubsidiaryId, err)
 		}
 
 		fmt.Println("id s : ")
@@ -357,6 +371,8 @@ func checkHasDetailed(repo *repositories.Repositories, vi []*models.VoucherItem)
 
 			}
 		}
+
+		subsidiary = nil
 	}
 
 	return nil
