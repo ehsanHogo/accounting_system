@@ -169,7 +169,13 @@ func UpdateVoucher(db *repositories.Repositories, d *models.Voucher, updatedItem
 
 func DeleteVoucher(db *repositories.Repositories, d *models.Voucher) error {
 
-	err := repositories.DeleteVoucherRecord(db, d)
+	err := validations.DeleteVoucherValidation(db, d)
+
+	if err != nil {
+		return fmt.Errorf("can not delete voucher due to validation failure: %v", err)
+	}
+
+	err = repositories.DeleteVoucherRecord(db, d)
 	if err != nil {
 		return fmt.Errorf("can not delete voucher due to database operation failure : %v", err)
 	} else {

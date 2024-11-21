@@ -2,7 +2,6 @@ package repositories
 
 import (
 	"accounting_system/internal/models"
-	"errors"
 	"fmt"
 
 	"gorm.io/gorm"
@@ -126,29 +125,29 @@ func DeleteSubsidiaryRecord(db *Repositories, v *models.Subsidiary) error {
 
 func DeleteVoucherRecord(db *Repositories, v *models.Voucher) error {
 
-	var prev *models.Voucher
-	var err error
-	prev, err = ReadRecord[models.Voucher](db, v.Model.ID)
-	if err != nil {
-		return fmt.Errorf("can not delete voucher record : %v", err)
+	// var prev *models.Voucher
+	// var err error
+	// prev, err = ReadRecord[models.Voucher](db, v.Model.ID)
+	// if err != nil {
+	// 	return fmt.Errorf("can not delete voucher record : %v", err)
+	// } else {
+
+	// if v.Version != prev.Version {
+	// 	return errors.New("can not delete because of different version")
+	// }
+
+	res := db.AccountingDB.Unscoped().Delete(&v)
+
+	if res.Error != nil {
+		return fmt.Errorf("error in deleting record: %w", res.Error)
+
 	} else {
 
-		if v.Version != prev.Version {
-			return errors.New("can not delete because of different version")
-		}
-
-		res := db.AccountingDB.Unscoped().Delete(&v)
-
-		if res.Error != nil {
-			return fmt.Errorf("error in deleting record: %w", res.Error)
-
-		} else {
-
-			fmt.Println("Record deleted successfully")
-			return nil
-		}
-		// }
+		fmt.Println("Record deleted successfully")
+		return nil
 	}
+	// }
+	// }
 
 }
 

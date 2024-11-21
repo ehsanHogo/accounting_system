@@ -1122,6 +1122,73 @@ func TestUpdateVoucher(t *testing.T) {
 
 	})
 }
+
+func TestDeleteVoucher(t *testing.T) {
+	repo, err := createConnectionForTest()
+	defer func() {
+		sqlDB, _ := repo.AccountingDB.DB()
+		sqlDB.Close()
+	}()
+	if err != nil {
+		t.Fatalf("can not connect to database %v", err)
+	}
+
+	t.Run("can delete voucher seccessfully", func(t *testing.T) {
+
+		voucher, err := createTempVoucher(repo)
+		assert.NoError(t, err, "expected no error while inserting voucher")
+
+		// fmt.Printf("voucher : %v", voucher.Model.ID)
+		err = DeleteVoucher(repo, voucher)
+		assert.NoError(t, err, "expected no error while deleting voucher")
+		result := repo.AccountingDB.First(&voucher)
+		assert.Error(t, result.Error, "expected error indicate voucher record not found")
+	})
+
+	t.Run("deletion voucher record fail because record does not exist in database", func(t *testing.T) {
+		voucher := &models.Voucher{}
+		voucher.Model.ID = 1_000_000
+		err = DeleteVoucher(repo, voucher)
+		assert.Error(t, err, "expected error indicate there is not such record in data base")
+
+	})
+
+	t.Run("can not delete voucher record if versions were  different", func(t *testing.T) {
+		voucher, err := createTempVoucher(repo)
+		assert.NoError(t, err, "expected no error while inseting voucher")
+
+		voucher.Number = generateUniqeCode[models.Voucher](repo, "number")
+		// fmt.Printf("prev id : %v\n", voucher.Model.ID)
+		// fmt.Printf("code : %v\n", voucher.Number)
+		// fmt.Printf("prev version : %v\n", voucher.Version)
+		err = UpdateVoucher(repo, voucher, []*models.VoucherItem{}, []*models.VoucherItem{}, []*models.VoucherItem{})
+		assert.NoError(t, err, "expected no error while updating voucher")
+
+		err = DeleteVoucher(repo, voucher)
+		// fmt.Printf("new version : %v\n", voucher.Version)
+		assert.Error(t, err, "expected error indicate the versions are different")
+
+	})
+
+	t.Run("can delete voucher record if versions were same", func(t *testing.T) {
+		voucher, err := createTempVoucher(repo)
+		assert.NoError(t, err, "expected no error while inseting voucher")
+
+		voucher.Number = generateUniqeCode[models.Voucher](repo, "number")
+		// fmt.Printf("prev id : %v\n", voucher.Model.ID)
+		// fmt.Printf("code : %v\n", voucher.Number)
+		// fmt.Printf("prev version : %v\n", voucher.Version)
+		err = UpdateVoucher(repo, voucher, []*models.VoucherItem{}, []*models.VoucherItem{}, []*models.VoucherItem{})
+		assert.NoError(t, err, "expected no error while updating voucher")
+		voucher, _ = repositories.ReadRecord[models.Voucher](repo, voucher.Model.ID)
+
+		err = DeleteVoucher(repo, voucher)
+		// fmt.Printf("new version : %v\n", voucher.Version)
+		assert.NoError(t, err, "expected no error while deleting")
+
+	})
+
+}
 func generateUniqeCode[T any](repo *repositories.Repositories, columnName string) string {
 	code := randgenerator.GenerateRandomCode()
 	for {

@@ -183,8 +183,6 @@ func UpdateSubsidiaryValidation(repo *repositories.Repositories, d *models.Subsi
 
 func DeleteDetailedValidation(db *repositories.Repositories, d *models.Detailed) error {
 
-	// var prevDetailed *models.Detailed
-	// var err error
 	prevDetailed, err := repositories.ReadRecord[models.Detailed](db, d.Model.ID)
 	if err != nil {
 		return fmt.Errorf("delete validation fail due to absence of detailed id in database  : %v", err)
@@ -340,11 +338,6 @@ func UpdateVoucherValidation(db *repositories.Repositories, d *models.Voucher, u
 		return fmt.Errorf("there are invalied voucher items due to : %v", err)
 	}
 
-	// var prevVoucher models.Voucher
-	// if err := db.AccountingDB.First(&prevVoucher, d.Model.ID).Error; err != nil {
-	// 	return fmt.Errorf("record not found: %w", err)
-	// }
-
 	return nil
 }
 
@@ -376,4 +369,18 @@ func checkHasDetailed(repo *repositories.Repositories, vi []*models.VoucherItem)
 	}
 
 	return nil
+}
+
+func DeleteVoucherValidation(db *repositories.Repositories, d *models.Voucher) error {
+	prevVoucher, err := repositories.ReadRecord[models.Voucher](db, d.Model.ID)
+	if err != nil {
+		return fmt.Errorf("can not find voucher record : %v", err)
+	}
+
+	if prevVoucher.Version != d.Version {
+		return fmt.Errorf("update validation fail due to different versions , expected version = %d , got : %d", prevVoucher.Version, d.Version)
+	}
+
+	return nil
+
 }
