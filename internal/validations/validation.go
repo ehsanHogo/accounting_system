@@ -117,13 +117,6 @@ func UpdateDetailedValidation(repo *repositories.Repositories, d *models.Detaile
 
 	}
 
-	var voucherHasThisDetailed models.VoucherItem
-	if err := repo.AccountingDB.First(&voucherHasThisDetailed, "detailed_id = ?", d.Model.ID).Error; err == nil {
-
-		return fmt.Errorf("can not update detailed record because it is reffrenced by some voucherItems")
-
-	}
-
 	err = ChackCodeValidation(d.Code)
 
 	if err != nil {
@@ -163,6 +156,13 @@ func UpdateSubsidiaryValidation(repo *repositories.Repositories, d *models.Subsi
 
 	if d.Version != prevSubsidiary.Version {
 		return fmt.Errorf("delete validation fail due to different versions , expected version = %d , got : %d", prevSubsidiary.Version, d.Version)
+
+	}
+
+	var voucherHasThisSubsidiary models.VoucherItem
+	if err := repo.AccountingDB.First(&voucherHasThisSubsidiary, "subsidiary_id = ?", d.Model.ID).Error; err == nil {
+
+		return fmt.Errorf("can not update subsidiary record because it is reffrenced by some voucherItems")
 
 	}
 
@@ -339,8 +339,8 @@ func checkHasDetailed(repo *repositories.Repositories, vi []*models.VoucherItem)
 	for _, v := range vi {
 		err := repo.AccountingDB.First(&subsidiary, v.SubsidiaryId)
 
-		if err != nil {
-			return fmt.Errorf("can not read subsidiary record : %v", err)
+		if err.Error != nil {
+			return fmt.Errorf("can not read subsidiary record : %v", err.Error)
 		}
 
 		if subsidiary.HasDetailed {

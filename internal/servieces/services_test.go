@@ -244,21 +244,6 @@ func TestUpdateDetailed(t *testing.T) {
 
 	})
 
-	t.Run("can not update detailed record if were reffrenced in some voucher items", func(t *testing.T) {
-		detailed, err := createTempDetailed(repo)
-		assert.NoError(t, err, "expected no error while inserting")
-		fmt.Println("in me ")
-		fmt.Printf("detialed id : %v\n", detailed.Model.ID)
-		_, err = createTempVoucher(repo, detailed.Model.ID)
-
-		fmt.Printf("detialed id : %v\n", detailed.Model.ID)
-		assert.NoError(t, err, "expected no error while inserting")
-		// fmt.Printf("voucher id : %v\n", voucher.Model.ID)
-		detailed.Code = generateUniqeCode[models.Detailed](repo, "code")
-		err = UpdateDetailed(repo, detailed)
-		assert.Error(t, err, "expected error indicate violation update forign key constraint")
-	})
-
 }
 
 func TestDeleteDetailed(t *testing.T) {
@@ -551,6 +536,21 @@ func TestUpdateSubsidiary(t *testing.T) {
 
 	})
 
+	t.Run("can not update subsidiary record if were reffrenced in some voucher items", func(t *testing.T) {
+		subsidiary, err := createTempSubsidiary(repo)
+		assert.NoError(t, err, "expected no error while inserting")
+		fmt.Println("in me ")
+		// fmt.Printf("detialed id : %v\n", subsidiary.Model.ID)
+		_, err = createTempVoucher(repo, 0, subsidiary.Model.ID)
+
+		// fmt.Printf("detialed id : %v\n", subsidiary.Model.ID)
+		assert.NoError(t, err, "expected no error while inserting")
+		// fmt.Printf("voucher id : %v\n", voucher.Model.ID)
+		subsidiary.Code = generateUniqeCode[models.Subsidiary](repo, "code")
+		err = UpdateSubsidiary(repo, subsidiary)
+		assert.Error(t, err, "expected error indicate violation update forign key constraint")
+	})
+
 }
 
 func TestDeleteSubsidiary(t *testing.T) {
@@ -642,9 +642,16 @@ func TestInsertVoucher(t *testing.T) {
 		t.Fatalf("can not connect to database %v", err)
 	}
 
-	t.Run("can insert voucher successfully", func(t *testing.T) {
+	// t.Run("can insert voucher successfully", func(t *testing.T) {
+	// 	voucher, err := createTempVoucher(repo)
+	// 	assert.NoError(t, err, "expected no error when inserting voucher")
 
-	})
+	// 	// assert.NoError(t, err, "expected voucher record to be created, but got error")
+
+	// 	var result models.Voucher
+	// 	err = repo.AccountingDB.First(&result, voucher.Model.ID).Error //Number is uniqe
+	// 	assert.NoError(t, err, " can not find the inserted voucher record :")
+	// })
 }
 
 func generateUniqeCode[T any](repo *repositories.Repositories, columnName string) string {
@@ -678,41 +685,41 @@ func generateUniqeTitle[T any](repo *repositories.Repositories) string {
 }
 
 func createTempVoucher(repo *repositories.Repositories, IDs ...uint) (*models.Voucher, error) {
-	temp := make([]*models.VoucherItem, 3)
+	temp := make([]*models.VoucherItem, 2)
+
+	subsidiary := &models.Subsidiary{Code: generateUniqeCode[models.Subsidiary](repo, "code"), Title: generateUniqeTitle[models.Subsidiary](repo), HasDetailed: true}
+	err := InsertSubsidiary(repo, subsidiary)
+	if err != nil {
+		return nil, err
+	}
+
 	if len(IDs) == 0 {
 
 		detailed, err := createTempDetailed(repo)
-		if err != nil {
-			return nil, err
-		}
 
-		subsidiary, err := createTempSubsidiary(repo)
 		if err != nil {
 			return nil, err
 		}
 
 		temp[0] = &models.VoucherItem{DetailedId: detailed.Model.ID, SubsidiaryId: subsidiary.Model.ID, Credit: 500}
 
-		temp[1] = &models.VoucherItem{DetailedId: detailed.Model.ID, SubsidiaryId: subsidiary.Model.ID, Debit: 250}
+		temp[1] = &models.VoucherItem{DetailedId: detailed.Model.ID, SubsidiaryId: subsidiary.Model.ID, Debit: 500}
 
-		temp[2] = &models.VoucherItem{DetailedId: detailed.Model.ID, Debit: 250}
+		// temp[2] = &models.VoucherItem{DetailedId: detailed.Model.ID, Debit: 250}
 	} else {
 		temp = make([]*models.VoucherItem, 2)
 
 		if len(IDs) == 1 {
-			subsidiary, err := createTempSubsidiary(repo)
-			if err != nil {
-				return nil, err
-			}
-			temp[0] = &models.VoucherItem{DetailedId: IDs[0], Credit: 500}
+
+			temp[0] = &models.VoucherItem{DetailedId: IDs[0], SubsidiaryId: subsidiary.Model.ID, Credit: 500}
 			temp[1] = &models.VoucherItem{DetailedId: IDs[0], SubsidiaryId: subsidiary.Model.ID, Debit: 500}
 		} else {
-			detailed, err := createTempDetailed(repo)
-			if err != nil {
-				return nil, err
-			}
-			temp[0] = &models.VoucherItem{DetailedId: detailed.Model.ID, Credit: 500}
-			temp[1] = &models.VoucherItem{DetailedId: detailed.Model.ID, SubsidiaryId: IDs[1], Debit: 500}
+			// detailed, err := createTempDetailed(repo)
+			// if err != nil {
+			// 	return nil, err
+			// }
+			temp[0] = &models.VoucherItem{SubsidiaryId: IDs[1], Credit: 500}
+			temp[1] = &models.VoucherItem{SubsidiaryId: IDs[1], Debit: 500}
 
 		}
 
@@ -724,7 +731,7 @@ func createTempVoucher(repo *repositories.Repositories, IDs ...uint) (*models.Vo
 	// err := errors.New("")
 	// for err != nil {
 
-	err := InsertVoucher(repo, voucher)
+	err = InsertVoucher(repo, voucher)
 	if err != nil {
 		return nil, fmt.Errorf("Error during record creation: %v\n", err)
 

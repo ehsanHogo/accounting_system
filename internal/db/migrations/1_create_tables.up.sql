@@ -31,8 +31,8 @@ CREATE TABLE "vouchers" (
 CREATE TABLE "voucher_items" (
   "id" SERIAL PRIMARY KEY,
   "voucher_id" INT,
-  "detailed_id" INT NOT NULL,
-  "subsidiary_id" INT,
+  "detailed_id" INT,
+  "subsidiary_id" INT NOT NULL,
   "debit" INT,
   "credit" INT,
   "created_at" TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -48,12 +48,12 @@ ADD
 ALTER TABLE
   "voucher_items"
 ADD
-  FOREIGN KEY ("detailed_id") REFERENCES "detaileds" ("id") ON DELETE RESTRICT ON UPDATE RESTRICT;
+  FOREIGN KEY ("detailed_id") REFERENCES "detaileds" ("id") ON DELETE RESTRICT;
 
 ALTER TABLE
   "voucher_items"
 ADD
-  FOREIGN KEY ("subsidiary_id") REFERENCES "subsidiaries" ("id") ON DELETE RESTRICT;
+  FOREIGN KEY ("subsidiary_id") REFERENCES "subsidiaries" ("id") ON DELETE RESTRICT ON UPDATE RESTRICT;
 
 -- ALTER TABLE "voucher_item" ADD FOREIGN KEY ("subsidiary_id") REFERENCES "subsidiary" ("id");
 -- ALTER TABLE "voucher" ADD FOREIGN KEY ("voucher_items_id") REFERENCES "voucher_items" ("id");
