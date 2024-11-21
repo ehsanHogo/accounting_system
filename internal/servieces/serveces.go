@@ -33,7 +33,12 @@ func UpdateDetailed(db *repositories.Repositories, d *models.Detailed) error {
 		return fmt.Errorf("can not update detailed due to validation failure : %v", err)
 	}
 
-	err = repositories.UpdateDetailed(db, d, d.Model.ID)
+	newV := &models.Detailed{
+		Code:    d.Code,
+		Title:   d.Title,
+		Version: d.Version + 1}
+
+	err = repositories.UpdateRecord[models.Detailed](db, newV, d.Model.ID)
 	if err != nil {
 		return fmt.Errorf("can not update detailed due to database operation failure: %v", err)
 	} else {
@@ -50,7 +55,7 @@ func DeleteDetailed(db *repositories.Repositories, d *models.Detailed) error {
 		return fmt.Errorf("can not delete detailed due to validation failure : %v", err)
 	}
 
-	err = repositories.DeleteDetailedRecord(db, d)
+	err = repositories.DeleteRecord[models.Detailed](db, d)
 
 	if err != nil {
 		return fmt.Errorf("can not delete detailed due to database operation failure: %v", err)
@@ -97,7 +102,13 @@ func UpdateSubsidiary(db *repositories.Repositories, d *models.Subsidiary) error
 		return fmt.Errorf("can not update subsidiary due to validation failure : %v", err)
 	}
 
-	err = repositories.UpdateSubsidiary(db, d, d.Model.ID)
+	newV := &models.Subsidiary{
+		Code:        d.Code,
+		Title:       d.Title,
+		HasDetailed: d.HasDetailed,
+		Version:     d.Version + 1}
+
+	err = repositories.UpdateRecord[models.Subsidiary](db, newV, d.Model.ID)
 	if err != nil {
 		return fmt.Errorf("can not update subsidiary due to database operation failure: %v", err)
 	} else {
@@ -114,7 +125,7 @@ func DeleteSubsidiary(db *repositories.Repositories, d *models.Subsidiary) error
 	if err != nil {
 		return fmt.Errorf("can not delete subsidiary due to validation failure : %v", err)
 	}
-	err = repositories.DeleteSubsidiaryRecord(db, d)
+	err = repositories.DeleteRecord[models.Subsidiary](db, d)
 	if err != nil {
 		return fmt.Errorf("can not delete subsidiary due to database operation failure : %v", err)
 	} else {
@@ -157,7 +168,35 @@ func UpdateVoucher(db *repositories.Repositories, d *models.Voucher, updatedItem
 		return fmt.Errorf("can not update voucher due to validation failure: %v", err)
 	}
 
-	err = repositories.UpdateVoucher(db, d, updatedItem, deletedItem, insertedItem, d.Model.ID)
+	newV := &models.Voucher{Number: d.Number, Version: d.Version + 1}
+	fmt.Println("here newV")
+	fmt.Println(newV.Number)
+	for _, vi := range deletedItem {
+
+		err := repositories.DeleteRecord(db, vi)
+		if err != nil {
+			return fmt.Errorf("can not delete voucher item : %w", err)
+		}
+	}
+
+	for _, vi := range updatedItem {
+		err := UpdateVoucherItem(db, vi, vi.Model.ID)
+		if err != nil {
+			return fmt.Errorf("can not update voucher item : %w", err)
+		}
+	}
+
+	for _, vi := range insertedItem {
+
+		vi.VoucherID = d.Model.ID
+		err := repositories.CreateRecord(db, vi)
+
+		if err != nil {
+			return fmt.Errorf("can not insert voucher item : %w", err)
+		}
+	}
+
+	err = repositories.UpdateRecord[models.Voucher](db, newV, d.Model.ID)
 	if err != nil {
 		return fmt.Errorf("can not update voucher due to database operation failure : %v", err)
 	} else {
@@ -175,7 +214,7 @@ func DeleteVoucher(db *repositories.Repositories, d *models.Voucher) error {
 		return fmt.Errorf("can not delete voucher due to validation failure: %v", err)
 	}
 
-	err = repositories.DeleteVoucherRecord(db, d)
+	err = repositories.DeleteRecord[models.Voucher](db, d)
 	if err != nil {
 		return fmt.Errorf("can not delete voucher due to database operation failure : %v", err)
 	} else {
@@ -194,4 +233,22 @@ func ReadVoucher(db *repositories.Repositories, id uint) (*models.Voucher, error
 
 		return res, nil
 	}
+}
+
+func UpdateVoucherItem(db *repositories.Repositories, v *models.VoucherItem, id uint) error {
+	var newV models.VoucherItem
+	if err := db.AccountingDB.First(&newV, id).Error; err != nil {
+		return fmt.Errorf("record not found: %w", err)
+	}
+
+	newV.Credit = v.Credit
+	newV.Debit = v.Debit
+	newV.DetailedId = v.DetailedId
+	newV.SubsidiaryId = v.SubsidiaryId
+
+	if err := db.AccountingDB.Model(&newV).Where("id = ?", v.Model.ID).Updates(newV).Error; err != nil {
+		return fmt.Errorf("failed to update record: %w", err)
+	}
+
+	return nil
 }

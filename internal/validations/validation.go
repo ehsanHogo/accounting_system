@@ -251,7 +251,7 @@ func UpdateVoucherValidation(db *repositories.Repositories, d *models.Voucher, u
 
 	prevVoucher, err := repositories.ReadRecord[models.Voucher](db, d.Model.ID)
 	if err != nil {
-		return fmt.Errorf("delete validation fail due to absence of subsidiary id in database  : %v", err)
+		return fmt.Errorf("delete validation fail due to absence of voucher id in database  : %v", err)
 	}
 
 	if prevVoucher.Version != d.Version {
