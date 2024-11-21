@@ -197,6 +197,22 @@ func DeleteDetailedValidation(db *repositories.Repositories, d *models.Detailed)
 	}
 }
 
+func DeleteSubsidiaryValidation(db *repositories.Repositories, d *models.Subsidiary) error {
+
+	// var prevDetailed *models.Detailed
+	// var err error
+	prevDetailed, err := repositories.ReadRecord[models.Subsidiary](db, d.Model.ID)
+	if err != nil {
+		return fmt.Errorf("delete validation fail due to absence of subsidiary id in database  : %v", err)
+	}
+
+	if d.Version == prevDetailed.Version {
+		return nil
+	} else {
+		return fmt.Errorf("delete validation fail due to different versions , expected version = %d , got : %d", prevDetailed.Version, d.Version)
+	}
+}
+
 func InsertVoucherValidation(d *models.Voucher) error {
 
 	err := ChackCodeValidation(d.Number)

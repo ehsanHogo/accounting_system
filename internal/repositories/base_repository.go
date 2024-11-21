@@ -98,29 +98,29 @@ func DeleteDetailedRecord(db *Repositories, v *models.Detailed) error {
 
 func DeleteSubsidiaryRecord(db *Repositories, v *models.Subsidiary) error {
 
-	var prev *models.Subsidiary
-	var err error
-	prev, err = ReadRecord[models.Subsidiary](db, v.Model.ID)
-	if err != nil {
-		return fmt.Errorf("can not delete subsidiary record : %v", err)
+	// var prev *models.Subsidiary
+	// var err error
+	// prev, err = ReadRecord[models.Subsidiary](db, v.Model.ID)
+	// if err != nil {
+	// 	return fmt.Errorf("can not delete subsidiary record : %v", err)
+	// } else {
+
+	// if v.Version != prev.Version {
+	// 	return errors.New("can not delete because of different version")
+	// } else {
+
+	res := db.AccountingDB.Unscoped().Delete(&v)
+
+	if res.Error != nil {
+		return fmt.Errorf("can not delete record due to : %v", res.Error)
+
 	} else {
 
-		if v.Version != prev.Version {
-			return errors.New("can not delete because of different version")
-		} else {
-
-			res := db.AccountingDB.Unscoped().Delete(&v)
-
-			if res.Error != nil {
-				return fmt.Errorf("error in deleting record: %w", res.Error)
-
-			} else {
-
-				fmt.Println("Record deleted successfully")
-				return nil
-			}
-		}
+		fmt.Println("Record deleted successfully")
+		return nil
 	}
+	// }
+	// }
 
 }
 

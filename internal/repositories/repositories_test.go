@@ -458,60 +458,60 @@ func TestDeleteDetailed(t *testing.T) {
 
 	})
 
-	t.Run("deletion detailed record fail because record does not exist in database", func(t *testing.T) {
-		detailed := &models.Detailed{}
-		detailed.Model.ID = 1_000_000
-		err := DeleteDetailedRecord(repo, detailed)
-		// result := repo.AccountingDB.First(&detailed)
-		assert.Error(t, err, "expected error indicate detailed record not found")
-	})
+	// t.Run("deletion detailed record fail because record does not exist in database", func(t *testing.T) {
+	// 	detailed := &models.Detailed{}
+	// 	detailed.Model.ID = 1_000_000
+	// 	err := DeleteDetailedRecord(repo, detailed)
+	// 	// result := repo.AccountingDB.First(&detailed)
+	// 	assert.Error(t, err, "expected error indicate detailed record not found")
+	// })
 
-	t.Run("deletion detailed record fails because there is a reffrence in some voucher items  ", func(t *testing.T) {
-		detailed, err := createTempDetailed(repo)
-		assert.NoError(t, err, "can not create detailed record due to")
+	// t.Run("deletion detailed record fails because there is a reffrence in some voucher items  ", func(t *testing.T) {
+	// 	detailed, err := createTempDetailed(repo)
+	// 	assert.NoError(t, err, "can not create detailed record due to")
 
-		voucher, err := createTempVoucher(repo, detailed.Model.ID)
-		assert.NoError(t, err, "can not create detailed record ")
-		fmt.Printf("det : %v", detailed.Model.ID)
-		fmt.Printf("vi : %v", voucher.VoucherItems[0].Model.ID)
-		err = DeleteDetailedRecord(repo, detailed)
+	// 	voucher, err := createTempVoucher(repo, detailed.Model.ID)
+	// 	assert.NoError(t, err, "can not create detailed record ")
+	// 	fmt.Printf("det : %v", detailed.Model.ID)
+	// 	fmt.Printf("vi : %v", voucher.VoucherItems[0].Model.ID)
+	// 	err = DeleteDetailedRecord(repo, detailed)
 
-		assert.Error(t, err, "expected error indicate violation forignkey constraint")
+	// 	assert.Error(t, err, "expected error indicate violation forignkey constraint")
 
-	})
+	// })
 
-	t.Run("can not delete detailed record if versions were  different", func(t *testing.T) {
-		detailed, err := createTempDetailed(repo)
-		assert.NoError(t, err, "can not create detailed record due to")
+	// t.Run("can not delete detailed record if versions were  different", func(t *testing.T) {
+	// 	detailed, err := createTempDetailed(repo)
+	// 	assert.NoError(t, err, "can not create detailed record due to")
 
-		detailed.Code = generateUniqeCode[models.Detailed](repo, "code")
-		// fmt.Printf("prev id : %v\n", detailed.Model.ID)
-		// fmt.Printf("code : %v\n", detailed.Code)
-		// fmt.Printf("prev version : %v\n", detailed.Version)
-		UpdateDetailed(repo, detailed, detailed.Model.ID)
-		err = DeleteDetailedRecord(repo, detailed)
-		// fmt.Printf("new version : %v\n", detailed.Version)
-		assert.Error(t, err, "expected error indicate the versions are different")
+	// 	detailed.Code = generateUniqeCode[models.Detailed](repo, "code")
+	// 	// fmt.Printf("prev id : %v\n", detailed.Model.ID)
+	// 	// fmt.Printf("code : %v\n", detailed.Code)
+	// 	// fmt.Printf("prev version : %v\n", detailed.Version)
+	// 	UpdateDetailed(repo, detailed, detailed.Model.ID)
+	// 	err = DeleteDetailedRecord(repo, detailed)
+	// 	// fmt.Printf("new version : %v\n", detailed.Version)
+	// 	assert.Error(t, err, "expected error indicate the versions are different")
 
-	})
+	// })
 
-	t.Run("can delete detailed record if versions were same", func(t *testing.T) {
-		detailed, err := createTempDetailed(repo)
-		assert.NoError(t, err, "can not create detailed record due to")
+	// t.Run("can delete detailed record if versions were same", func(t *testing.T) {
+	// 	detailed, err := createTempDetailed(repo)
+	// 	assert.NoError(t, err, "can not create detailed record due to")
 
-		detailed.Code = generateUniqeCode[models.Detailed](repo, "code")
-		// fmt.Printf("prev id : %v\n", detailed.Model.ID)
-		// fmt.Printf("code : %v\n", detailed.Code)
-		// fmt.Printf("prev version : %v\n", detailed.Version)
-		err = UpdateDetailed(repo, detailed, detailed.Model.ID)
-		assert.NoError(t, err, "can not update detailed record ")
-		detailed, _ = ReadRecord[models.Detailed](repo, detailed.Model.ID)
+	// 	detailed.Code = generateUniqeCode[models.Detailed](repo, "code")
+	// 	// fmt.Printf("prev id : %v\n", detailed.Model.ID)
+	// 	// fmt.Printf("code : %v\n", detailed.Code)
+	// 	// fmt.Printf("prev version : %v\n", detailed.Version)
+	// 	err = UpdateDetailed(repo, detailed, detailed.Model.ID)
+	// 	assert.NoError(t, err, "can not update detailed record ")
+	// 	detailed, _ = ReadRecord[models.Detailed](repo, detailed.Model.ID)
 
-		err = DeleteDetailedRecord(repo, detailed)
-		// fmt.Printf("new version : %v\n", detailed.Version)
-		assert.NoError(t, err, "expected no error")
+	// 	err = DeleteDetailedRecord(repo, detailed)
+	// 	// fmt.Printf("new version : %v\n", detailed.Version)
+	// 	assert.NoError(t, err, "expected no error")
 
-	})
+	// })
 }
 
 func TestDeleteSubsidiary(t *testing.T) {
@@ -524,72 +524,72 @@ func TestDeleteSubsidiary(t *testing.T) {
 		t.Fatalf("can not connect to database %v", err)
 	}
 
-	t.Run("delete subsidiary record seccessfully", func(t *testing.T) {
-		subsidiary, err := createTempSubsidiary(repo)
-		assert.NoError(t, err, "can not create subsidiary record due to")
+	// t.Run("delete subsidiary record seccessfully", func(t *testing.T) {
+	// 	subsidiary, err := createTempSubsidiary(repo)
+	// 	assert.NoError(t, err, "can not create subsidiary record due to")
 
-		err = DeleteSubsidiaryRecord(repo, subsidiary)
+	// 	err = DeleteSubsidiaryRecord(repo, subsidiary)
 
-		assert.NoError(t, err, "can not delete subsidiary record due to ")
+	// 	assert.NoError(t, err, "can not delete subsidiary record due to ")
 
-	})
+	// })
 
-	t.Run("deletion subsidiary record fail because record does not exist in database", func(t *testing.T) {
-		subsidiary := &models.Subsidiary{}
-		subsidiary.Model.ID = 1_000_000
-		err := DeleteSubsidiaryRecord(repo, subsidiary)
+	// t.Run("deletion subsidiary record fail because record does not exist in database", func(t *testing.T) {
+	// 	subsidiary := &models.Subsidiary{}
+	// 	subsidiary.Model.ID = 1_000_000
+	// 	err := DeleteSubsidiaryRecord(repo, subsidiary)
 
-		assert.Error(t, err, "expected error indicate subsiduary record not found")
-	})
+	// 	assert.Error(t, err, "expected error indicate subsiduary record not found")
+	// })
 
-	t.Run("deletion subsidiary record fails because there is a reffrence in some voucher items  ", func(t *testing.T) {
-		subsidiary, err := createTempSubsidiary(repo)
-		assert.NoError(t, err, "can not create subsidiary record due to")
+	// t.Run("deletion subsidiary record fails because there is a reffrence in some voucher items  ", func(t *testing.T) {
+	// 	subsidiary, err := createTempSubsidiary(repo)
+	// 	assert.NoError(t, err, "can not create subsidiary record due to")
 
-		_, err = createTempVoucher(repo, 0, subsidiary.Model.ID)
-		assert.NoError(t, err, "can not create voucher item record")
-		// fmt.Printf("det : %v", subsidiary.Model.ID)
-		// fmt.Printf("vi : %v", voucher.VoucherItems[0].Model.ID)
-		err = DeleteSubsidiaryRecord(repo, subsidiary)
+	// 	_, err = createTempVoucher(repo, 0, subsidiary.Model.ID)
+	// 	assert.NoError(t, err, "can not create voucher item record")
+	// 	// fmt.Printf("det : %v", subsidiary.Model.ID)
+	// 	// fmt.Printf("vi : %v", voucher.VoucherItems[0].Model.ID)
+	// 	err = DeleteSubsidiaryRecord(repo, subsidiary)
 
-		assert.Error(t, err, "expected error indicate violation forignkey constraint")
+	// 	assert.Error(t, err, "expected error indicate violation forignkey constraint")
 
-	})
+	// })
 
-	t.Run("can not delete subsidiary record if versions were  different", func(t *testing.T) {
-		subsidiary, err := createTempSubsidiary(repo)
-		assert.NoError(t, err, "can not create subsidiary record due to")
+	// t.Run("can not delete subsidiary record if versions were  different", func(t *testing.T) {
+	// 	subsidiary, err := createTempSubsidiary(repo)
+	// 	assert.NoError(t, err, "can not create subsidiary record due to")
 
-		subsidiary.Code = generateUniqeCode[models.Subsidiary](repo, "code")
-		// fmt.Printf("prev id : %v\n", subsidiary.Model.ID)
-		// fmt.Printf("code : %v\n", subsidiary.Code)
-		// fmt.Printf("prev version : %v\n", subsidiary.Version)
-		err = UpdateSubsidiary(repo, subsidiary, subsidiary.Model.ID)
-		assert.NoError(t, err, "can not update subsidiary record ")
-		err = DeleteSubsidiaryRecord(repo, subsidiary)
-		// fmt.Printf("new version : %v\n", subsidiary.Version)
-		assert.Error(t, err, "expected error indicate the versions are different")
+	// 	subsidiary.Code = generateUniqeCode[models.Subsidiary](repo, "code")
+	// 	// fmt.Printf("prev id : %v\n", subsidiary.Model.ID)
+	// 	// fmt.Printf("code : %v\n", subsidiary.Code)
+	// 	// fmt.Printf("prev version : %v\n", subsidiary.Version)
+	// 	err = UpdateSubsidiary(repo, subsidiary, subsidiary.Model.ID)
+	// 	assert.NoError(t, err, "can not update subsidiary record ")
+	// 	err = DeleteSubsidiaryRecord(repo, subsidiary)
+	// 	// fmt.Printf("new version : %v\n", subsidiary.Version)
+	// 	assert.Error(t, err, "expected error indicate the versions are different")
 
-	})
+	// })
 
-	t.Run("can delete subsidiary record if versions were same", func(t *testing.T) {
-		subsidiary, err := createTempSubsidiary(repo)
-		assert.NoError(t, err, "can not create subsidiary record due to")
+	// t.Run("can delete subsidiary record if versions were same", func(t *testing.T) {
+	// 	subsidiary, err := createTempSubsidiary(repo)
+	// 	assert.NoError(t, err, "can not create subsidiary record due to")
 
-		subsidiary.Code = generateUniqeCode[models.Subsidiary](repo, "code")
-		// fmt.Printf("prev id : %v\n", subsidiary.Model.ID)
-		// fmt.Printf("code : %v\n", subsidiary.Code)
-		// fmt.Printf("prev version : %v\n", subsidiary.Version)
-		err = UpdateSubsidiary(repo, subsidiary, subsidiary.Model.ID)
-		assert.NoError(t, err, "cann not update subsidiary record due to ")
+	// 	subsidiary.Code = generateUniqeCode[models.Subsidiary](repo, "code")
+	// 	// fmt.Printf("prev id : %v\n", subsidiary.Model.ID)
+	// 	// fmt.Printf("code : %v\n", subsidiary.Code)
+	// 	// fmt.Printf("prev version : %v\n", subsidiary.Version)
+	// 	err = UpdateSubsidiary(repo, subsidiary, subsidiary.Model.ID)
+	// 	assert.NoError(t, err, "cann not update subsidiary record due to ")
 
-		subsidiary, _ = ReadRecord[models.Subsidiary](repo, subsidiary.Model.ID)
+	// 	subsidiary, _ = ReadRecord[models.Subsidiary](repo, subsidiary.Model.ID)
 
-		err = DeleteSubsidiaryRecord(repo, subsidiary)
-		// fmt.Printf("new version : %v\n", subsidiary.Version)
-		assert.NoError(t, err, "expected no error")
+	// 	err = DeleteSubsidiaryRecord(repo, subsidiary)
+	// 	// fmt.Printf("new version : %v\n", subsidiary.Version)
+	// 	assert.NoError(t, err, "expected no error")
 
-	})
+	// })
 }
 
 func TestDeleteVoucher(t *testing.T) {

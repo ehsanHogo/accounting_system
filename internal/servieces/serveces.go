@@ -109,7 +109,12 @@ func UpdateSubsidiary(db *repositories.Repositories, d *models.Subsidiary) error
 
 func DeleteSubsidiary(db *repositories.Repositories, d *models.Subsidiary) error {
 
-	err := repositories.DeleteSubsidiaryRecord(db, d)
+	err := validations.DeleteSubsidiaryValidation(db, d)
+
+	if err != nil {
+		return fmt.Errorf("can not delete subsidiary due to validation failure : %v", err)
+	}
+	err = repositories.DeleteSubsidiaryRecord(db, d)
 	if err != nil {
 		return fmt.Errorf("can not delete subsidiary due to database operation failure : %v", err)
 	} else {

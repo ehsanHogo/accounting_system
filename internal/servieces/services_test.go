@@ -184,7 +184,7 @@ func TestUpdateDetailed(t *testing.T) {
 
 	t.Run("can not update detailed record if versions were  different", func(t *testing.T) {
 		detailed, err := createTempDetailed(repo)
-		assert.NoError(t, err, "can not create detailed record due to")
+		assert.NoError(t, err, "cexpected no error while inserting")
 
 		detailed.Code = generateUniqeCode[models.Detailed](repo, "code")
 		// fmt.Printf("prev id : %v\n", detailed.Model.ID)
@@ -202,14 +202,14 @@ func TestUpdateDetailed(t *testing.T) {
 
 	t.Run("can update detailed record if versions were same", func(t *testing.T) {
 		detailed, err := createTempDetailed(repo)
-		assert.NoError(t, err, "can not create detailed record due to")
+		assert.NoError(t, err, "expected no error while inserting")
 
 		detailed.Code = generateUniqeCode[models.Detailed](repo, "code")
 		// fmt.Printf("prev id : %v\n", detailed.Model.ID)
 		// fmt.Printf("code : %v\n", detailed.Code)
 		// fmt.Printf("prev version : %v\n", detailed.Version)
 		err = UpdateDetailed(repo, detailed)
-		assert.NoError(t, err, "can not update detailed record")
+		assert.NoError(t, err, "expected no error while updating")
 
 		detailed, _ = repositories.ReadRecord[models.Detailed](repo, detailed.Model.ID)
 		detailed.Code = generateUniqeCode[models.Detailed](repo, "code")
@@ -221,13 +221,13 @@ func TestUpdateDetailed(t *testing.T) {
 
 	t.Run("can not update detailed record if were reffrenced in some voucher items", func(t *testing.T) {
 		detailed, err := createTempDetailed(repo)
-		assert.NoError(t, err, "can not create detailed record due to")
+		assert.NoError(t, err, "expected no error while inserting")
 		fmt.Println("in me ")
 		fmt.Printf("detialed id : %v\n", detailed.Model.ID)
 		_, err = createTempVoucher(repo, detailed.Model.ID)
 
 		fmt.Printf("detialed id : %v\n", detailed.Model.ID)
-		assert.NoError(t, err, "can not create voucher record")
+		assert.NoError(t, err, "expected no error while inserting")
 		// fmt.Printf("voucher id : %v\n", voucher.Model.ID)
 		detailed.Code = generateUniqeCode[models.Detailed](repo, "code")
 		err = UpdateDetailed(repo, detailed)
@@ -248,10 +248,10 @@ func TestDeleteDetailed(t *testing.T) {
 
 	t.Run("can delete detailed successfully", func(t *testing.T) {
 		detailed, err := createTempDetailed(repo)
-		assert.NoError(t, err, "can not create detailed record due to")
+		assert.NoError(t, err, "expected no error while inserting")
 
 		err = DeleteDetailed(repo, detailed)
-		assert.NoError(t, err, "can not delete detailed record")
+		assert.NoError(t, err, "expected no error while deleting")
 
 		result := repo.AccountingDB.First(&detailed)
 		assert.Error(t, result.Error, "expected error indicate detailed record not found")
@@ -267,10 +267,10 @@ func TestDeleteDetailed(t *testing.T) {
 
 	t.Run("deletion detailed record fails because there is a reffrence in some voucher items  ", func(t *testing.T) {
 		detailed, err := createTempDetailed(repo)
-		assert.NoError(t, err, "can not create detailed record due to")
+		assert.NoError(t, err, "expected no error while inserting")
 
 		voucher, err := createTempVoucher(repo, detailed.Model.ID)
-		assert.NoError(t, err, "can not create detailed record ")
+		assert.NoError(t, err, "expected no error while inserting")
 		fmt.Printf("det : %v", detailed.Model.ID)
 		fmt.Printf("vi : %v", voucher.VoucherItems[0].Model.ID)
 		err = DeleteDetailed(repo, detailed)
@@ -281,7 +281,7 @@ func TestDeleteDetailed(t *testing.T) {
 
 	t.Run("can not delete detailed record if versions were  different", func(t *testing.T) {
 		detailed, err := createTempDetailed(repo)
-		assert.NoError(t, err, "can not create detailed record due to")
+		assert.NoError(t, err, "expected no error while inserting")
 
 		detailed.Code = generateUniqeCode[models.Detailed](repo, "code")
 		// fmt.Printf("prev id : %v\n", detailed.Model.ID)
@@ -297,7 +297,7 @@ func TestDeleteDetailed(t *testing.T) {
 
 	t.Run("can delete detailed record if versions were same", func(t *testing.T) {
 		detailed, err := createTempDetailed(repo)
-		assert.NoError(t, err, "can not create detailed record due to")
+		assert.NoError(t, err, "expected no error while inserting")
 
 		detailed.Code = generateUniqeCode[models.Detailed](repo, "code")
 		// fmt.Printf("prev id : %v\n", detailed.Model.ID)
@@ -385,7 +385,7 @@ func TestUpdateSubsidiary(t *testing.T) {
 
 	t.Run("can update subsidiary successfully", func(t *testing.T) {
 		subsidiary, err := createTempSubsidiary(repo)
-		assert.NoError(t, err, "can not insert subsidiary record")
+		assert.NoError(t, err, "expected no error while inserting")
 
 		fetchSubsidiary, err := repositories.ReadRecord[models.Subsidiary](repo, subsidiary.Model.ID)
 		assert.NoError(t, err, "expected no error when reading subsidiary record ")
@@ -400,7 +400,7 @@ func TestUpdateSubsidiary(t *testing.T) {
 
 	t.Run("can not update subsidiary due to empty title", func(t *testing.T) {
 		subsidiary, err := createTempSubsidiary(repo)
-		assert.NoError(t, err, "can not insert subsidiary record")
+		assert.NoError(t, err, "expected no error while inserting")
 
 		fetchSubsidiary, err := repositories.ReadRecord[models.Subsidiary](repo, subsidiary.Model.ID)
 		assert.NoError(t, err, "expected no error when reading subsidiary record ")
@@ -412,7 +412,7 @@ func TestUpdateSubsidiary(t *testing.T) {
 
 	t.Run("can not update subsidiary due to empty code", func(t *testing.T) {
 		subsidiary, err := createTempSubsidiary(repo)
-		assert.NoError(t, err, "can not insert subsidiary record")
+		assert.NoError(t, err, "expected no error while inserting")
 
 		fetchSubsidiary, err := repositories.ReadRecord[models.Subsidiary](repo, subsidiary.Model.ID)
 		assert.NoError(t, err, "expected no error when reading subsidiary record ")
@@ -424,7 +424,7 @@ func TestUpdateSubsidiary(t *testing.T) {
 
 	t.Run("can not update subsidiary when  code length is greater than 64", func(t *testing.T) {
 		subsidiary, err := createTempSubsidiary(repo)
-		assert.NoError(t, err, "can not insert subsidiary record")
+		assert.NoError(t, err, "expected no error while inserting")
 
 		fetchSubsidiary, err := repositories.ReadRecord[models.Subsidiary](repo, subsidiary.Model.ID)
 		assert.NoError(t, err, "expected no error when reading subsidiary record ")
@@ -441,7 +441,7 @@ func TestUpdateSubsidiary(t *testing.T) {
 
 	t.Run("can not update subsidiary when  title length is greater than 64", func(t *testing.T) {
 		subsidiary, err := createTempSubsidiary(repo)
-		assert.NoError(t, err, "can not insert subsidiary record")
+		assert.NoError(t, err, "expected no error while inserting")
 
 		fetchSubsidiary, err := repositories.ReadRecord[models.Subsidiary](repo, subsidiary.Model.ID)
 		assert.NoError(t, err, "expected no error when reading subsidiary record ")
@@ -458,7 +458,7 @@ func TestUpdateSubsidiary(t *testing.T) {
 
 	t.Run("return error when update subsidiary record that is not in databse", func(t *testing.T) {
 		subsidiary, err := createTempSubsidiary(repo)
-		assert.NoError(t, err, "can not create subsidiary record")
+		assert.NoError(t, err, "expected no error while inserting")
 		subsidiary.Model.ID = 1_000_000
 		err = UpdateSubsidiary(repo, subsidiary)
 		assert.Error(t, err, "expected error indicate there is such id in database")
@@ -467,14 +467,14 @@ func TestUpdateSubsidiary(t *testing.T) {
 
 	t.Run("can not update subsidiary record if versions were  different", func(t *testing.T) {
 		subsidiary, err := createTempSubsidiary(repo)
-		assert.NoError(t, err, "can not create subsidiary record due to")
+		assert.NoError(t, err, "expected no error while inserting")
 
 		subsidiary.Code = generateUniqeCode[models.Subsidiary](repo, "code")
 		// fmt.Printf("prev id : %v\n", subsidiary.Model.ID)
 		// fmt.Printf("code : %v\n", subsidiary.Code)
 		// fmt.Printf("prev version : %v\n", subsidiary.Version)
 		err = UpdateSubsidiary(repo, subsidiary)
-
+		assert.NoError(t, err, "expected no error while updating")
 		subsidiary.Code = generateUniqeCode[models.Subsidiary](repo, "code")
 		err = UpdateSubsidiary(repo, subsidiary)
 		assert.Error(t, err, "expected no error while updating subsidiary")
@@ -497,6 +497,85 @@ func TestUpdateSubsidiary(t *testing.T) {
 		err = UpdateSubsidiary(repo, subsidiary)
 		// fmt.Printf("new version : %v\n", subsidiary.Version)
 		assert.NoError(t, err, "expected no error")
+
+	})
+
+}
+
+func TestDeleteSubsidiary(t *testing.T) {
+	repo, err := createConnectionForTest()
+	defer func() {
+		sqlDB, _ := repo.AccountingDB.DB()
+		sqlDB.Close()
+	}()
+	if err != nil {
+		t.Fatalf("can not connect to database %v", err)
+	}
+
+	t.Run("delete subsidiary record seccessfully", func(t *testing.T) {
+		subsidiary, err := createTempSubsidiary(repo)
+		assert.NoError(t, err, "expected no error while inserting")
+
+		err = DeleteSubsidiary(repo, subsidiary)
+
+		assert.NoError(t, err, "expected no error while deleting ")
+
+	})
+
+	t.Run("deletion subsidiary record fail because record does not exist in database", func(t *testing.T) {
+		subsidiary := &models.Subsidiary{}
+		subsidiary.Model.ID = 1_000_000
+		err := DeleteSubsidiary(repo, subsidiary)
+
+		assert.Error(t, err, "expected error indicate subsiduary record not found")
+	})
+
+	t.Run("deletion subsidiary record fails because there is a reffrence in some voucher items  ", func(t *testing.T) {
+		subsidiary, err := createTempSubsidiary(repo)
+		assert.NoError(t, err, "expected no error while inserting")
+
+		_, err = createTempVoucher(repo, 0, subsidiary.Model.ID)
+		assert.NoError(t, err, "expected no error while inserting")
+		// fmt.Printf("det : %v", subsidiary.Model.ID)
+		// fmt.Printf("vi : %v", voucher.VoucherItems[0].Model.ID)
+		err = DeleteSubsidiary(repo, subsidiary)
+
+		assert.Error(t, err, "expected error indicate violation forignkey constraint")
+
+	})
+
+	t.Run("can not delete subsidiary record if versions were  different", func(t *testing.T) {
+		subsidiary, err := createTempSubsidiary(repo)
+		assert.NoError(t, err, "expected no error while inserting")
+
+		subsidiary.Code = generateUniqeCode[models.Subsidiary](repo, "code")
+		// fmt.Printf("prev id : %v\n", subsidiary.Model.ID)
+		// fmt.Printf("code : %v\n", subsidiary.Code)
+		// fmt.Printf("prev version : %v\n", subsidiary.Version)
+		err = UpdateSubsidiary(repo, subsidiary)
+		assert.NoError(t, err, "can not update subsidiary record ")
+		err = DeleteSubsidiary(repo, subsidiary)
+		// fmt.Printf("new version : %v\n", subsidiary.Version)
+		assert.Error(t, err, "expected error indicate the versions are different")
+
+	})
+
+	t.Run("can delete subsidiary record if versions were same", func(t *testing.T) {
+		subsidiary, err := createTempSubsidiary(repo)
+		assert.NoError(t, err, "expected no error while inserting")
+
+		subsidiary.Code = generateUniqeCode[models.Subsidiary](repo, "code")
+		// fmt.Printf("prev id : %v\n", subsidiary.Model.ID)
+		// fmt.Printf("code : %v\n", subsidiary.Code)
+		// fmt.Printf("prev version : %v\n", subsidiary.Version)
+		err = UpdateSubsidiary(repo, subsidiary)
+		assert.NoError(t, err, "cann not update subsidiary record due to ")
+
+		subsidiary, _ = repositories.ReadRecord[models.Subsidiary](repo, subsidiary.Model.ID)
+
+		err = DeleteSubsidiary(repo, subsidiary)
+		// fmt.Printf("new version : %v\n", subsidiary.Version)
+		assert.NoError(t, err, "expected no error while deleting")
 
 	})
 
