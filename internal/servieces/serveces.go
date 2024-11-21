@@ -4,12 +4,13 @@ import (
 	"accounting_system/internal/models"
 	"accounting_system/internal/repositories"
 	"accounting_system/internal/validations"
+
 	"fmt"
 )
 
 func InsertDetailed(db *repositories.Repositories, d *models.Detailed) error {
 
-	err := validations.DetailedValidation(d)
+	err := validations.InsertDetailedValidation(d)
 
 	if err != nil {
 		return fmt.Errorf("can not insert detailed due to validation failure : %v", err)
@@ -26,7 +27,7 @@ func InsertDetailed(db *repositories.Repositories, d *models.Detailed) error {
 }
 
 func UpdateDetailed(db *repositories.Repositories, d *models.Detailed) error {
-	err := validations.DetailedValidation(d)
+	err := validations.UpdateDetailedValidation(db, d)
 
 	if err != nil {
 		return fmt.Errorf("can not update detailed due to validation failure : %v", err)
@@ -73,7 +74,7 @@ func ReadDetailed(db *repositories.Repositories, id uint) (*models.Detailed, err
 
 func InsertSubsidiary(db *repositories.Repositories, d *models.Subsidiary) error {
 
-	err := validations.SubsidiaryValidation(d)
+	err := validations.InsertSubsidiaryValidation(d)
 
 	if err != nil {
 		return fmt.Errorf("can not insert subsidiary due to validation failure : %v", err)
@@ -90,7 +91,7 @@ func InsertSubsidiary(db *repositories.Repositories, d *models.Subsidiary) error
 }
 
 func UpdateSubsidiary(db *repositories.Repositories, d *models.Subsidiary) error {
-	err := validations.SubsidiaryValidation(d)
+	err := validations.UpdateSubsidiaryValidation(d)
 
 	if err != nil {
 		return fmt.Errorf("can not update subsidiary due to validation failure : %v", err)

@@ -192,33 +192,30 @@ func ReadRecord[T any](db *Repositories, id uint) (*T, error) {
 
 func UpdateDetailed(db *Repositories, v *models.Detailed, id uint) error {
 	var newV models.Detailed
-	if err := db.AccountingDB.First(&newV, id).Error; err != nil {
-		return fmt.Errorf("record not found: %w", err)
+
+	// if v.Version != newV.Version {
+	// 	return fmt.Errorf("can not update , the version of detailed record is different. expected version : %v", newV.Version)
+	// } else {
+
+	// var voucherHasThisDetailed models.VoucherItem
+	// if err := db.AccountingDB.First(&voucherHasThisDetailed, "detailed_id = ?", id).Error; err != nil {
+
+	// fmt.Printf("errrrrrr : %v\n", err)
+	newV.Code = v.Code
+	newV.Title = v.Title
+	newV.Version += 1
+	fmt.Printf("newval %v", newV)
+
+	if err := db.AccountingDB.Save(&newV).Error; err != nil {
+		return fmt.Errorf("can not  update record due to : %v", err)
 	}
 
-	if v.Version != newV.Version {
-		return fmt.Errorf("can not update , the version of detailed record is different. expected version : %v", newV.Version)
-	} else {
+	return nil
+	// } else { //ther is a voucher has this detailed
+	// 	return fmt.Errorf("ccan not update detailed record because it is reffrenced by some voucherItems")
+	// }
 
-		var voucherHasThisDetailed models.VoucherItem
-		if err := db.AccountingDB.First(&voucherHasThisDetailed, "detailed_id = ?", id).Error; err != nil {
-
-			fmt.Printf("errrrrrr : %v\n", err)
-			newV.Code = v.Code
-			newV.Title = v.Title
-			newV.Version += 1
-			fmt.Printf("newval %v", newV)
-
-			if err := db.AccountingDB.Save(&newV).Error; err != nil {
-				return fmt.Errorf("failed to update record: %w", err)
-			}
-
-			return nil
-		} else { //ther is a voucher has this detailed
-			return fmt.Errorf("ccan not update detailed record because it is reffrenced by some voucherItems")
-		}
-
-	}
+	// }
 }
 
 func UpdateSubsidiary(db *Repositories, v *models.Subsidiary, id uint) error {

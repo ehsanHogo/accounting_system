@@ -89,7 +89,73 @@ func CheckTitleValidaion(t string) error {
 	return nil
 }
 
-func DetailedValidation(d *models.Detailed) error {
+func InsertDetailedValidation(d *models.Detailed) error {
+	err := ChackCodeValidation(d.Code)
+
+	if err != nil {
+		return fmt.Errorf("code validation fail due to  : %v", err)
+	}
+
+	err = CheckTitleValidaion(d.Title)
+
+	if err != nil {
+		return fmt.Errorf("title validation fail due to : %v", err)
+	}
+
+	return nil
+}
+
+func UpdateDetailedValidation(repo *repositories.Repositories, d *models.Detailed) error {
+
+	prevDetailed, err := repositories.ReadRecord[models.Detailed](repo, d.Model.ID)
+	if err != nil {
+		return fmt.Errorf("update validation fail due to absence of detailed id in database  : %v", err)
+	}
+
+	if d.Version != prevDetailed.Version {
+		return fmt.Errorf("delete validation fail due to different versions , expected version = %d , got : %d", prevDetailed.Version, d.Version)
+
+	}
+
+	var voucherHasThisDetailed models.VoucherItem
+	if err := repo.AccountingDB.First(&voucherHasThisDetailed, "detailed_id = ?", d.Model.ID).Error; err == nil {
+
+		return fmt.Errorf("can not update detailed record because it is reffrenced by some voucherItems")
+
+	}
+
+	err = ChackCodeValidation(d.Code)
+
+	if err != nil {
+		return fmt.Errorf("code validation fail due to  : %v", err)
+	}
+
+	err = CheckTitleValidaion(d.Title)
+
+	if err != nil {
+		return fmt.Errorf("title validation fail due to : %v", err)
+	}
+
+	return nil
+}
+
+func InsertSubsidiaryValidation(d *models.Subsidiary) error {
+	err := ChackCodeValidation(d.Code)
+
+	if err != nil {
+		return fmt.Errorf("code validation fail due to  : %v", err)
+	}
+
+	err = CheckTitleValidaion(d.Title)
+
+	if err != nil {
+		return fmt.Errorf("title validation fail due to : %v", err)
+	}
+
+	return nil
+}
+
+func UpdateSubsidiaryValidation(d *models.Subsidiary) error {
 	err := ChackCodeValidation(d.Code)
 
 	if err != nil {
@@ -119,22 +185,6 @@ func DeleteDetailedValidation(db *repositories.Repositories, d *models.Detailed)
 	} else {
 		return fmt.Errorf("delete validation fail due to different versions , expected version = %d , got : %d", prevDetailed.Version, d.Version)
 	}
-}
-
-func SubsidiaryValidation(d *models.Subsidiary) error {
-	err := ChackCodeValidation(d.Code)
-
-	if err != nil {
-		return fmt.Errorf("code validation fail due to  : %v", err)
-	}
-
-	err = CheckTitleValidaion(d.Title)
-
-	if err != nil {
-		return fmt.Errorf("title validation fail due to : %v", err)
-	}
-
-	return nil
 }
 
 func InsertVoucherValidation(d *models.Voucher) error {

@@ -102,47 +102,68 @@ func TestUpdateDetailed(t *testing.T) {
 	}
 
 	t.Run("can update detailed record successfully", func(t *testing.T) {
-		detailed := &models.Detailed{Code: generateUniqeCode[models.Detailed](repo, "code"), Title: generateUniqeTitle[models.Detailed](repo)}
+		detailed, err := createTempDetailed(repo)
+		assert.NoError(t, err, "expected no error while inserting detailed")
+		insertedDetailed, err := ReadDetailed(repo, detailed.Model.ID)
+		assert.NoError(t, err, "expected no error while reading detailed")
+		insertedDetailed.Code = generateUniqeCode[models.Detailed](repo, "code")
+		insertedDetailed.Title = generateUniqeTitle[models.Detailed](repo)
 
-		err := UpdateDetailed(repo, detailed)
+		err = UpdateDetailed(repo, insertedDetailed)
 
 		assert.NoError(t, err, "expected no error when updating detailed")
 	})
 
 	t.Run("can not update detailed record with empty code", func(t *testing.T) {
-		detailed := &models.Detailed{Title: generateUniqeTitle[models.Detailed](repo)}
+		detailed, err := createTempDetailed(repo)
+		assert.NoError(t, err, "expected no error while inserting detailed")
 
-		err := UpdateDetailed(repo, detailed)
+		insertedDetailed, err := ReadDetailed(repo, detailed.Model.ID)
+		assert.NoError(t, err, "expected no error while reading detailed")
+		insertedDetailed.Code = ""
+		err = UpdateDetailed(repo, detailed)
 
 		assert.Error(t, err, "expected error indicate empty code not allowed")
 	})
 
 	t.Run("can not update detailed record with empty title", func(t *testing.T) {
-		detailed := &models.Detailed{Code: generateUniqeCode[models.Detailed](repo, "code")}
+		detailed, err := createTempDetailed(repo)
+		assert.NoError(t, err, "expected no error while inserting detailed")
 
-		err := UpdateDetailed(repo, detailed)
+		insertedDetailed, err := ReadDetailed(repo, detailed.Model.ID)
+		assert.NoError(t, err, "expected no error while reading detailed")
+		insertedDetailed.Title = ""
+		err = UpdateDetailed(repo, detailed)
 
 		assert.Error(t, err, "expected error indicate empty title not allowed")
 	})
 
 	t.Run("can not update detailed record with code length greater than 64", func(t *testing.T) {
-		detailed := &models.Detailed{Title: generateUniqeTitle[models.Detailed](repo)}
+		detailed, err := createTempDetailed(repo)
+		assert.NoError(t, err, "expected no error while inserting detailed")
+
+		insertedDetailed, err := ReadDetailed(repo, detailed.Model.ID)
+		assert.NoError(t, err, "expected no error while reading detailed")
 		s := "1"
 		for i := 0; i < 70; i++ {
-			detailed.Code += s
+			insertedDetailed.Code += s
 		}
-		err := UpdateDetailed(repo, detailed)
+		err = UpdateDetailed(repo, insertedDetailed)
 
 		assert.Error(t, err, "expected error indicate code length should not be greater than 64 ")
 	})
 
 	t.Run("can not update detailed record with title length greater than 64", func(t *testing.T) {
-		detailed := &models.Detailed{Code: generateUniqeCode[models.Detailed](repo, "code")}
+		detailed, err := createTempDetailed(repo)
+		assert.NoError(t, err, "expected no error while inserting detailed")
+
+		insertedDetailed, err := ReadDetailed(repo, detailed.Model.ID)
+		assert.NoError(t, err, "expected no error while reading detailed")
 		s := "a"
 		for i := 0; i < 70; i++ {
-			detailed.Title += s
+			insertedDetailed.Title += s
 		}
-		err := UpdateDetailed(repo, detailed)
+		err = UpdateDetailed(repo, insertedDetailed)
 
 		assert.Error(t, err, "expected error indicate title length should not be greater than 64 ")
 	})
