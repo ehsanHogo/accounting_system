@@ -24,7 +24,7 @@ func InsertVoucher(db *gorm.DB, d *models.Voucher) error {
 	return nil
 }
 
-func UpdateVoucher(db *gorm.DB, d *models.Voucher, updatedItem []*models.VoucherItem, deletedItem []*models.VoucherItem, insertedItem []*models.VoucherItem) error {
+func UpdateVoucher(db *gorm.DB, d *models.Voucher, updatedItem []*models.VoucherItem, deletedItem []int64, insertedItem []*models.VoucherItem) error {
 
 	tx := db.Begin()
 	if tx.Error != nil {
@@ -47,14 +47,14 @@ func UpdateVoucher(db *gorm.DB, d *models.Voucher, updatedItem []*models.Voucher
 
 	for _, vi := range deletedItem {
 
-		err := repositories.DeleteRecord(tx, vi)
+		err := repositories.DeleteRecord[models.VoucherItem](tx, vi)
 		if err != nil {
 			return fmt.Errorf("can not delete voucher item : %w", err)
 		}
 	}
 
 	for _, vi := range updatedItem {
-		err := UpdateVoucherItem(tx, vi, vi.ID)
+		err := updateVoucherItem(tx, vi, vi.ID)
 		if err != nil {
 			return fmt.Errorf("can not update voucher item : %w", err)
 		}
@@ -93,7 +93,7 @@ func DeleteVoucher(db *gorm.DB, d *models.Voucher) error {
 		return fmt.Errorf("can not delete voucher due to validation failure: %v", err)
 	}
 
-	err = repositories.DeleteRecord[models.Voucher](db, d)
+	err = repositories.DeleteRecord[models.Voucher](db, d.ID)
 	if err != nil {
 		return fmt.Errorf("can not delete voucher due to database operation failure : %v", err)
 	} else {
@@ -125,7 +125,7 @@ func ReadVoucherItem(db *gorm.DB, id int64) (*models.VoucherItem, error) {
 	}
 }
 
-func UpdateVoucherItem(db *gorm.DB, v *models.VoucherItem, id int64) error {
+func updateVoucherItem(db *gorm.DB, v *models.VoucherItem, id int64) error {
 	var newV models.VoucherItem
 	if err := db.First(&newV, id).Error; err != nil {
 		return fmt.Errorf("record not found: %w", err)

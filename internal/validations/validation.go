@@ -43,7 +43,7 @@ func CheckDebitCredit(credit, debit int32) error {
 }
 
 func CheckBalance(v []*models.VoucherItem) error {
-	var credits int32   = 0
+	var credits int32 = 0
 	var debits int32 = 0
 
 	for _, v := range v {
@@ -252,7 +252,7 @@ func InsertVoucherValidation(db *gorm.DB, d *models.Voucher) error {
 	return nil
 }
 
-func UpdateVoucherValidation(db *gorm.DB, d *models.Voucher, updatedItem []*models.VoucherItem, deletedItem []*models.VoucherItem, insertedItem []*models.VoucherItem) error {
+func UpdateVoucherValidation(db *gorm.DB, d *models.Voucher, updatedItem []*models.VoucherItem, deletedItem []int64, insertedItem []*models.VoucherItem) error {
 
 	prevVoucher, err := repositories.ReadRecord[models.Voucher](db, d.ID)
 	if err != nil {
@@ -296,7 +296,17 @@ func UpdateVoucherValidation(db *gorm.DB, d *models.Voucher, updatedItem []*mode
 		return fmt.Errorf("balance credit and debit validation in updated voucher items  fail due to : %v", err)
 	}
 
-	err = CheckBalance(deletedItem)
+	deletedItemList := make([]*models.VoucherItem, 0)
+	var temVoucherItem *models.VoucherItem
+	for _, val := range deletedItem {
+		temVoucherItem, err = repositories.ReadRecord[models.VoucherItem](db, val)
+		if err != nil {
+			return fmt.Errorf("can not find voucher item due to : %v", err)
+		}
+		deletedItemList = append(deletedItemList, temVoucherItem)
+	}
+
+	err = CheckBalance(deletedItemList)
 
 	if err != nil {
 		return fmt.Errorf("balance redit and debit  validation in deleted voucher items fail due to : %v", err)
@@ -312,7 +322,7 @@ func UpdateVoucherValidation(db *gorm.DB, d *models.Voucher, updatedItem []*mode
 
 	exists := make(map[int64]bool)
 	for _, val := range deletedItem {
-		exists[val.ID] = true
+		exists[val] = true
 	}
 
 	newVoucherItems := []*models.VoucherItem{}

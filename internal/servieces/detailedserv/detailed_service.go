@@ -56,7 +56,7 @@ func DeleteDetailed(db *gorm.DB, d *models.Detailed) error {
 		return fmt.Errorf("can not delete detailed due to validation failure : %v", err)
 	}
 
-	err = repositories.DeleteRecord[models.Detailed](db, d)
+	err = repositories.DeleteRecord[models.Detailed](db, d.ID)
 
 	if err != nil {
 		return fmt.Errorf("can not delete detailed due to database operation failure: %v", err)

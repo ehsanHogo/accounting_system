@@ -36,7 +36,7 @@ func TestRepositories(t *testing.T) {
 		assert.NoError(t, err, "expected no error while reading detailed record ")
 		assert.Equal(t, detailed.Code, fetchDetailed.Code)
 
-		err = DeleteRecord(repo.AccountingDB, fetchDetailed)
+		err = DeleteRecord[models.Detailed](repo.AccountingDB, fetchDetailed.ID)
 		assert.NoError(t, err, "expected no error while deleting detailed record ")
 
 		_, err = ReadRecord[models.Detailed](repo.AccountingDB, detailed.ID)
@@ -62,7 +62,7 @@ func TestRepositories(t *testing.T) {
 		assert.NoError(t, err, "expected no error while reading subsidiary record ")
 		assert.Equal(t, subsidiary.Code, fetchSubsidiary.Code)
 
-		err = DeleteRecord(repo.AccountingDB, fetchSubsidiary)
+		err = DeleteRecord[models.Subsidiary](repo.AccountingDB, fetchSubsidiary.ID)
 		assert.NoError(t, err, "expected no error while deleting subsidiary record ")
 
 		_, err = ReadRecord[models.Subsidiary](repo.AccountingDB, subsidiary.ID)
@@ -104,7 +104,7 @@ func TestRepositories(t *testing.T) {
 		assert.NoError(t, err, "expected no error while reading voucher record ")
 		assert.Equal(t, voucher.Number, fetchVoucher.Number)
 
-		err = DeleteRecord(repo.AccountingDB, fetchVoucher)
+		err = DeleteRecord[models.Voucher](repo.AccountingDB, fetchVoucher.ID)
 		assert.NoError(t, err, "expected no error while deleting voucher record ")
 
 		_, err = ReadRecord[models.Voucher](repo.AccountingDB, voucher.ID)
@@ -161,13 +161,13 @@ func TestRepositories(t *testing.T) {
 		assert.NoError(t, err, "expected no error while reading voucherItem2 record ")
 		assert.Equal(t, updatedVoucherItem2.Credit, fetchVoucherItem2.Credit)
 
-		err = DeleteRecord(repo.AccountingDB, updatedVoucherItem1)
+		err = DeleteRecord[models.VoucherItem](repo.AccountingDB, updatedVoucherItem1.ID)
 		assert.NoError(t, err, "expected no error while deleting voucherItem1 record ")
 
 		_, err = ReadRecord[models.VoucherItem](repo.AccountingDB, updatedVoucherItem1.ID)
 		assert.Error(t, err, "expected  error indicate voucherItem1 record not found  ")
 
-		err = DeleteRecord(repo.AccountingDB, updatedVoucherItem2)
+		err = DeleteRecord[models.VoucherItem](repo.AccountingDB, updatedVoucherItem2.ID)
 		assert.NoError(t, err, "expected no error while deleting voucherItem2 record ")
 
 		_, err = ReadRecord[models.VoucherItem](repo.AccountingDB, updatedVoucherItem2.ID)

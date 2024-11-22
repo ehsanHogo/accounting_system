@@ -54,8 +54,10 @@ func CreateRecord[T any](db *gorm.DB, v *T) error {
 
 }
 
-func DeleteRecord[T any](db *gorm.DB, v *T) error {
-	res := db.Unscoped().Delete(&v)
+func DeleteRecord[T any](db *gorm.DB, id int64) error {
+
+	var v T
+	res := db.Unscoped().Delete(&v, id)
 
 	if res.Error != nil {
 		return fmt.Errorf("can not delete record due to: %v", res.Error)

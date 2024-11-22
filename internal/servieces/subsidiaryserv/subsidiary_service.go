@@ -57,7 +57,7 @@ func DeleteSubsidiary(db *gorm.DB, d *models.Subsidiary) error {
 	if err != nil {
 		return fmt.Errorf("can not delete subsidiary due to validation failure : %v", err)
 	}
-	err = repositories.DeleteRecord[models.Subsidiary](db, d)
+	err = repositories.DeleteRecord[models.Subsidiary](db, d.ID)
 	if err != nil {
 		return fmt.Errorf("can not delete subsidiary due to database operation failure : %v", err)
 	} else {
