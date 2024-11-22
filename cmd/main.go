@@ -13,7 +13,6 @@ import (
 func main() {
 
 	repo, err := repositories.CreateConnectionForTest()
-	// err = errors.New("")
 
 	if err != nil {
 		fmt.Printf("can not connect to database due to : %v\n", err)
@@ -35,7 +34,7 @@ func main() {
 
 	voucher := &models.Voucher{Number: randgenerator.GenerateRandomCode()}
 	voucher.VoucherItems = []*models.VoucherItem{{DetailedId: detailed.ID, SubsidiaryId: subsidiary.ID, Credit: 400}, {DetailedId: detailed.ID, SubsidiaryId: subsidiary.ID, Debit: 200}, {DetailedId: detailed.ID, SubsidiaryId: subsidiary.ID, Debit: 200}}
-	// repositories.CreateRecord(repo.AccountingDB, detailed)
+
 	err = voucherserv.InsertVoucher(repo.AccountingDB, voucher)
 	if err != nil {
 		fmt.Printf("can not insert voucher due to : %v\n", err)
@@ -51,7 +50,5 @@ func main() {
 		fmt.Printf("can not update voucher due to : %v\n", err)
 		return
 	}
-
-	// err = voucherserv.UpdateVoucher(repo.AccountingDB, voucher, []*models.VoucherItem{}, []*models.VoucherItem{}, []*models.VoucherItem{{SubsidiaryId: subsidiary.ID, DetailedId:  detailed.ID, Credit: 200}, {SubsidiaryId: subsidiary.ID, DetailedId:  detailed.ID,Debit: 200}})
 
 }
