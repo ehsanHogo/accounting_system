@@ -350,3 +350,30 @@ func TestDeleteSubsidiary(t *testing.T) {
 	})
 
 }
+
+func TestReadSubsidiary(t *testing.T) {
+	repo, err := repositories.CreateConnectionForTest()
+	defer func() {
+		sqlDB, _ := repo.AccountingDB.DB()
+		sqlDB.Close()
+	}()
+	if err != nil {
+		t.Fatalf("can not connect to database %v", err)
+	}
+
+	t.Run("can read the subsidairy record successfully", func(t *testing.T) {
+		subsidairy, err := temporary.CreateTempSubsidiary(repo)
+		assert.NoError(t, err, "expected no error while craeting subsidairy")
+
+		_, err = ReadSubsidiary(repo, subsidairy.Model.ID)
+		assert.NoError(t, err, "expected no error")
+
+	})
+
+	t.Run("return error when the subsidairy record is not in database ", func(t *testing.T) {
+
+		_, err := ReadSubsidiary(repo, 1_000_000)
+		assert.Error(t, err, "expected  error indicate can not found the subsidairy record")
+
+	})
+}

@@ -337,20 +337,29 @@ func TestDeleteDetailed(t *testing.T) {
 
 }
 
-// func temporary.CreateTempDetailed(repo *repositories.Repositories) (*models.Detailed, error) {
+func TestReadDetailed(t *testing.T) {
+	repo, err := repositories.CreateConnectionForTest()
+	defer func() {
+		sqlDB, _ := repo.AccountingDB.DB()
+		sqlDB.Close()
+	}()
+	if err != nil {
+		t.Fatalf("can not connect to database %v", err)
+	}
 
-// 	detailed := &models.Detailed{Code: repositories.GenerateUniqeCode[models.Detailed](repo, "code"), Title: repositories.GenerateUniqeTitle[models.Detailed](repo)}
+	t.Run("can read the detailed record successfully", func(t *testing.T) {
+		detailed, err := temporary.CreateTempDetailed(repo)
+		assert.NoError(t, err, "expected no error while craeting detailed")
 
-// 	// err := errors.New("")
-// 	// for err != nil {
+		_, err = ReadDetailed(repo, detailed.Model.ID)
+		assert.NoError(t, err, "expected no error")
 
-// 	err := detailedserv.InsertDetailed(repo, detailed)
-// 	if err != nil {
-// 		return nil, fmt.Errorf("error during record creation: %v", err)
+	})
 
-// 	}
+	t.Run("return error when the detailed record is not in database ", func(t *testing.T) {
 
-// 	return detailed, nil
+		_, err := ReadDetailed(repo, 1_000_000)
+		assert.Error(t, err, "expected  error indicate can not found the detailed record")
 
-// 	// }
-// }
+	})
+}

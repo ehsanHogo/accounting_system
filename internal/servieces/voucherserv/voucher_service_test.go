@@ -517,8 +517,19 @@ func TestReadVoucher(t *testing.T) {
 		t.Fatalf("can not connect to database %v", err)
 	}
 
+	t.Run("can read the voucher record successfully", func(t *testing.T) {
+		voucher, err := temporary.CreateTempVoucher(repo)
+		assert.NoError(t, err, "expected no error while craeting voucher")
 
+		_, err = ReadVoucher(repo, voucher.Model.ID)
+		assert.NoError(t, err, "expected no error")
 
+	})
 
-	t.Run("can read vo")
+	t.Run("return error when the voucher record is not in database ", func(t *testing.T) {
+
+		_, err := ReadVoucher(repo, 1_000_000)
+		assert.Error(t, err, "expected  error indicate can not found the voucher record")
+
+	})
 }
