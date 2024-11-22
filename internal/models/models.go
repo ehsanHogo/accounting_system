@@ -5,14 +5,14 @@ import (
 )
 
 type Detailed struct {
-	ID        int64           `gorm:"primaryKey"`
+	ID      int64  `gorm:"primaryKey"`
 	Code    string `gorm:"unique"`
 	Title   string `gorm:"unique"`
-	Version int64   `gorm:"default:0"`
+	Version int64  `gorm:"default:0"`
 }
 
 type Subsidiary struct {
-	ID        int64           `gorm:"primaryKey"`
+	ID          int64  `gorm:"primaryKey"`
 	Code        string `gorm:"unique"`
 	Title       string `gorm:"unique"`
 	HasDetailed bool
@@ -20,7 +20,7 @@ type Subsidiary struct {
 }
 
 type VoucherItem struct {
-	ID        int64           `gorm:"primaryKey"`
+	ID        int64 `gorm:"primaryKey"`
 	VoucherID int64 `gorm:"not null;constraint:OnDelete:CASCADE;"`
 
 	DetailedId   int64 `gorm:"constraint:OnUpdate:CASCADE,OnDelete:RESTRICT;default:null;"`
@@ -30,10 +30,10 @@ type VoucherItem struct {
 }
 
 type Voucher struct {
-	ID        int64           `gorm:"primaryKey"`
+	ID           int64          `gorm:"primaryKey"`
 	Number       string         `gorm:"unique"`
 	VoucherItems []*VoucherItem `gorm:"foreignKey:VoucherID"`
-	Version      int64           `gorm:"default:0"`
+	Version      int64          `gorm:"default:0"`
 }
 
 func (u *Detailed) BeforeUpdate(tx *gorm.DB) (err error) {
