@@ -26,7 +26,6 @@ func TestInsertDetailed(t *testing.T) {
 	t.Run("can insert detailed record successfully", func(t *testing.T) {
 		_, err := temporary.CreateTempDetailed(repo)
 
-		// err := InsertDetailed(repo, detailed)
 
 		assert.NoError(t, err, "expected no error when inserting detailed")
 	})
@@ -112,7 +111,6 @@ func TestUpdateDetailed(t *testing.T) {
 		insertedDetailed, err := ReadDetailed(repo, detailed.Model.ID)
 		assert.NoError(t, err, "expected no error while reading detailed")
 		insertedDetailed.Code = repositories.GenerateUniqeCode[models.Detailed](repo, "code")
-		// insertedDetailed.Title = repositories.GenerateUniqeTitle[models.Detailed](repo)
 
 		err = UpdateDetailed(repo, insertedDetailed)
 
@@ -192,15 +190,12 @@ func TestUpdateDetailed(t *testing.T) {
 		assert.NoError(t, err, "cexpected no error while inserting")
 
 		detailed.Code = repositories.GenerateUniqeCode[models.Detailed](repo, "code")
-		// fmt.Printf("prev id : %v\n", detailed.Model.ID)
-		// fmt.Printf("code : %v\n", detailed.Code)
-		// fmt.Printf("prev version : %v\n", detailed.Version)
+
 		err = UpdateDetailed(repo, detailed)
 		assert.NoError(t, err, "expected no error while updating")
 
 		detailed.Code = repositories.GenerateUniqeCode[models.Detailed](repo, "code")
 		err = UpdateDetailed(repo, detailed)
-		// fmt.Printf("new version : %v\n", detailed.Version)
 		assert.Error(t, err, "expected error indicate the versions are different")
 
 	})
@@ -210,9 +205,7 @@ func TestUpdateDetailed(t *testing.T) {
 		assert.NoError(t, err, "expected no error while inserting")
 
 		detailed.Code = repositories.GenerateUniqeCode[models.Detailed](repo, "code")
-		// fmt.Printf("prev id : %v\n", detailed.Model.ID)
-		// fmt.Printf("code : %v\n", detailed.Code)
-		// fmt.Printf("prev version : %v\n", detailed.Version)
+
 		err = UpdateDetailed(repo, detailed)
 		assert.NoError(t, err, "expected no error while updating")
 
@@ -283,7 +276,6 @@ func TestDeleteDetailed(t *testing.T) {
 		detailed := &models.Detailed{}
 		detailed.Model.ID = 1_000_000
 		err := DeleteDetailed(repo, detailed)
-		// result := repo.AccountingDB.First(&detailed)
 		assert.Error(t, err, "expected error indicate detailed record not found")
 	})
 
@@ -306,13 +298,10 @@ func TestDeleteDetailed(t *testing.T) {
 		assert.NoError(t, err, "expected no error while inserting")
 
 		detailed.Code = repositories.GenerateUniqeCode[models.Detailed](repo, "code")
-		// fmt.Printf("prev id : %v\n", detailed.Model.ID)
-		// fmt.Printf("code : %v\n", detailed.Code)
-		// fmt.Printf("prev version : %v\n", detailed.Version)
+
 		err = UpdateDetailed(repo, detailed)
 		assert.NoError(t, err, "expected no error while updating detailed record")
 		err = DeleteDetailed(repo, detailed)
-		// fmt.Printf("new version : %v\n", detailed.Version)
 		assert.Error(t, err, "expected error indicate the versions are different")
 
 	})
@@ -322,15 +311,12 @@ func TestDeleteDetailed(t *testing.T) {
 		assert.NoError(t, err, "expected no error while inserting")
 
 		detailed.Code = repositories.GenerateUniqeCode[models.Detailed](repo, "code")
-		// fmt.Printf("prev id : %v\n", detailed.Model.ID)
-		// fmt.Printf("code : %v\n", detailed.Code)
-		// fmt.Printf("prev version : %v\n", detailed.Version)
+
 		err = UpdateDetailed(repo, detailed)
 		assert.NoError(t, err, "can not update detailed record ")
 		detailed, _ = ReadDetailed(repo, detailed.Model.ID)
 
 		err = DeleteDetailed(repo, detailed)
-		// fmt.Printf("new version : %v\n", detailed.Version)
 		assert.NoError(t, err, "expected no error")
 
 	})

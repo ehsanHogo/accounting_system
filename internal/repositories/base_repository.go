@@ -32,9 +32,9 @@ func CreateConnectionForTest() (*Repositories, error) {
 
 	sqlDB, _ := db.DB()
 
-	sqlDB.SetMaxOpenConns(100)                // Limit the maximum number of open connections
-	sqlDB.SetMaxIdleConns(5)                  // Set idle connection limit
-	sqlDB.SetConnMaxLifetime(5 * time.Minute) // Limit connection lifetime
+	sqlDB.SetMaxOpenConns(100)                
+	sqlDB.SetMaxIdleConns(5)                 
+	sqlDB.SetConnMaxLifetime(5 * time.Minute) 
 
 	return NewConnection(db), nil
 }

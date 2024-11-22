@@ -38,10 +38,7 @@ func CreateTempVoucher(repo *repositories.Repositories, IDs ...uint) (*models.Vo
 			temp[0] = &models.VoucherItem{DetailedId: IDs[0], SubsidiaryId: subsidiary.Model.ID, Credit: 500}
 			temp[1] = &models.VoucherItem{DetailedId: IDs[0], SubsidiaryId: subsidiary.Model.ID, Debit: 500}
 		} else {
-			// detailed, err := createTempDetailed(repo)
-			// if err != nil {
-			// 	return nil, err
-			// }
+
 			temp[0] = &models.VoucherItem{SubsidiaryId: IDs[1], Credit: 500}
 			temp[1] = &models.VoucherItem{SubsidiaryId: IDs[1], Debit: 500}
 
@@ -52,8 +49,7 @@ func CreateTempVoucher(repo *repositories.Repositories, IDs ...uint) (*models.Vo
 	number := repositories.GenerateUniqeCode[models.Voucher](repo, "number")
 	voucher := &models.Voucher{Number: number, VoucherItems: temp}
 
-	// err := errors.New("")
-	// for err != nil {
+
 
 	err = repositories.CreateRecord(repo, voucher)
 	if err != nil {
@@ -61,7 +57,6 @@ func CreateTempVoucher(repo *repositories.Repositories, IDs ...uint) (*models.Vo
 
 	}
 
-	// }
 
 	return voucher, nil
 }

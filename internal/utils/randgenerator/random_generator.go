@@ -18,8 +18,8 @@ func GenerateRandomCode() string {
 }
 
 func GenerateRandomTitle() string {
-	r := rand.New(rand.NewSource(time.Now().UnixNano())) // Create a local random generator
-	length := r.Intn(64) + 1                             // Length will be between 1 and 64
+	r := rand.New(rand.NewSource(time.Now().UnixNano())) 
+	length := r.Intn(64) + 1                             
 	letters := "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
 	result := make([]byte, length)
 	for i := 0; i < length; i++ {

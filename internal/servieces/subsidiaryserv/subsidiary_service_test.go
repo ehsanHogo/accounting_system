@@ -114,7 +114,6 @@ func TestUpdateSubsidiary(t *testing.T) {
 		fetchSubsidiary, err := ReadSubsidiary(repo, subsidiary.Model.ID)
 		assert.NoError(t, err, "expected no error when reading subsidiary record ")
 		fetchSubsidiary.Code = repositories.GenerateUniqeCode[models.Subsidiary](repo, "code")
-		// fetchSubsidiary.Title = repositories.GenerateUniqeTitle[models.Subsidiary](repo)
 		err = UpdateSubsidiary(repo, fetchSubsidiary)
 		assert.NoError(t, err, "expected no error when  updating subsidiary record")
 		checkUpdated, err := ReadSubsidiary(repo, fetchSubsidiary.Model.ID)
@@ -194,15 +193,12 @@ func TestUpdateSubsidiary(t *testing.T) {
 		assert.NoError(t, err, "expected no error while inserting")
 
 		subsidiary.Code = repositories.GenerateUniqeCode[models.Subsidiary](repo, "code")
-		// fmt.Printf("prev id : %v\n", subsidiary.Model.ID)
-		// fmt.Printf("code : %v\n", subsidiary.Code)
-		// fmt.Printf("prev version : %v\n", subsidiary.Version)
+
 		err = UpdateSubsidiary(repo, subsidiary)
 		assert.NoError(t, err, "expected no error while updating")
 		subsidiary.Code = repositories.GenerateUniqeCode[models.Subsidiary](repo, "code")
 		err = UpdateSubsidiary(repo, subsidiary)
 		assert.Error(t, err, "expected no error while updating subsidiary")
-		// fmt.Printf("new version : %v\n", subsidiary.Version)
 		assert.Error(t, err, "expected error indicate the versions are different")
 
 	})
@@ -212,14 +208,11 @@ func TestUpdateSubsidiary(t *testing.T) {
 		assert.NoError(t, err, "can not create subsidiary record due to")
 
 		subsidiary.Code = repositories.GenerateUniqeCode[models.Subsidiary](repo, "code")
-		// fmt.Printf("prev id : %v\n", subsidiary.Model.ID)
-		// fmt.Printf("code : %v\n", subsidiary.Code)
-		// fmt.Printf("prev version : %v\n", subsidiary.Version)
+
 		UpdateSubsidiary(repo, subsidiary)
 		subsidiary, _ = ReadSubsidiary(repo, subsidiary.Model.ID)
 		subsidiary.Code = repositories.GenerateUniqeCode[models.Subsidiary](repo, "code")
 		err = UpdateSubsidiary(repo, subsidiary)
-		// fmt.Printf("new version : %v\n", subsidiary.Version)
 		assert.NoError(t, err, "expected no error")
 
 	})
@@ -228,12 +221,9 @@ func TestUpdateSubsidiary(t *testing.T) {
 		subsidiary, err := temporary.CreateTempSubsidiary(repo)
 		assert.NoError(t, err, "expected no error while inserting")
 		fmt.Println("in me ")
-		// fmt.Printf("detialed id : %v\n", subsidiary.Model.ID)
 		_, err = temporary.CreateTempVoucher(repo, 0, subsidiary.Model.ID)
 
-		// fmt.Printf("detialed id : %v\n", subsidiary.Model.ID)
 		assert.NoError(t, err, "expected no error while inserting")
-		// fmt.Printf("voucher id : %v\n", voucher.Model.ID)
 		subsidiary.Code = repositories.GenerateUniqeCode[models.Subsidiary](repo, "code")
 		err = UpdateSubsidiary(repo, subsidiary)
 		assert.Error(t, err, "expected error indicate violation update forign key constraint")
@@ -306,8 +296,7 @@ func TestDeleteSubsidiary(t *testing.T) {
 
 		_, err = temporary.CreateTempVoucher(repo, 0, subsidiary.Model.ID)
 		assert.NoError(t, err, "expected no error while inserting")
-		// fmt.Printf("det : %v", subsidiary.Model.ID)
-		// fmt.Printf("vi : %v", voucher.VoucherItems[0].Model.ID)
+
 		err = DeleteSubsidiary(repo, subsidiary)
 
 		assert.Error(t, err, "expected error indicate violation forignkey constraint")
@@ -319,13 +308,10 @@ func TestDeleteSubsidiary(t *testing.T) {
 		assert.NoError(t, err, "expected no error while inserting")
 
 		subsidiary.Code = repositories.GenerateUniqeCode[models.Subsidiary](repo, "code")
-		// fmt.Printf("prev id : %v\n", subsidiary.Model.ID)
-		// fmt.Printf("code : %v\n", subsidiary.Code)
-		// fmt.Printf("prev version : %v\n", subsidiary.Version)
+
 		err = UpdateSubsidiary(repo, subsidiary)
 		assert.NoError(t, err, "can not update subsidiary record ")
 		err = DeleteSubsidiary(repo, subsidiary)
-		// fmt.Printf("new version : %v\n", subsidiary.Version)
 		assert.Error(t, err, "expected error indicate the versions are different")
 
 	})
@@ -335,16 +321,13 @@ func TestDeleteSubsidiary(t *testing.T) {
 		assert.NoError(t, err, "expected no error while inserting")
 
 		subsidiary.Code = repositories.GenerateUniqeCode[models.Subsidiary](repo, "code")
-		// fmt.Printf("prev id : %v\n", subsidiary.Model.ID)
-		// fmt.Printf("code : %v\n", subsidiary.Code)
-		// fmt.Printf("prev version : %v\n", subsidiary.Version)
+
 		err = UpdateSubsidiary(repo, subsidiary)
 		assert.NoError(t, err, "cann not update subsidiary record due to ")
 
 		subsidiary, _ = ReadSubsidiary(repo, subsidiary.Model.ID)
 
 		err = DeleteSubsidiary(repo, subsidiary)
-		// fmt.Printf("new version : %v\n", subsidiary.Version)
 		assert.NoError(t, err, "expected no error while deleting")
 
 	})
