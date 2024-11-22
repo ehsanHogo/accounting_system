@@ -74,6 +74,7 @@ func ReadRecord[T any](db *gorm.DB, id uint) (*T, error) {
 	if err := db.First(&res, id).Error; err != nil {
 		return nil, fmt.Errorf("record not found: %w", err)
 	}
+	fmt.Println("Record read successfully")
 	return &res, nil
 }
 
@@ -83,6 +84,7 @@ func UpdateRecord[T any](db *gorm.DB, v *T, id uint) error {
 		return fmt.Errorf("can not  update record due to : %v", err)
 	}
 
+	fmt.Println("Record update successfully")
 	return nil
 
 }

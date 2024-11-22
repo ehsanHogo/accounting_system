@@ -7,7 +7,6 @@ import (
 	"accounting_system/internal/utils/temporary"
 	"accounting_system/internal/validations"
 
-	"fmt"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -213,7 +212,7 @@ func TestUpdateDetailed(t *testing.T) {
 		detailed, _ = ReadDetailed(repo.AccountingDB, detailed.Model.ID)
 		detailed.Code = repositories.GenerateUniqeCode[models.Detailed](repo.AccountingDB, "code")
 		err = UpdateDetailed(repo.AccountingDB, detailed)
-		fmt.Printf("new version : %v\n", detailed.Version)
+
 		assert.NoError(t, err, "expected no error")
 
 	})
@@ -276,10 +275,9 @@ func TestDeleteDetailed(t *testing.T) {
 		detailed, err := temporary.CreateTempDetailed(repo.AccountingDB)
 		assert.NoError(t, err, "expected no error while inserting")
 
-		voucher, err := temporary.CreateTempVoucher(repo.AccountingDB, detailed.Model.ID)
+		_, err = temporary.CreateTempVoucher(repo.AccountingDB, detailed.Model.ID)
 		assert.NoError(t, err, "expected no error while inserting")
-		fmt.Printf("det : %v", detailed.Model.ID)
-		fmt.Printf("vi : %v", voucher.VoucherItems[0].Model.ID)
+
 		err = DeleteDetailed(repo.AccountingDB, detailed)
 
 		assert.Error(t, err, "expected error indicate violation forignkey constraint")

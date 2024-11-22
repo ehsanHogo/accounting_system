@@ -7,7 +7,6 @@ import (
 	"accounting_system/internal/utils/temporary"
 	"accounting_system/internal/validations"
 
-	"fmt"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -166,8 +165,7 @@ func TestInsertVoucher(t *testing.T) {
 
 		subsidiary, err := temporary.CreateTempSubsidiary(repo.AccountingDB)
 		assert.NoError(t, err, "expected no error while inserting subsidiary ")
-		fmt.Println("ftfugg")
-		fmt.Println(detailed.Model.ID)
+
 		voucher := &models.Voucher{Number: repositories.GenerateUniqeCode[models.Voucher](repo.AccountingDB, "number"), VoucherItems: []*models.VoucherItem{{SubsidiaryId: subsidiary.Model.ID, Credit: 100}, {SubsidiaryId: subsidiary.Model.ID, DetailedId: detailed.Model.ID, Debit: 100}}}
 
 		err = InsertVoucher(repo.AccountingDB, voucher)
@@ -357,8 +355,6 @@ func TestUpdateVoucher(t *testing.T) {
 
 		subsidiary, err := temporary.CreateTempSubsidiary(repo.AccountingDB)
 		assert.NoError(t, err, "expected no error while inserting subsidiary ")
-		fmt.Println("ftfugg")
-		fmt.Println(detailed.Model.ID)
 
 		_, err = temporary.CreateTempVoucher(repo.AccountingDB)
 		assert.NoError(t, err, "expected no error while inserting voucher ")
@@ -390,14 +386,12 @@ func TestUpdateVoucher(t *testing.T) {
 
 		voucher.Number = repositories.GenerateUniqeCode[models.Voucher](repo.AccountingDB, "number")
 
-		fmt.Printf("prev version : %v\n", voucher.Version)
 		err = UpdateVoucher(repo.AccountingDB, voucher, []*models.VoucherItem{}, []*models.VoucherItem{}, []*models.VoucherItem{})
 		assert.NoError(t, err, "can not update voucher record")
 
 		voucher.Number = repositories.GenerateUniqeCode[models.Voucher](repo.AccountingDB, "number")
 		err = UpdateVoucher(repo.AccountingDB, voucher, []*models.VoucherItem{}, []*models.VoucherItem{}, []*models.VoucherItem{})
 
-		fmt.Printf("new version : %v\n", voucher.Version)
 		assert.Error(t, err, "expected error indicate the versions are different")
 
 	})

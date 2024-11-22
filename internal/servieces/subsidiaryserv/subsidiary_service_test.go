@@ -7,7 +7,6 @@ import (
 	"accounting_system/internal/utils/temporary"
 	"accounting_system/internal/validations"
 
-	"fmt"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -220,7 +219,7 @@ func TestUpdateSubsidiary(t *testing.T) {
 	t.Run("can not update subsidiary record if were reffrenced in some voucher items", func(t *testing.T) {
 		subsidiary, err := temporary.CreateTempSubsidiary(repo.AccountingDB)
 		assert.NoError(t, err, "expected no error while inserting")
-		fmt.Println("in me ")
+
 		_, err = temporary.CreateTempVoucher(repo.AccountingDB, 0, subsidiary.Model.ID)
 
 		assert.NoError(t, err, "expected no error while inserting")

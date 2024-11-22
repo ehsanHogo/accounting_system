@@ -1,8 +1,6 @@
 package models
 
 import (
-	"fmt"
-
 	"gorm.io/gorm"
 )
 
@@ -39,19 +37,19 @@ type Voucher struct {
 }
 
 func (u *Detailed) BeforeUpdate(tx *gorm.DB) (err error) {
-	fmt.Println("here")
+
 	u.Version++
 	return
 }
 
 func (u *Subsidiary) BeforeUpdate(tx *gorm.DB) (err error) {
-	fmt.Println("here")
+
 	u.Version++
 	return
 }
 
 func (u *Voucher) BeforeUpdate(tx *gorm.DB) (err error) {
-	fmt.Println("here")
+
 	u.Version++
 	return
 }

@@ -323,8 +323,7 @@ func UpdateVoucherValidation(db *gorm.DB, d *models.Voucher, updatedItem []*mode
 	}
 
 	newVoucherItems = append(newVoucherItems, insertedItem...)
-	fmt.Println("lenjndsjf")
-	fmt.Println(len(newVoucherItems))
+
 	err = CheckVoucherItemsLength(len(newVoucherItems))
 
 	if err != nil {
@@ -350,15 +349,11 @@ func checkHasDetailed(repo *gorm.DB, vi []*models.VoucherItem) error {
 	var subsidiary *models.Subsidiary
 	for _, v := range vi {
 		err := repo.First(&subsidiary, v.SubsidiaryId).Error
-		fmt.Println(err)
+
 		if err != nil {
 			return fmt.Errorf("can not read subsidiary record %v : %v", v.SubsidiaryId, err)
 		}
 
-		fmt.Println("id s : ")
-		fmt.Println(subsidiary.HasDetailed)
-		fmt.Println(v.DetailedId)
-		fmt.Println(v.ID)
 		if subsidiary.HasDetailed {
 			if v.DetailedId == 0 {
 				return fmt.Errorf("can not have empty detailed when subsidiary has detailed")

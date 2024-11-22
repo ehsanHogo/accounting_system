@@ -44,8 +44,7 @@ func UpdateVoucher(db *gorm.DB, d *models.Voucher, updatedItem []*models.Voucher
 	}
 
 	newV := &models.Voucher{Number: d.Number}
-	fmt.Println("here newV")
-	fmt.Println(newV.Number)
+
 	for _, vi := range deletedItem {
 
 		err := repositories.DeleteRecord(tx, vi)
