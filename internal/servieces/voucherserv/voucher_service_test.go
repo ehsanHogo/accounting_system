@@ -506,3 +506,19 @@ func TestDeleteVoucher(t *testing.T) {
 	})
 
 }
+
+func TestReadVoucher(t *testing.T) {
+	repo, err := repositories.CreateConnectionForTest()
+	defer func() {
+		sqlDB, _ := repo.AccountingDB.DB()
+		sqlDB.Close()
+	}()
+	if err != nil {
+		t.Fatalf("can not connect to database %v", err)
+	}
+
+
+
+
+	t.Run("can read vo")
+}
