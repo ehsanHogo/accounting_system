@@ -30,6 +30,6 @@ func main() {
 
 	// voucher := &models.Voucher{Number: "12345", VoucherItems: temp}
 	detailed := &models.Detailed{Code: "13", Title: "te2st"}
-	repositories.CreateRecord(repo, detailed)
+	repositories.CreateRecord(repo.AccountingDB, detailed)
 
 }
