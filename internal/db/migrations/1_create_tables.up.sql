@@ -2,9 +2,6 @@ CREATE TABLE "detaileds" (
   "id" BIGSERIAL PRIMARY KEY,
   "code" varchar UNIQUE,
   "title" varchar UNIQUE,
-  "created_at" timestamp DEFAULT CURRENT_TIMESTAMP,
-  "updated_at" timestamp DEFAULT CURRENT_TIMESTAMP,
-  "deleted_at" TIMESTAMP,
   "version" BIGINT DEFAULT 0 NOT NULL
 );
 
@@ -13,18 +10,12 @@ CREATE TABLE subsidiaries (
   "code" VARCHAR UNIQUE,
   "title" VARCHAR UNIQUE,
   "has_detailed" BOOLEAN,
-  "created_at" TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  "updated_at" TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  "deleted_at" TIMESTAMP,
   "version" BIGINT DEFAULT 0 NOT NULL
 );
 
 CREATE TABLE "vouchers" (
   "id" BIGSERIAL PRIMARY KEY,
   "number" varchar UNIQUE,
-  "created_at" TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  "updated_at" TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  "deleted_at" TIMESTAMP,
   "version" BIGINT DEFAULT 0 NOT NULL
 );
 
@@ -34,10 +25,7 @@ CREATE TABLE "voucher_items" (
   "detailed_id" BIGINT,
   "subsidiary_id" BIGINT NOT NULL,
   "debit" INT,
-  "credit" INT,
-  "created_at" TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  "updated_at" TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  "deleted_at" TIMESTAMP
+  "credit" INT
 );
 
 ALTER TABLE
