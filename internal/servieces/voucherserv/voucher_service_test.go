@@ -5,6 +5,7 @@ import (
 	"accounting_system/internal/repositories"
 	"accounting_system/internal/servieces/subsidiaryserv"
 	"accounting_system/internal/utils/temporary"
+	"accounting_system/internal/validations"
 
 	"fmt"
 	"testing"
@@ -12,15 +13,23 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestInsertVoucher(t *testing.T) {
+const InvalidRecordID = 1_000_000
+
+func SetupTestRepo(t *testing.T) *repositories.Repositories {
 	repo, err := repositories.CreateConnectionForTest()
-	defer func() {
+	if err != nil {
+		t.Fatalf("cannot connect to database: %v", err)
+	}
+
+	t.Cleanup(func() {
 		sqlDB, _ := repo.AccountingDB.DB()
 		sqlDB.Close()
-	}()
-	if err != nil {
-		t.Fatalf("can not connect to database %v", err)
-	}
+	})
+	return repo
+}
+
+func TestInsertVoucher(t *testing.T) {
+	repo := SetupTestRepo(t)
 
 	t.Run("can insert voucher successfully", func(t *testing.T) {
 		voucher, err := temporary.CreateTempVoucher(repo.AccountingDB)
@@ -66,7 +75,7 @@ func TestInsertVoucher(t *testing.T) {
 		voucher := &models.Voucher{VoucherItems: []*models.VoucherItem{{SubsidiaryId: subsidiary.Model.ID, DetailedId: detailed.Model.ID, Credit: 100}, {SubsidiaryId: subsidiary.Model.ID, DetailedId: detailed.Model.ID, Debit: 100}}}
 
 		s := "1"
-		for i := 0; i < 70; i++ {
+		for i := 0; i < validations.MaxCodeLength; i++ {
 			voucher.Number += s
 		}
 		err = InsertVoucher(repo.AccountingDB, voucher)
@@ -168,26 +177,19 @@ func TestInsertVoucher(t *testing.T) {
 
 	t.Run("can not insert voucher record when voucher item does not  specify subsidiary", func(t *testing.T) {
 
-		voucherItem1  := &models.VoucherItem{Credit: 100}
-		voucherItem2  := &models.VoucherItem{Debit: 100}
+		voucherItem1 := &models.VoucherItem{Credit: 100}
+		voucherItem2 := &models.VoucherItem{Debit: 100}
 
 		voucher := &models.Voucher{Number: repositories.GenerateUniqeCode[models.Voucher](repo.AccountingDB, "number"), VoucherItems: []*models.VoucherItem{voucherItem1, voucherItem2}}
 
-		err = InsertVoucher(repo.AccountingDB, voucher)
+		err := InsertVoucher(repo.AccountingDB, voucher)
 
 		assert.Error(t, err, "expected error indicate voucher items should have subsidiary")
 	})
 }
 
 func TestUpdateVoucher(t *testing.T) {
-	repo, err := repositories.CreateConnectionForTest()
-	defer func() {
-		sqlDB, _ := repo.AccountingDB.DB()
-		sqlDB.Close()
-	}()
-	if err != nil {
-		t.Fatalf("can not connect to database %v", err)
-	}
+	repo := SetupTestRepo(t)
 
 	t.Run("can update voucher  seccessfully", func(t *testing.T) {
 
@@ -271,7 +273,7 @@ func TestUpdateVoucher(t *testing.T) {
 		voucher := &models.Voucher{VoucherItems: []*models.VoucherItem{{SubsidiaryId: subsidiary.Model.ID, DetailedId: detailed.Model.ID, Credit: 100}, {SubsidiaryId: subsidiary.Model.ID, DetailedId: detailed.Model.ID, Debit: 100}}}
 
 		s := "1"
-		for i := 0; i < 70; i++ {
+		for i := 0; i < validations.MaxCodeLength+1; i++ {
 			voucher.Number += s
 		}
 		err = UpdateVoucher(repo.AccountingDB, voucher, []*models.VoucherItem{}, []*models.VoucherItem{}, []*models.VoucherItem{})
@@ -376,7 +378,7 @@ func TestUpdateVoucher(t *testing.T) {
 		assert.NoError(t, err, "expected no error while inserting subsidiary ")
 
 		voucher := &models.Voucher{Number: repositories.GenerateUniqeCode[models.Voucher](repo.AccountingDB, "number"), VoucherItems: []*models.VoucherItem{{SubsidiaryId: subsidiary.Model.ID, DetailedId: detailed.Model.ID, Credit: 100}, {SubsidiaryId: subsidiary.Model.ID, DetailedId: detailed.Model.ID, Debit: -100}}}
-		voucher.Model.ID = 1_000_000
+		voucher.Model.ID = InvalidRecordID
 		err = UpdateVoucher(repo.AccountingDB, voucher, []*models.VoucherItem{}, []*models.VoucherItem{}, []*models.VoucherItem{})
 		assert.Error(t, err, "expected error indicate there is such id in database")
 
@@ -419,15 +421,7 @@ func TestUpdateVoucher(t *testing.T) {
 }
 
 func TestDeleteVoucher(t *testing.T) {
-	repo, err := repositories.CreateConnectionForTest()
-	defer func() {
-		sqlDB, _ := repo.AccountingDB.DB()
-		sqlDB.Close()
-	}()
-	if err != nil {
-		t.Fatalf("can not connect to database %v", err)
-	}
-
+	repo := SetupTestRepo(t)
 	t.Run("can delete voucher seccessfully", func(t *testing.T) {
 
 		voucher, err := temporary.CreateTempVoucher(repo.AccountingDB)
@@ -441,8 +435,8 @@ func TestDeleteVoucher(t *testing.T) {
 
 	t.Run("deletion voucher record fail because record does not exist in database", func(t *testing.T) {
 		voucher := &models.Voucher{}
-		voucher.Model.ID = 1_000_000
-		err = DeleteVoucher(repo.AccountingDB, voucher)
+		voucher.Model.ID = InvalidRecordID
+		err := DeleteVoucher(repo.AccountingDB, voucher)
 		assert.Error(t, err, "expected error indicate there is not such record in data base")
 
 	})
@@ -479,14 +473,7 @@ func TestDeleteVoucher(t *testing.T) {
 }
 
 func TestReadVoucher(t *testing.T) {
-	repo, err := repositories.CreateConnectionForTest()
-	defer func() {
-		sqlDB, _ := repo.AccountingDB.DB()
-		sqlDB.Close()
-	}()
-	if err != nil {
-		t.Fatalf("can not connect to database %v", err)
-	}
+	repo := SetupTestRepo(t)
 
 	t.Run("can read the voucher record successfully", func(t *testing.T) {
 		voucher, err := temporary.CreateTempVoucher(repo.AccountingDB)
@@ -499,7 +486,7 @@ func TestReadVoucher(t *testing.T) {
 
 	t.Run("return error when the voucher record is not in database ", func(t *testing.T) {
 
-		_, err := ReadVoucher(repo.AccountingDB, 1_000_000)
+		_, err := ReadVoucher(repo.AccountingDB, InvalidRecordID)
 		assert.Error(t, err, "expected  error indicate can not found the voucher record")
 
 	})

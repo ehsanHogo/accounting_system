@@ -95,3 +95,6 @@ func CreateTempDetailed(repo *gorm.DB) (*models.Detailed, error) {
 	return detailed, nil
 
 }
+
+
+

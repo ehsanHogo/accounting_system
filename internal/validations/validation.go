@@ -9,6 +9,11 @@ import (
 	"gorm.io/gorm"
 )
 
+const (
+	MaxCodeLength  = 64
+	MaxTitleLength = 64
+)
+
 func CheckEmpty(s string) error {
 	if len(s) == 0 {
 		return errors.New("empty field not allowed")
@@ -69,7 +74,7 @@ func ChackCodeValidation(c string) error {
 		return err
 	}
 
-	err = CheckMaxLength(c, 64)
+	err = CheckMaxLength(c, MaxCodeLength)
 	if err != nil {
 		return err
 	}
@@ -83,7 +88,7 @@ func CheckTitleValidaion(t string) error {
 		return err
 	}
 
-	err = CheckMaxLength(t, 64)
+	err = CheckMaxLength(t, MaxTitleLength)
 	if err != nil {
 		return err
 	}

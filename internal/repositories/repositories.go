@@ -32,9 +32,9 @@ func CreateConnectionForTest() (*Repositories, error) {
 
 	sqlDB, _ := db.DB()
 
-	sqlDB.SetMaxOpenConns(100)                
-	sqlDB.SetMaxIdleConns(5)                 
-	sqlDB.SetConnMaxLifetime(5 * time.Minute) 
+	sqlDB.SetMaxOpenConns(100)
+	sqlDB.SetMaxIdleConns(5)
+	sqlDB.SetConnMaxLifetime(5 * time.Minute)
 
 	return NewConnection(db), nil
 }

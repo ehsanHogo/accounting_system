@@ -5,6 +5,7 @@ import (
 	"accounting_system/internal/repositories"
 	"accounting_system/internal/utils/randgenerator"
 	"accounting_system/internal/utils/temporary"
+	"accounting_system/internal/validations"
 
 	"fmt"
 	"testing"
@@ -12,17 +13,23 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestInsertSubsidiary(t *testing.T) {
+const InvalidRecordID = 1_000_000
 
+func SetupTestRepo(t *testing.T) *repositories.Repositories {
 	repo, err := repositories.CreateConnectionForTest()
-	defer func() {
-		sqlDB, _ := repo.AccountingDB.DB()
-		sqlDB.Close()
-	}()
 	if err != nil {
-		t.Fatalf("can not connect to database %v", err)
+		t.Fatalf("cannot connect to database: %v", err)
 	}
 
+	t.Cleanup(func() {
+		sqlDB, _ := repo.AccountingDB.DB()
+		sqlDB.Close()
+	})
+	return repo
+}
+func TestInsertSubsidiary(t *testing.T) {
+
+	repo := SetupTestRepo(t)
 	t.Run("can insert subsidiary record successfully", func(t *testing.T) {
 		subsidiary := &models.Subsidiary{Code: repositories.GenerateUniqeCode[models.Subsidiary](repo.AccountingDB, "code"), Title: repositories.GenerateUniqeTitle[models.Subsidiary](repo.AccountingDB)}
 
@@ -50,7 +57,7 @@ func TestInsertSubsidiary(t *testing.T) {
 	t.Run("can not insert subsidiary record with code length greater than 64", func(t *testing.T) {
 		subsidiary := &models.Subsidiary{Title: repositories.GenerateUniqeTitle[models.Subsidiary](repo.AccountingDB)}
 		s := "1"
-		for i := 0; i < 70; i++ {
+		for i := 0; i < validations.MaxCodeLength+1; i++ {
 			subsidiary.Code += s
 		}
 		err := InsertSubsidiary(repo.AccountingDB, subsidiary)
@@ -61,7 +68,7 @@ func TestInsertSubsidiary(t *testing.T) {
 	t.Run("can not insert subsidiary record with title length greater than 64", func(t *testing.T) {
 		subsidiary := &models.Subsidiary{Code: repositories.GenerateUniqeCode[models.Subsidiary](repo.AccountingDB, "code")}
 		s := "a"
-		for i := 0; i < 70; i++ {
+		for i := 0; i < validations.MaxTitleLength+1; i++ {
 			subsidiary.Title += s
 		}
 		err := InsertSubsidiary(repo.AccountingDB, subsidiary)
@@ -98,14 +105,7 @@ func TestInsertSubsidiary(t *testing.T) {
 
 func TestUpdateSubsidiary(t *testing.T) {
 
-	repo, err := repositories.CreateConnectionForTest()
-	defer func() {
-		sqlDB, _ := repo.AccountingDB.DB()
-		sqlDB.Close()
-	}()
-	if err != nil {
-		t.Fatalf("can not connect to database %v", err)
-	}
+	repo := SetupTestRepo(t)
 
 	t.Run("can update subsidiary successfully", func(t *testing.T) {
 		subsidiary, err := temporary.CreateTempSubsidiary(repo.AccountingDB)
@@ -153,7 +153,7 @@ func TestUpdateSubsidiary(t *testing.T) {
 		assert.NoError(t, err, "expected no error when reading subsidiary record ")
 		s := "1"
 		fetchSubsidiary.Code = ""
-		for i := 0; i < 70; i++ {
+		for i := 0; i < validations.MaxCodeLength+1; i++ {
 			fetchSubsidiary.Code += s
 		}
 
@@ -169,9 +169,9 @@ func TestUpdateSubsidiary(t *testing.T) {
 		fetchSubsidiary, err := ReadSubsidiary(repo.AccountingDB, subsidiary.Model.ID)
 		assert.NoError(t, err, "expected no error when reading subsidiary record ")
 		s := "a"
-		fetchSubsidiary.Code = ""
-		for i := 0; i < 70; i++ {
-			fetchSubsidiary.Code += s
+		fetchSubsidiary.Title = ""
+		for i := 0; i < validations.MaxTitleLength+1; i++ {
+			fetchSubsidiary.Title += s
 		}
 
 		err = UpdateSubsidiary(repo.AccountingDB, fetchSubsidiary)
@@ -182,7 +182,7 @@ func TestUpdateSubsidiary(t *testing.T) {
 	t.Run("return error when update subsidiary record that is not in databse", func(t *testing.T) {
 		subsidiary, err := temporary.CreateTempSubsidiary(repo.AccountingDB)
 		assert.NoError(t, err, "expected no error while inserting")
-		subsidiary.Model.ID = 1_000_000
+		subsidiary.Model.ID = InvalidRecordID
 		err = UpdateSubsidiary(repo.AccountingDB, subsidiary)
 		assert.Error(t, err, "expected error indicate there is such id in database")
 
@@ -263,14 +263,7 @@ func TestUpdateSubsidiary(t *testing.T) {
 }
 
 func TestDeleteSubsidiary(t *testing.T) {
-	repo, err := repositories.CreateConnectionForTest()
-	defer func() {
-		sqlDB, _ := repo.AccountingDB.DB()
-		sqlDB.Close()
-	}()
-	if err != nil {
-		t.Fatalf("can not connect to database %v", err)
-	}
+	repo := SetupTestRepo(t)
 
 	t.Run("delete subsidiary record seccessfully", func(t *testing.T) {
 		subsidiary, err := temporary.CreateTempSubsidiary(repo.AccountingDB)
@@ -284,7 +277,7 @@ func TestDeleteSubsidiary(t *testing.T) {
 
 	t.Run("deletion subsidiary record fail because record does not exist in database", func(t *testing.T) {
 		subsidiary := &models.Subsidiary{}
-		subsidiary.Model.ID = 1_000_000
+		subsidiary.Model.ID = InvalidRecordID
 		err := DeleteSubsidiary(repo.AccountingDB, subsidiary)
 
 		assert.Error(t, err, "expected error indicate subsiduary record not found")
@@ -335,15 +328,7 @@ func TestDeleteSubsidiary(t *testing.T) {
 }
 
 func TestReadSubsidiary(t *testing.T) {
-	repo, err := repositories.CreateConnectionForTest()
-	defer func() {
-		sqlDB, _ := repo.AccountingDB.DB()
-		sqlDB.Close()
-	}()
-	if err != nil {
-		t.Fatalf("can not connect to database %v", err)
-	}
-
+	repo := SetupTestRepo(t)
 	t.Run("can read the subsidairy record successfully", func(t *testing.T) {
 		subsidairy, err := temporary.CreateTempSubsidiary(repo.AccountingDB)
 		assert.NoError(t, err, "expected no error while craeting subsidairy")
@@ -355,7 +340,7 @@ func TestReadSubsidiary(t *testing.T) {
 
 	t.Run("return error when the subsidairy record is not in database ", func(t *testing.T) {
 
-		_, err := ReadSubsidiary(repo.AccountingDB, 1_000_000)
+		_, err := ReadSubsidiary(repo.AccountingDB, InvalidRecordID)
 		assert.Error(t, err, "expected  error indicate can not found the subsidairy record")
 
 	})

@@ -33,5 +33,3 @@ type Voucher struct {
 	VoucherItems []*VoucherItem `gorm:"foreignKey:VoucherID"`
 	Version      uint
 }
-
-

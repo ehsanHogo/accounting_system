@@ -5,6 +5,7 @@ import (
 	"accounting_system/internal/repositories"
 	"accounting_system/internal/utils/randgenerator"
 	"accounting_system/internal/utils/temporary"
+	"accounting_system/internal/validations"
 
 	"fmt"
 	"testing"
@@ -12,17 +13,23 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestInsertDetailed(t *testing.T) {
+const InvalidRecordID = 1_000_000
 
+func SetupTestRepo(t *testing.T) *repositories.Repositories {
 	repo, err := repositories.CreateConnectionForTest()
-	defer func() {
-		sqlDB, _ := repo.AccountingDB.DB()
-		sqlDB.Close()
-	}()
 	if err != nil {
-		t.Fatalf("can not connect to database %v", err)
+		t.Fatalf("cannot connect to database: %v", err)
 	}
 
+	t.Cleanup(func() {
+		sqlDB, _ := repo.AccountingDB.DB()
+		sqlDB.Close()
+	})
+	return repo
+}
+func TestInsertDetailed(t *testing.T) {
+
+	repo := SetupTestRepo(t)
 	t.Run("can insert detailed record successfully", func(t *testing.T) {
 		_, err := temporary.CreateTempDetailed(repo.AccountingDB)
 
@@ -48,7 +55,7 @@ func TestInsertDetailed(t *testing.T) {
 	t.Run("can not insert detailed record with code length greater than 64", func(t *testing.T) {
 		detailed := &models.Detailed{Title: repositories.GenerateUniqeTitle[models.Detailed](repo.AccountingDB)}
 		s := "1"
-		for i := 0; i < 70; i++ {
+		for i := 0; i < validations.MaxCodeLength+1; i++ {
 			detailed.Code += s
 		}
 		err := InsertDetailed(repo.AccountingDB, detailed)
@@ -59,7 +66,7 @@ func TestInsertDetailed(t *testing.T) {
 	t.Run("can not insert detailed record with title length greater than 64", func(t *testing.T) {
 		detailed := &models.Detailed{Code: repositories.GenerateUniqeCode[models.Detailed](repo.AccountingDB, "code")}
 		s := "a"
-		for i := 0; i < 70; i++ {
+		for i := 0; i < validations.MaxTitleLength+1; i++ {
 			detailed.Title += s
 		}
 		err := InsertDetailed(repo.AccountingDB, detailed)
@@ -95,14 +102,7 @@ func TestInsertDetailed(t *testing.T) {
 
 func TestUpdateDetailed(t *testing.T) {
 
-	repo, err := repositories.CreateConnectionForTest()
-	defer func() {
-		sqlDB, _ := repo.AccountingDB.DB()
-		sqlDB.Close()
-	}()
-	if err != nil {
-		t.Fatalf("can not connect to database %v", err)
-	}
+	repo := SetupTestRepo(t)
 
 	t.Run("can update detailed record successfully", func(t *testing.T) {
 		detailed, err := temporary.CreateTempDetailed(repo.AccountingDB)
@@ -151,7 +151,7 @@ func TestUpdateDetailed(t *testing.T) {
 		insertedDetailed, err := ReadDetailed(repo.AccountingDB, detailed.Model.ID)
 		assert.NoError(t, err, "expected no error while reading detailed")
 		s := "1"
-		for i := 0; i < 70; i++ {
+		for i := 0; i < validations.MaxCodeLength+1; i++ {
 			insertedDetailed.Code += s
 		}
 		err = UpdateDetailed(repo.AccountingDB, insertedDetailed)
@@ -166,7 +166,7 @@ func TestUpdateDetailed(t *testing.T) {
 		insertedDetailed, err := ReadDetailed(repo.AccountingDB, detailed.Model.ID)
 		assert.NoError(t, err, "expected no error while reading detailed")
 		s := "a"
-		for i := 0; i < 70; i++ {
+		for i := 0; i < validations.MaxTitleLength+1; i++ {
 			insertedDetailed.Title += s
 		}
 		err = UpdateDetailed(repo.AccountingDB, insertedDetailed)
@@ -178,7 +178,7 @@ func TestUpdateDetailed(t *testing.T) {
 		code := randgenerator.GenerateRandomCode()
 		title := randgenerator.GenerateRandomTitle()
 		detailed := &models.Detailed{Code: code, Title: title}
-		detailed.Model.ID = 1_000_000
+		detailed.Model.ID = InvalidRecordID
 		err := UpdateDetailed(repo.AccountingDB, detailed)
 		assert.Error(t, err, "expected error indicate there is such id in database")
 
@@ -251,15 +251,7 @@ func TestUpdateDetailed(t *testing.T) {
 }
 
 func TestDeleteDetailed(t *testing.T) {
-	repo, err := repositories.CreateConnectionForTest()
-	defer func() {
-		sqlDB, _ := repo.AccountingDB.DB()
-		sqlDB.Close()
-	}()
-	if err != nil {
-		t.Fatalf("can not connect to database %v", err)
-	}
-
+	repo := SetupTestRepo(t)
 	t.Run("can delete detailed successfully", func(t *testing.T) {
 		detailed, err := temporary.CreateTempDetailed(repo.AccountingDB)
 		assert.NoError(t, err, "expected no error while inserting")
@@ -273,7 +265,7 @@ func TestDeleteDetailed(t *testing.T) {
 
 	t.Run("deletion detailed record fail because record does not exist in database", func(t *testing.T) {
 		detailed := &models.Detailed{}
-		detailed.Model.ID = 1_000_000
+		detailed.Model.ID = InvalidRecordID
 		err := DeleteDetailed(repo.AccountingDB, detailed)
 		assert.Error(t, err, "expected error indicate detailed record not found")
 	})
@@ -323,15 +315,7 @@ func TestDeleteDetailed(t *testing.T) {
 }
 
 func TestReadDetailed(t *testing.T) {
-	repo, err := repositories.CreateConnectionForTest()
-	defer func() {
-		sqlDB, _ := repo.AccountingDB.DB()
-		sqlDB.Close()
-	}()
-	if err != nil {
-		t.Fatalf("can not connect to database %v", err)
-	}
-
+	repo := SetupTestRepo(t)
 	t.Run("can read the detailed record successfully", func(t *testing.T) {
 		detailed, err := temporary.CreateTempDetailed(repo.AccountingDB)
 		assert.NoError(t, err, "expected no error while craeting detailed")
@@ -343,7 +327,7 @@ func TestReadDetailed(t *testing.T) {
 
 	t.Run("return error when the detailed record is not in database ", func(t *testing.T) {
 
-		_, err := ReadDetailed(repo.AccountingDB, 1_000_000)
+		_, err := ReadDetailed(repo.AccountingDB, InvalidRecordID)
 		assert.Error(t, err, "expected  error indicate can not found the detailed record")
 
 	})
