@@ -4,15 +4,13 @@ import (
 	"accounting_system/internal/models"
 	"accounting_system/internal/repositories"
 
-	"accounting_system/internal/utils/randgenerator"
-
 	"fmt"
 )
 
 func CreateTempVoucher(repo *repositories.Repositories, IDs ...uint) (*models.Voucher, error) {
 	temp := make([]*models.VoucherItem, 4)
 
-	subsidiary := &models.Subsidiary{Code: randgenerator.GenerateUniqeCode[models.Subsidiary](repo, "code"), Title: randgenerator.GenerateUniqeTitle[models.Subsidiary](repo), HasDetailed: true}
+	subsidiary := &models.Subsidiary{Code: repositories.GenerateUniqeCode[models.Subsidiary](repo, "code"), Title: repositories.GenerateUniqeTitle[models.Subsidiary](repo), HasDetailed: true}
 	err := repositories.CreateRecord(repo, subsidiary)
 	if err != nil {
 		return nil, err
@@ -51,7 +49,7 @@ func CreateTempVoucher(repo *repositories.Repositories, IDs ...uint) (*models.Vo
 
 	}
 
-	number := randgenerator.GenerateUniqeCode[models.Voucher](repo, "number")
+	number := repositories.GenerateUniqeCode[models.Voucher](repo, "number")
 	voucher := &models.Voucher{Number: number, VoucherItems: temp}
 
 	// err := errors.New("")
@@ -79,7 +77,7 @@ func CreateTempVoucherItem(repo *repositories.Repositories) (*models.VoucherItem
 }
 
 func CreateTempSubsidiary(repo *repositories.Repositories) (*models.Subsidiary, error) {
-	subsidiary := &models.Subsidiary{Code: randgenerator.GenerateUniqeCode[models.Subsidiary](repo, "code"), Title: randgenerator.GenerateUniqeTitle[models.Subsidiary](repo), HasDetailed: false}
+	subsidiary := &models.Subsidiary{Code: repositories.GenerateUniqeCode[models.Subsidiary](repo, "code"), Title: repositories.GenerateUniqeTitle[models.Subsidiary](repo), HasDetailed: false}
 
 	err := repositories.CreateRecord(repo, subsidiary)
 	if err != nil {
@@ -92,7 +90,7 @@ func CreateTempSubsidiary(repo *repositories.Repositories) (*models.Subsidiary, 
 
 func CreateTempDetailed(repo *repositories.Repositories) (*models.Detailed, error) {
 
-	detailed := &models.Detailed{Code: randgenerator.GenerateUniqeCode[models.Detailed](repo, "code"), Title: randgenerator.GenerateUniqeTitle[models.Detailed](repo)}
+	detailed := &models.Detailed{Code: repositories.GenerateUniqeCode[models.Detailed](repo, "code"), Title: repositories.GenerateUniqeTitle[models.Detailed](repo)}
 
 	err := repositories.CreateRecord(repo, detailed)
 	if err != nil {

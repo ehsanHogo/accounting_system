@@ -2,6 +2,7 @@ package repositories
 
 import (
 	"accounting_system/config"
+	"accounting_system/internal/utils/randgenerator"
 	"fmt"
 	"time"
 
@@ -92,4 +93,34 @@ func FindRecord[T any, U any](db *Repositories, val U, columnName string) bool {
 		return false
 	}
 	return true
+}
+
+func GenerateUniqeCode[T any](repo *Repositories, columnName string) string {
+	code := randgenerator.GenerateRandomCode()
+	for {
+		exist := FindRecord[T](repo, code, columnName)
+
+		if exist {
+			code = randgenerator.GenerateRandomCode()
+		} else {
+			break
+		}
+	}
+
+	return code
+}
+
+func GenerateUniqeTitle[T any](repo *Repositories) string {
+	title := randgenerator.GenerateRandomTitle()
+	for {
+		exist := FindRecord[T](repo, title, "title")
+
+		if exist {
+			title = randgenerator.GenerateRandomTitle()
+		} else {
+			break
+		}
+	}
+
+	return title
 }

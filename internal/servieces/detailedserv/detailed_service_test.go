@@ -32,7 +32,7 @@ func TestInsertDetailed(t *testing.T) {
 	})
 
 	t.Run("can not insert detailed record with empty code", func(t *testing.T) {
-		detailed := &models.Detailed{Title: randgenerator.GenerateUniqeTitle[models.Detailed](repo)}
+		detailed := &models.Detailed{Title: repositories.GenerateUniqeTitle[models.Detailed](repo)}
 
 		err := InsertDetailed(repo, detailed)
 
@@ -40,7 +40,7 @@ func TestInsertDetailed(t *testing.T) {
 	})
 
 	t.Run("can not insert detailed record with empty title", func(t *testing.T) {
-		detailed := &models.Detailed{Code: randgenerator.GenerateUniqeCode[models.Detailed](repo, "code")}
+		detailed := &models.Detailed{Code: repositories.GenerateUniqeCode[models.Detailed](repo, "code")}
 
 		err := InsertDetailed(repo, detailed)
 
@@ -48,7 +48,7 @@ func TestInsertDetailed(t *testing.T) {
 	})
 
 	t.Run("can not insert detailed record with code length greater than 64", func(t *testing.T) {
-		detailed := &models.Detailed{Title: randgenerator.GenerateUniqeTitle[models.Detailed](repo)}
+		detailed := &models.Detailed{Title: repositories.GenerateUniqeTitle[models.Detailed](repo)}
 		s := "1"
 		for i := 0; i < 70; i++ {
 			detailed.Code += s
@@ -59,7 +59,7 @@ func TestInsertDetailed(t *testing.T) {
 	})
 
 	t.Run("can not insert detailed record with title length greater than 64", func(t *testing.T) {
-		detailed := &models.Detailed{Code: randgenerator.GenerateUniqeCode[models.Detailed](repo, "code")}
+		detailed := &models.Detailed{Code: repositories.GenerateUniqeCode[models.Detailed](repo, "code")}
 		s := "a"
 		for i := 0; i < 70; i++ {
 			detailed.Title += s
@@ -111,8 +111,8 @@ func TestUpdateDetailed(t *testing.T) {
 		assert.NoError(t, err, "expected no error while inserting detailed")
 		insertedDetailed, err := ReadDetailed(repo, detailed.Model.ID)
 		assert.NoError(t, err, "expected no error while reading detailed")
-		insertedDetailed.Code = randgenerator.GenerateUniqeCode[models.Detailed](repo, "code")
-		// insertedDetailed.Title = randgenerator.GenerateUniqeTitle[models.Detailed](repo)
+		insertedDetailed.Code = repositories.GenerateUniqeCode[models.Detailed](repo, "code")
+		// insertedDetailed.Title = repositories.GenerateUniqeTitle[models.Detailed](repo)
 
 		err = UpdateDetailed(repo, insertedDetailed)
 
@@ -191,14 +191,14 @@ func TestUpdateDetailed(t *testing.T) {
 		detailed, err := temporary.CreateTempDetailed(repo)
 		assert.NoError(t, err, "cexpected no error while inserting")
 
-		detailed.Code = randgenerator.GenerateUniqeCode[models.Detailed](repo, "code")
+		detailed.Code = repositories.GenerateUniqeCode[models.Detailed](repo, "code")
 		// fmt.Printf("prev id : %v\n", detailed.Model.ID)
 		// fmt.Printf("code : %v\n", detailed.Code)
 		// fmt.Printf("prev version : %v\n", detailed.Version)
 		err = UpdateDetailed(repo, detailed)
 		assert.NoError(t, err, "expected no error while updating")
 
-		detailed.Code = randgenerator.GenerateUniqeCode[models.Detailed](repo, "code")
+		detailed.Code = repositories.GenerateUniqeCode[models.Detailed](repo, "code")
 		err = UpdateDetailed(repo, detailed)
 		// fmt.Printf("new version : %v\n", detailed.Version)
 		assert.Error(t, err, "expected error indicate the versions are different")
@@ -209,7 +209,7 @@ func TestUpdateDetailed(t *testing.T) {
 		detailed, err := temporary.CreateTempDetailed(repo)
 		assert.NoError(t, err, "expected no error while inserting")
 
-		detailed.Code = randgenerator.GenerateUniqeCode[models.Detailed](repo, "code")
+		detailed.Code = repositories.GenerateUniqeCode[models.Detailed](repo, "code")
 		// fmt.Printf("prev id : %v\n", detailed.Model.ID)
 		// fmt.Printf("code : %v\n", detailed.Code)
 		// fmt.Printf("prev version : %v\n", detailed.Version)
@@ -217,7 +217,7 @@ func TestUpdateDetailed(t *testing.T) {
 		assert.NoError(t, err, "expected no error while updating")
 
 		detailed, _ = repositories.ReadRecord[models.Detailed](repo, detailed.Model.ID)
-		detailed.Code = randgenerator.GenerateUniqeCode[models.Detailed](repo, "code")
+		detailed.Code = repositories.GenerateUniqeCode[models.Detailed](repo, "code")
 		err = UpdateDetailed(repo, detailed)
 		fmt.Printf("new version : %v\n", detailed.Version)
 		assert.NoError(t, err, "expected no error")
@@ -305,7 +305,7 @@ func TestDeleteDetailed(t *testing.T) {
 		detailed, err := temporary.CreateTempDetailed(repo)
 		assert.NoError(t, err, "expected no error while inserting")
 
-		detailed.Code = randgenerator.GenerateUniqeCode[models.Detailed](repo, "code")
+		detailed.Code = repositories.GenerateUniqeCode[models.Detailed](repo, "code")
 		// fmt.Printf("prev id : %v\n", detailed.Model.ID)
 		// fmt.Printf("code : %v\n", detailed.Code)
 		// fmt.Printf("prev version : %v\n", detailed.Version)
@@ -321,7 +321,7 @@ func TestDeleteDetailed(t *testing.T) {
 		detailed, err := temporary.CreateTempDetailed(repo)
 		assert.NoError(t, err, "expected no error while inserting")
 
-		detailed.Code = randgenerator.GenerateUniqeCode[models.Detailed](repo, "code")
+		detailed.Code = repositories.GenerateUniqeCode[models.Detailed](repo, "code")
 		// fmt.Printf("prev id : %v\n", detailed.Model.ID)
 		// fmt.Printf("code : %v\n", detailed.Code)
 		// fmt.Printf("prev version : %v\n", detailed.Version)
@@ -339,7 +339,7 @@ func TestDeleteDetailed(t *testing.T) {
 
 // func temporary.CreateTempDetailed(repo *repositories.Repositories) (*models.Detailed, error) {
 
-// 	detailed := &models.Detailed{Code: randgenerator.GenerateUniqeCode[models.Detailed](repo, "code"), Title: randgenerator.GenerateUniqeTitle[models.Detailed](repo)}
+// 	detailed := &models.Detailed{Code: repositories.GenerateUniqeCode[models.Detailed](repo, "code"), Title: repositories.GenerateUniqeTitle[models.Detailed](repo)}
 
 // 	// err := errors.New("")
 // 	// for err != nil {

@@ -12,7 +12,6 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-
 func TestInsertSubsidiary(t *testing.T) {
 
 	repo, err := repositories.CreateConnectionForTest()
@@ -25,7 +24,7 @@ func TestInsertSubsidiary(t *testing.T) {
 	}
 
 	t.Run("can insert subsidiary record successfully", func(t *testing.T) {
-		subsidiary := &models.Subsidiary{Code: randgenerator.GenerateUniqeCode[models.Subsidiary](repo, "code"), Title: randgenerator.GenerateUniqeTitle[models.Subsidiary](repo)}
+		subsidiary := &models.Subsidiary{Code: repositories.GenerateUniqeCode[models.Subsidiary](repo, "code"), Title: repositories.GenerateUniqeTitle[models.Subsidiary](repo)}
 
 		err := InsertSubsidiary(repo, subsidiary)
 
@@ -33,7 +32,7 @@ func TestInsertSubsidiary(t *testing.T) {
 	})
 
 	t.Run("can not insert subsidiary record with empty code", func(t *testing.T) {
-		subsidiary := &models.Subsidiary{Title: randgenerator.GenerateUniqeTitle[models.Subsidiary](repo)}
+		subsidiary := &models.Subsidiary{Title: repositories.GenerateUniqeTitle[models.Subsidiary](repo)}
 
 		err := InsertSubsidiary(repo, subsidiary)
 
@@ -41,7 +40,7 @@ func TestInsertSubsidiary(t *testing.T) {
 	})
 
 	t.Run("can not insert subsidiary record with empty title", func(t *testing.T) {
-		subsidiary := &models.Subsidiary{Code: randgenerator.GenerateUniqeCode[models.Subsidiary](repo, "code")}
+		subsidiary := &models.Subsidiary{Code: repositories.GenerateUniqeCode[models.Subsidiary](repo, "code")}
 
 		err := InsertSubsidiary(repo, subsidiary)
 
@@ -49,7 +48,7 @@ func TestInsertSubsidiary(t *testing.T) {
 	})
 
 	t.Run("can not insert subsidiary record with code length greater than 64", func(t *testing.T) {
-		subsidiary := &models.Subsidiary{Title: randgenerator.GenerateUniqeTitle[models.Subsidiary](repo)}
+		subsidiary := &models.Subsidiary{Title: repositories.GenerateUniqeTitle[models.Subsidiary](repo)}
 		s := "1"
 		for i := 0; i < 70; i++ {
 			subsidiary.Code += s
@@ -60,7 +59,7 @@ func TestInsertSubsidiary(t *testing.T) {
 	})
 
 	t.Run("can not insert subsidiary record with title length greater than 64", func(t *testing.T) {
-		subsidiary := &models.Subsidiary{Code: randgenerator.GenerateUniqeCode[models.Subsidiary](repo, "code")}
+		subsidiary := &models.Subsidiary{Code: repositories.GenerateUniqeCode[models.Subsidiary](repo, "code")}
 		s := "a"
 		for i := 0; i < 70; i++ {
 			subsidiary.Title += s
@@ -114,8 +113,8 @@ func TestUpdateSubsidiary(t *testing.T) {
 
 		fetchSubsidiary, err := repositories.ReadRecord[models.Subsidiary](repo, subsidiary.Model.ID)
 		assert.NoError(t, err, "expected no error when reading subsidiary record ")
-		fetchSubsidiary.Code = randgenerator.GenerateUniqeCode[models.Subsidiary](repo, "code")
-		// fetchSubsidiary.Title = randgenerator.GenerateUniqeTitle[models.Subsidiary](repo)
+		fetchSubsidiary.Code = repositories.GenerateUniqeCode[models.Subsidiary](repo, "code")
+		// fetchSubsidiary.Title = repositories.GenerateUniqeTitle[models.Subsidiary](repo)
 		err = UpdateSubsidiary(repo, fetchSubsidiary)
 		assert.NoError(t, err, "expected no error when  updating subsidiary record")
 		checkUpdated, err := repositories.ReadRecord[models.Subsidiary](repo, fetchSubsidiary.Model.ID)
@@ -194,13 +193,13 @@ func TestUpdateSubsidiary(t *testing.T) {
 		subsidiary, err := temporary.CreateTempSubsidiary(repo)
 		assert.NoError(t, err, "expected no error while inserting")
 
-		subsidiary.Code = randgenerator.GenerateUniqeCode[models.Subsidiary](repo, "code")
+		subsidiary.Code = repositories.GenerateUniqeCode[models.Subsidiary](repo, "code")
 		// fmt.Printf("prev id : %v\n", subsidiary.Model.ID)
 		// fmt.Printf("code : %v\n", subsidiary.Code)
 		// fmt.Printf("prev version : %v\n", subsidiary.Version)
 		err = UpdateSubsidiary(repo, subsidiary)
 		assert.NoError(t, err, "expected no error while updating")
-		subsidiary.Code = randgenerator.GenerateUniqeCode[models.Subsidiary](repo, "code")
+		subsidiary.Code = repositories.GenerateUniqeCode[models.Subsidiary](repo, "code")
 		err = UpdateSubsidiary(repo, subsidiary)
 		assert.Error(t, err, "expected no error while updating subsidiary")
 		// fmt.Printf("new version : %v\n", subsidiary.Version)
@@ -212,13 +211,13 @@ func TestUpdateSubsidiary(t *testing.T) {
 		subsidiary, err := temporary.CreateTempSubsidiary(repo)
 		assert.NoError(t, err, "can not create subsidiary record due to")
 
-		subsidiary.Code = randgenerator.GenerateUniqeCode[models.Subsidiary](repo, "code")
+		subsidiary.Code = repositories.GenerateUniqeCode[models.Subsidiary](repo, "code")
 		// fmt.Printf("prev id : %v\n", subsidiary.Model.ID)
 		// fmt.Printf("code : %v\n", subsidiary.Code)
 		// fmt.Printf("prev version : %v\n", subsidiary.Version)
 		UpdateSubsidiary(repo, subsidiary)
 		subsidiary, _ = repositories.ReadRecord[models.Subsidiary](repo, subsidiary.Model.ID)
-		subsidiary.Code = randgenerator.GenerateUniqeCode[models.Subsidiary](repo, "code")
+		subsidiary.Code = repositories.GenerateUniqeCode[models.Subsidiary](repo, "code")
 		err = UpdateSubsidiary(repo, subsidiary)
 		// fmt.Printf("new version : %v\n", subsidiary.Version)
 		assert.NoError(t, err, "expected no error")
@@ -235,7 +234,7 @@ func TestUpdateSubsidiary(t *testing.T) {
 		// fmt.Printf("detialed id : %v\n", subsidiary.Model.ID)
 		assert.NoError(t, err, "expected no error while inserting")
 		// fmt.Printf("voucher id : %v\n", voucher.Model.ID)
-		subsidiary.Code = randgenerator.GenerateUniqeCode[models.Subsidiary](repo, "code")
+		subsidiary.Code = repositories.GenerateUniqeCode[models.Subsidiary](repo, "code")
 		err = UpdateSubsidiary(repo, subsidiary)
 		assert.Error(t, err, "expected error indicate violation update forign key constraint")
 	})
@@ -319,7 +318,7 @@ func TestDeleteSubsidiary(t *testing.T) {
 		subsidiary, err := temporary.CreateTempSubsidiary(repo)
 		assert.NoError(t, err, "expected no error while inserting")
 
-		subsidiary.Code = randgenerator.GenerateUniqeCode[models.Subsidiary](repo, "code")
+		subsidiary.Code = repositories.GenerateUniqeCode[models.Subsidiary](repo, "code")
 		// fmt.Printf("prev id : %v\n", subsidiary.Model.ID)
 		// fmt.Printf("code : %v\n", subsidiary.Code)
 		// fmt.Printf("prev version : %v\n", subsidiary.Version)
@@ -335,7 +334,7 @@ func TestDeleteSubsidiary(t *testing.T) {
 		subsidiary, err := temporary.CreateTempSubsidiary(repo)
 		assert.NoError(t, err, "expected no error while inserting")
 
-		subsidiary.Code = randgenerator.GenerateUniqeCode[models.Subsidiary](repo, "code")
+		subsidiary.Code = repositories.GenerateUniqeCode[models.Subsidiary](repo, "code")
 		// fmt.Printf("prev id : %v\n", subsidiary.Model.ID)
 		// fmt.Printf("code : %v\n", subsidiary.Code)
 		// fmt.Printf("prev version : %v\n", subsidiary.Version)
