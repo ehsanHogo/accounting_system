@@ -3,6 +3,7 @@ package detailedserv
 import (
 	"accounting_system/internal/models"
 	"accounting_system/internal/repositories"
+	"accounting_system/internal/utils/casting"
 	"accounting_system/internal/utils/randgenerator"
 	"accounting_system/internal/utils/temporary"
 
@@ -32,7 +33,7 @@ func TestInsertDetailed(t *testing.T) {
 	})
 
 	t.Run("can not insert detailed record with empty code", func(t *testing.T) {
-		detailed := &models.Detailed{Title: randgenerator.GenerateUniqeTitle[models.Detailed](repo)}
+		detailed := &models.InsertDetailedRequest{Title: randgenerator.GenerateUniqeTitle[models.Detailed](repo)}
 
 		err := InsertDetailed(repo, detailed)
 
@@ -40,7 +41,7 @@ func TestInsertDetailed(t *testing.T) {
 	})
 
 	t.Run("can not insert detailed record with empty title", func(t *testing.T) {
-		detailed := &models.Detailed{Code: randgenerator.GenerateUniqeCode[models.Detailed](repo, "code")}
+		detailed := &models.InsertDetailedRequest{Code: randgenerator.GenerateUniqeCode[models.Detailed](repo, "code")}
 
 		err := InsertDetailed(repo, detailed)
 
@@ -48,7 +49,7 @@ func TestInsertDetailed(t *testing.T) {
 	})
 
 	t.Run("can not insert detailed record with code length greater than 64", func(t *testing.T) {
-		detailed := &models.Detailed{Title: randgenerator.GenerateUniqeTitle[models.Detailed](repo)}
+		detailed := &models.InsertDetailedRequest{Title: randgenerator.GenerateUniqeTitle[models.Detailed](repo)}
 		s := "1"
 		for i := 0; i < 70; i++ {
 			detailed.Code += s
@@ -59,7 +60,7 @@ func TestInsertDetailed(t *testing.T) {
 	})
 
 	t.Run("can not insert detailed record with title length greater than 64", func(t *testing.T) {
-		detailed := &models.Detailed{Code: randgenerator.GenerateUniqeCode[models.Detailed](repo, "code")}
+		detailed := &models.InsertDetailedRequest{Code: randgenerator.GenerateUniqeCode[models.Detailed](repo, "code")}
 		s := "a"
 		for i := 0; i < 70; i++ {
 			detailed.Title += s
@@ -73,9 +74,9 @@ func TestInsertDetailed(t *testing.T) {
 
 		detailed, err := temporary.CreateTempDetailed(repo)
 		assert.NoError(t, err, "expected no error when inserting")
-		detailed.Title = randgenerator.GenerateRandomTitle()
-
-		err = InsertDetailed(repo, detailed)
+		// detailed.Title = randgenerator.GenerateRandomTitle()
+		newDetailed := &models.InsertDetailedRequest{Code: detailed.Code, Title: randgenerator.GenerateRandomTitle()}
+		err = InsertDetailed(repo, newDetailed)
 
 		assert.Error(t, err, "expected getting duplicate detailed code error")
 
@@ -86,9 +87,10 @@ func TestInsertDetailed(t *testing.T) {
 		detailed, err := temporary.CreateTempDetailed(repo)
 		assert.NoError(t, err, "expected no error when inserting")
 
-		detailed.Code = randgenerator.GenerateRandomCode()
+		// detailed.Code = randgenerator.GenerateRandomCode()
+		newDetailed := &models.InsertDetailedRequest{Code: randgenerator.GenerateRandomCode(), Title: detailed.Title}
 
-		err = InsertDetailed(repo, detailed)
+		err = InsertDetailed(repo, newDetailed)
 
 		assert.Error(t, err, "expected getting duplicate detailed title error")
 
@@ -111,16 +113,16 @@ func TestUpdateDetailed(t *testing.T) {
 		assert.NoError(t, err, "expected no error while inserting detailed")
 		insertedDetailed, err := ReadDetailed(repo, detailed.Model.ID)
 		assert.NoError(t, err, "expected no error while reading detailed")
-		insertedDetailed.Code = randgenerator.GenerateUniqeCode[models.Detailed](repo, "code")
+		// insertedDetailed.Code = randgenerator.GenerateUniqeCode[models.Detailed](repo, "code")
 		// insertedDetailed.Title = randgenerator.GenerateUniqeTitle[models.Detailed](repo)
-
-		err = UpdateDetailed(repo, insertedDetailed)
+		updateDetailed := &models.UpdateDetailedRequest{ID: casting.UintToString(insertedDetailed.Model.ID), Code: randgenerator.GenerateUniqeCode[models.Detailed](repo, "code"), Title: insertedDetailed.Title}
+		err = UpdateDetailed(repo, updateDetailed)
 
 		assert.NoError(t, err, "expected no error when updating detailed")
 
 		checkUpdated, err := repositories.ReadRecord[models.Detailed](repo, insertedDetailed.Model.ID)
 		assert.NoError(t, err, "expected no error when reading detailed record ")
-		assert.Equal(t, insertedDetailed.Code, checkUpdated.Code)
+		assert.Equal(t, updateDetailed.Code, checkUpdated.Code)
 	})
 
 	t.Run("can not update detailed record with empty code", func(t *testing.T) {
@@ -129,8 +131,11 @@ func TestUpdateDetailed(t *testing.T) {
 
 		insertedDetailed, err := ReadDetailed(repo, detailed.Model.ID)
 		assert.NoError(t, err, "expected no error while reading detailed")
-		insertedDetailed.Code = ""
-		err = UpdateDetailed(repo, insertedDetailed)
+		// insertedDetailed.Code = ""
+
+		updateDetailed := &models.UpdateDetailedRequest{ID: casting.UintToString(insertedDetailed.Model.ID), Title: insertedDetailed.Title}
+
+		err = UpdateDetailed(repo, updateDetailed)
 
 		assert.Error(t, err, "expected error indicate empty code not allowed")
 	})
@@ -141,8 +146,10 @@ func TestUpdateDetailed(t *testing.T) {
 
 		insertedDetailed, err := ReadDetailed(repo, detailed.Model.ID)
 		assert.NoError(t, err, "expected no error while reading detailed")
-		insertedDetailed.Title = ""
-		err = UpdateDetailed(repo, insertedDetailed)
+		// insertedDetailed.Title = ""
+		updateDetailed := &models.UpdateDetailedRequest{ID: casting.UintToString(insertedDetailed.Model.ID), Code: insertedDetailed.Code}
+
+		err = UpdateDetailed(repo, updateDetailed)
 
 		assert.Error(t, err, "expected error indicate empty title not allowed")
 	})
@@ -153,11 +160,15 @@ func TestUpdateDetailed(t *testing.T) {
 
 		insertedDetailed, err := ReadDetailed(repo, detailed.Model.ID)
 		assert.NoError(t, err, "expected no error while reading detailed")
+
+		updateDetailed := &models.UpdateDetailedRequest{ID: casting.UintToString(insertedDetailed.Model.ID), Title: insertedDetailed.Title}
+
 		s := "1"
 		for i := 0; i < 70; i++ {
-			insertedDetailed.Code += s
+			updateDetailed.Code += s
 		}
-		err = UpdateDetailed(repo, insertedDetailed)
+
+		err = UpdateDetailed(repo, updateDetailed)
 
 		assert.Error(t, err, "expected error indicate code length should not be greater than 64 ")
 	})
@@ -168,11 +179,14 @@ func TestUpdateDetailed(t *testing.T) {
 
 		insertedDetailed, err := ReadDetailed(repo, detailed.Model.ID)
 		assert.NoError(t, err, "expected no error while reading detailed")
+
+		updateDetailed := &models.UpdateDetailedRequest{ID: casting.UintToString(insertedDetailed.Model.ID), Code: insertedDetailed.Code}
+
 		s := "a"
 		for i := 0; i < 70; i++ {
-			insertedDetailed.Title += s
+			updateDetailed.Title += s
 		}
-		err = UpdateDetailed(repo, insertedDetailed)
+		err = UpdateDetailed(repo, updateDetailed)
 
 		assert.Error(t, err, "expected error indicate title length should not be greater than 64 ")
 	})
@@ -180,8 +194,8 @@ func TestUpdateDetailed(t *testing.T) {
 	t.Run("can not update detailed record that is not in databse", func(t *testing.T) {
 		code := randgenerator.GenerateRandomCode()
 		title := randgenerator.GenerateRandomTitle()
-		detailed := &models.Detailed{Code: code, Title: title}
-		detailed.Model.ID = 1_000_000
+		detailed := &models.UpdateDetailedRequest{Code: code, Title: title}
+		detailed.ID = "1000000"
 		err := UpdateDetailed(repo, detailed)
 		assert.Error(t, err, "expected error indicate there is such id in database")
 
@@ -191,15 +205,18 @@ func TestUpdateDetailed(t *testing.T) {
 		detailed, err := temporary.CreateTempDetailed(repo)
 		assert.NoError(t, err, "cexpected no error while inserting")
 
-		detailed.Code = randgenerator.GenerateUniqeCode[models.Detailed](repo, "code")
+		// detailed.Code = randgenerator.GenerateUniqeCode[models.Detailed](repo, "code")
+
+		updateDetailed := &models.UpdateDetailedRequest{ID: casting.UintToString(detailed.Model.ID), Code: randgenerator.GenerateUniqeCode[models.Detailed](repo, "code"), Title: detailed.Title, Version: casting.UintToString(detailed.Version)}
+
 		// fmt.Printf("prev id : %v\n", detailed.Model.ID)
 		// fmt.Printf("code : %v\n", detailed.Code)
 		// fmt.Printf("prev version : %v\n", detailed.Version)
-		err = UpdateDetailed(repo, detailed)
+		err = UpdateDetailed(repo, updateDetailed)
 		assert.NoError(t, err, "expected no error while updating")
 
-		detailed.Code = randgenerator.GenerateUniqeCode[models.Detailed](repo, "code")
-		err = UpdateDetailed(repo, detailed)
+		updateDetailed.Code = randgenerator.GenerateUniqeCode[models.Detailed](repo, "code")
+		err = UpdateDetailed(repo, updateDetailed)
 		// fmt.Printf("new version : %v\n", detailed.Version)
 		assert.Error(t, err, "expected error indicate the versions are different")
 
@@ -209,16 +226,21 @@ func TestUpdateDetailed(t *testing.T) {
 		detailed, err := temporary.CreateTempDetailed(repo)
 		assert.NoError(t, err, "expected no error while inserting")
 
-		detailed.Code = randgenerator.GenerateUniqeCode[models.Detailed](repo, "code")
+		// detailed.Code = randgenerator.GenerateUniqeCode[models.Detailed](repo, "code")
+
+		updateDetailed := &models.UpdateDetailedRequest{ID: casting.UintToString(detailed.Model.ID), Code: randgenerator.GenerateUniqeCode[models.Detailed](repo, "code"), Title: detailed.Title}
+
 		// fmt.Printf("prev id : %v\n", detailed.Model.ID)
 		// fmt.Printf("code : %v\n", detailed.Code)
 		// fmt.Printf("prev version : %v\n", detailed.Version)
-		err = UpdateDetailed(repo, detailed)
+		err = UpdateDetailed(repo, updateDetailed)
 		assert.NoError(t, err, "expected no error while updating")
 
 		detailed, _ = repositories.ReadRecord[models.Detailed](repo, detailed.Model.ID)
-		detailed.Code = randgenerator.GenerateUniqeCode[models.Detailed](repo, "code")
-		err = UpdateDetailed(repo, detailed)
+		// detailed.Code = randgenerator.GenerateUniqeCode[models.Detailed](repo, "code")
+		updateDetailed = &models.UpdateDetailedRequest{ID: casting.UintToString(detailed.Model.ID), Code: randgenerator.GenerateUniqeCode[models.Detailed](repo, "code"), Title: detailed.Title, Version: casting.UintToString(detailed.Version)}
+
+		err = UpdateDetailed(repo, updateDetailed)
 		fmt.Printf("new version : %v\n", detailed.Version)
 		assert.NoError(t, err, "expected no error")
 
@@ -232,9 +254,10 @@ func TestUpdateDetailed(t *testing.T) {
 
 		detailed, err = temporary.CreateTempDetailed(repo)
 		assert.NoError(t, err, "expected no error while updating detailed ")
+		updateDetailed := &models.UpdateDetailedRequest{ID: casting.UintToString(detailed.Model.ID), Code: prevCode, Title: detailed.Title}
 
-		detailed.Code = prevCode
-		err = UpdateDetailed(repo, detailed)
+		// detailed.Code = prevCode
+		err = UpdateDetailed(repo, updateDetailed)
 
 		assert.Error(t, err, "expected getting duplicate detailed code error")
 
@@ -249,8 +272,10 @@ func TestUpdateDetailed(t *testing.T) {
 		detailed, err = temporary.CreateTempDetailed(repo)
 		assert.NoError(t, err, "expected no error while updating detailed ")
 
-		detailed.Title = prevTitle
-		err = UpdateDetailed(repo, detailed)
+		updateDetailed := &models.UpdateDetailedRequest{ID: casting.UintToString(detailed.Model.ID), Code: detailed.Code, Title: prevTitle}
+
+		// detailed.Title = prevTitle
+		err = UpdateDetailed(repo, updateDetailed)
 
 		assert.Error(t, err, "expected getting duplicate detailed number error")
 
@@ -305,11 +330,13 @@ func TestDeleteDetailed(t *testing.T) {
 		detailed, err := temporary.CreateTempDetailed(repo)
 		assert.NoError(t, err, "expected no error while inserting")
 
-		detailed.Code = randgenerator.GenerateUniqeCode[models.Detailed](repo, "code")
+		// detailed.Code = randgenerator.GenerateUniqeCode[models.Detailed](repo, "code")
 		// fmt.Printf("prev id : %v\n", detailed.Model.ID)
 		// fmt.Printf("code : %v\n", detailed.Code)
 		// fmt.Printf("prev version : %v\n", detailed.Version)
-		err = UpdateDetailed(repo, detailed)
+		updateDetailed := &models.UpdateDetailedRequest{ID: casting.UintToString(detailed.Model.ID), Code: randgenerator.GenerateUniqeCode[models.Detailed](repo, "code"), Title: detailed.Title}
+
+		err = UpdateDetailed(repo, updateDetailed)
 		assert.NoError(t, err, "expected no error while updating detailed record")
 		err = DeleteDetailed(repo, detailed)
 		// fmt.Printf("new version : %v\n", detailed.Version)
@@ -321,11 +348,14 @@ func TestDeleteDetailed(t *testing.T) {
 		detailed, err := temporary.CreateTempDetailed(repo)
 		assert.NoError(t, err, "expected no error while inserting")
 
-		detailed.Code = randgenerator.GenerateUniqeCode[models.Detailed](repo, "code")
+		// detailed.Code = randgenerator.GenerateUniqeCode[models.Detailed](repo, "code")
 		// fmt.Printf("prev id : %v\n", detailed.Model.ID)
 		// fmt.Printf("code : %v\n", detailed.Code)
 		// fmt.Printf("prev version : %v\n", detailed.Version)
-		err = UpdateDetailed(repo, detailed)
+
+		updateDetailed := &models.UpdateDetailedRequest{ID: casting.UintToString(detailed.Model.ID), Code: randgenerator.GenerateUniqeCode[models.Detailed](repo, "code"), Title: detailed.Title}
+
+		err = UpdateDetailed(repo, updateDetailed)
 		assert.NoError(t, err, "can not update detailed record ")
 		detailed, _ = repositories.ReadRecord[models.Detailed](repo, detailed.Model.ID)
 

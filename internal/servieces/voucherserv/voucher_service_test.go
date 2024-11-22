@@ -4,6 +4,7 @@ import (
 	"accounting_system/internal/models"
 	"accounting_system/internal/repositories"
 	"accounting_system/internal/servieces/subsidiaryserv"
+	"accounting_system/internal/utils/casting"
 	"accounting_system/internal/utils/randgenerator"
 	"accounting_system/internal/utils/temporary"
 
@@ -146,11 +147,11 @@ func TestInsertVoucher(t *testing.T) {
 		detailed, err := temporary.CreateTempDetailed(repo)
 		assert.NoError(t, err, "expected no error while inserting detailed ")
 
-		subsidiary := &models.Subsidiary{Code: randgenerator.GenerateUniqeCode[models.Subsidiary](repo, "code"), Title: randgenerator.GenerateUniqeTitle[models.Subsidiary](repo), HasDetailed: true}
+		subsidiary := &models.InsertSubsidiaryRequest{Code: randgenerator.GenerateUniqeCode[models.Subsidiary](repo, "code"), Title: randgenerator.GenerateUniqeTitle[models.Subsidiary](repo), HasDl: true}
 		err = subsidiaryserv.InsertSubsidiary(repo, subsidiary)
 		assert.NoError(t, err, "expected no error while inserting subsidiary ")
-
-		voucher := &models.Voucher{Number: randgenerator.GenerateUniqeCode[models.Voucher](repo, "number"), VoucherItems: []*models.VoucherItem{{SubsidiaryId: subsidiary.Model.ID, Credit: 100}, {SubsidiaryId: subsidiary.Model.ID, DetailedId: detailed.Model.ID, Debit: 100}}}
+		// fetchSubsidiary, err := subsidiaryserv.ReadSubsidiary(repo, subsidiary.ID)
+		voucher := &models.Voucher{Number: randgenerator.GenerateUniqeCode[models.Voucher](repo, "number"), VoucherItems: []*models.VoucherItem{{SubsidiaryId: casting.StringToUint(subsidiary.ID), Credit: 100}, {SubsidiaryId: casting.StringToUint(subsidiary.ID), DetailedId: detailed.Model.ID, Debit: 100}}}
 		// detailed := &models.Detailed{Title: randgenerator.GenerateUniqeTitle[models.Detailed](repo)}
 
 		err = InsertVoucher(repo, voucher)
@@ -353,13 +354,13 @@ func TestUpdateVoucher(t *testing.T) {
 		detailed, err := temporary.CreateTempDetailed(repo)
 		assert.NoError(t, err, "expected no error while inserting detailed ")
 
-		subsidiary := &models.Subsidiary{Code: randgenerator.GenerateUniqeCode[models.Subsidiary](repo, "code"), Title: randgenerator.GenerateUniqeTitle[models.Subsidiary](repo), HasDetailed: true}
+		subsidiary := &models.InsertSubsidiaryRequest{Code: randgenerator.GenerateUniqeCode[models.Subsidiary](repo, "code"), Title: randgenerator.GenerateUniqeTitle[models.Subsidiary](repo), HasDl: true}
 		err = subsidiaryserv.InsertSubsidiary(repo, subsidiary)
 		assert.NoError(t, err, "expected no error while inserting subsidiary ")
 		_, err = temporary.CreateTempVoucher(repo)
 		assert.NoError(t, err, "expected no error while inserting voucher ")
 
-		voucher := &models.Voucher{Number: randgenerator.GenerateUniqeCode[models.Voucher](repo, "number"), VoucherItems: []*models.VoucherItem{{SubsidiaryId: subsidiary.Model.ID, Credit: 100}, {SubsidiaryId: subsidiary.Model.ID, DetailedId: detailed.Model.ID, Debit: 100}}}
+		voucher := &models.Voucher{Number: randgenerator.GenerateUniqeCode[models.Voucher](repo, "number"), VoucherItems: []*models.VoucherItem{{SubsidiaryId: casting.StringToUint(subsidiary.ID), Credit: 100}, {SubsidiaryId: casting.StringToUint(subsidiary.ID), DetailedId: detailed.Model.ID, Debit: 100}}}
 		// detailed := &models.Detailed{Title: randgenerator.GenerateUniqeTitle[models.Detailed](repo)}
 
 		err = UpdateVoucher(repo, voucher, []*models.VoucherItem{}, []*models.VoucherItem{}, []*models.VoucherItem{})

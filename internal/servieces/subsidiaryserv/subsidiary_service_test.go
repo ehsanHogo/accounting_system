@@ -12,7 +12,6 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-
 func TestInsertSubsidiary(t *testing.T) {
 
 	repo, err := repositories.CreateConnectionForTest()
@@ -25,7 +24,7 @@ func TestInsertSubsidiary(t *testing.T) {
 	}
 
 	t.Run("can insert subsidiary record successfully", func(t *testing.T) {
-		subsidiary := &models.Subsidiary{Code: randgenerator.GenerateUniqeCode[models.Subsidiary](repo, "code"), Title: randgenerator.GenerateUniqeTitle[models.Subsidiary](repo)}
+		subsidiary := &models.InsertSubsidiaryRequest{Code: randgenerator.GenerateUniqeCode[models.Subsidiary](repo, "code"), Title: randgenerator.GenerateUniqeTitle[models.Subsidiary](repo)}
 
 		err := InsertSubsidiary(repo, subsidiary)
 
@@ -33,7 +32,7 @@ func TestInsertSubsidiary(t *testing.T) {
 	})
 
 	t.Run("can not insert subsidiary record with empty code", func(t *testing.T) {
-		subsidiary := &models.Subsidiary{Title: randgenerator.GenerateUniqeTitle[models.Subsidiary](repo)}
+		subsidiary := &models.InsertSubsidiaryRequest{Title: randgenerator.GenerateUniqeTitle[models.Subsidiary](repo)}
 
 		err := InsertSubsidiary(repo, subsidiary)
 
@@ -41,7 +40,7 @@ func TestInsertSubsidiary(t *testing.T) {
 	})
 
 	t.Run("can not insert subsidiary record with empty title", func(t *testing.T) {
-		subsidiary := &models.Subsidiary{Code: randgenerator.GenerateUniqeCode[models.Subsidiary](repo, "code")}
+		subsidiary := &models.InsertSubsidiaryRequest{Code: randgenerator.GenerateUniqeCode[models.Subsidiary](repo, "code")}
 
 		err := InsertSubsidiary(repo, subsidiary)
 
@@ -49,7 +48,7 @@ func TestInsertSubsidiary(t *testing.T) {
 	})
 
 	t.Run("can not insert subsidiary record with code length greater than 64", func(t *testing.T) {
-		subsidiary := &models.Subsidiary{Title: randgenerator.GenerateUniqeTitle[models.Subsidiary](repo)}
+		subsidiary := &models.InsertSubsidiaryRequest{Title: randgenerator.GenerateUniqeTitle[models.Subsidiary](repo)}
 		s := "1"
 		for i := 0; i < 70; i++ {
 			subsidiary.Code += s
@@ -60,7 +59,7 @@ func TestInsertSubsidiary(t *testing.T) {
 	})
 
 	t.Run("can not insert subsidiary record with title length greater than 64", func(t *testing.T) {
-		subsidiary := &models.Subsidiary{Code: randgenerator.GenerateUniqeCode[models.Subsidiary](repo, "code")}
+		subsidiary := &models.InsertSubsidiaryRequest{Code: randgenerator.GenerateUniqeCode[models.Subsidiary](repo, "code")}
 		s := "a"
 		for i := 0; i < 70; i++ {
 			subsidiary.Title += s
@@ -75,9 +74,9 @@ func TestInsertSubsidiary(t *testing.T) {
 		subsidiary, err := temporary.CreateTempSubsidiary(repo)
 		assert.NoError(t, err, "cexpected no error when inserting subsidiary")
 
-		subsidiary.Title = randgenerator.GenerateRandomTitle()
-
-		err = InsertSubsidiary(repo, subsidiary)
+		// subsidiary.Title = randgenerator.GenerateRandomTitle()
+		newSubsidiary := &models.InsertSubsidiaryRequest{Code: subsidiary.Code, Title: randgenerator.GenerateRandomTitle(), HasDl: subsidiary.HasDetailed}
+		err = InsertSubsidiary(repo, newSubsidiary)
 
 		assert.Error(t, err, "expected getting duplicate subsidiary code error")
 
@@ -89,8 +88,9 @@ func TestInsertSubsidiary(t *testing.T) {
 		assert.NoError(t, err, "expected no error when inserting subsidiary")
 
 		subsidiary.Code = randgenerator.GenerateRandomCode()
+		newSubsidiary := &models.InsertSubsidiaryRequest{Code: randgenerator.GenerateRandomCode(), Title: subsidiary.Title, HasDl: subsidiary.HasDetailed}
 
-		err = InsertSubsidiary(repo, subsidiary)
+		err = InsertSubsidiary(repo, newSubsidiary)
 
 		assert.Error(t, err, "expected getting duplicate subsidiary title error")
 

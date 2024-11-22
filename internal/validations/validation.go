@@ -3,6 +3,7 @@ package validations
 import (
 	"accounting_system/internal/models"
 	"accounting_system/internal/repositories"
+	"accounting_system/internal/utils/casting"
 	"errors"
 	"fmt"
 )
@@ -89,7 +90,7 @@ func CheckTitleValidaion(t string) error {
 	return nil
 }
 
-func InsertDetailedValidation(d *models.Detailed) error {
+func InsertDetailedValidation(d *models.InsertDetailedRequest) error {
 	err := ChackCodeValidation(d.Code)
 
 	if err != nil {
@@ -105,15 +106,15 @@ func InsertDetailedValidation(d *models.Detailed) error {
 	return nil
 }
 
-func UpdateDetailedValidation(repo *repositories.Repositories, d *models.Detailed) error {
+func UpdateDetailedValidation(repo *repositories.Repositories, d *models.UpdateDetailedRequest) error {
 
-	prevDetailed, err := repositories.ReadRecord[models.Detailed](repo, d.Model.ID)
+	prevDetailed, err := repositories.ReadRecord[models.Detailed](repo, casting.StringToUint(d.ID))
 	if err != nil {
 		return fmt.Errorf("update validation fail due to absence of detailed id in database  : %v", err)
 	}
 
-	if d.Version != prevDetailed.Version {
-		return fmt.Errorf("delete validation fail due to different versions , expected version = %d , got : %d", prevDetailed.Version, d.Version)
+	if casting.StringToUint(d.Version) != (prevDetailed.Version) {
+		return fmt.Errorf("delete validation fail due to different versions , expected version = %d , got : %s", prevDetailed.Version, d.Version)
 
 	}
 
@@ -132,7 +133,7 @@ func UpdateDetailedValidation(repo *repositories.Repositories, d *models.Detaile
 	return nil
 }
 
-func InsertSubsidiaryValidation(d *models.Subsidiary) error {
+func InsertSubsidiaryValidation(d *models.InsertSubsidiaryRequest) error {
 	err := ChackCodeValidation(d.Code)
 
 	if err != nil {
@@ -181,17 +182,17 @@ func UpdateSubsidiaryValidation(repo *repositories.Repositories, d *models.Subsi
 	return nil
 }
 
-func DeleteDetailedValidation(db *repositories.Repositories, d *models.Detailed) error {
+func DeleteDetailedValidation(db *repositories.Repositories, d *models.DeleteDetailedRequest) error {
 
-	prevDetailed, err := repositories.ReadRecord[models.Detailed](db, d.Model.ID)
+	prevDetailed, err := repositories.ReadRecord[models.Detailed](db, casting.StringToUint(d.ID))
 	if err != nil {
 		return fmt.Errorf("delete validation fail due to absence of detailed id in database  : %v", err)
 	}
 
-	if d.Version == prevDetailed.Version {
+	if casting.StringToUint(d.Version) == prevDetailed.Version {
 		return nil
 	} else {
-		return fmt.Errorf("delete validation fail due to different versions , expected version = %d , got : %d", prevDetailed.Version, d.Version)
+		return fmt.Errorf("delete validation fail due to different versions , expected version = %d , got : %s", prevDetailed.Version, d.Version)
 	}
 }
 

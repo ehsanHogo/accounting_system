@@ -3,11 +3,12 @@ package subsidiaryserv
 import (
 	"accounting_system/internal/models"
 	"accounting_system/internal/repositories"
+	"accounting_system/internal/utils/casting"
 	"accounting_system/internal/validations"
 	"fmt"
 )
 
-func InsertSubsidiary(db *repositories.Repositories, d *models.Subsidiary) error {
+func InsertSubsidiary(db *repositories.Repositories, d *models.InsertSubsidiaryRequest) error {
 
 	err := validations.InsertSubsidiaryValidation(d)
 
@@ -15,10 +16,13 @@ func InsertSubsidiary(db *repositories.Repositories, d *models.Subsidiary) error
 		return fmt.Errorf("can not insert subsidiary due to validation failure : %v", err)
 	}
 
-	err = repositories.CreateRecord(db, d)
+	newSubsidiary := &models.Subsidiary{Code: d.Code, Title: d.Title, HasDetailed: d.HasDl}
+	err = repositories.CreateRecord(db, newSubsidiary)
 	if err != nil {
 		return fmt.Errorf("can not insert subsidiary due to database operation failure: %v", err)
 	} else {
+
+		d.ID = casting.UintToString(newSubsidiary.Model.ID)
 
 		return nil
 	}

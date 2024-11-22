@@ -35,3 +35,53 @@ type Voucher struct {
 }
 
 //creare models
+
+type InsertDetailedRequest struct {
+	ID    string
+	Code  string
+	Title string
+
+	Version string
+}
+
+type UpdateDetailedRequest struct {
+	ID    string
+	Code  string
+	Title string
+
+	Version string
+}
+
+type DeleteDetailedRequest struct {
+	ID      string
+	Version string
+}
+
+type GetDetailedRequest struct {
+	ID string
+}
+
+type InsertSubsidiaryRequest struct {
+	ID      string
+	Code    string
+	Title   string
+	HasDl   bool
+	Version string
+}
+
+type UpdateSubsidiaryRequest struct {
+	ID      string
+	Code    string
+	Title   string
+	HasDl   bool
+	Version string
+}
+
+type DeleteSubsidiaryRequest struct {
+	ID      string
+	Version string
+}
+
+type GetSubsidiaryRequest struct {
+	ID string
+}
