@@ -2,3 +2,12 @@ testing creation of voucherItem
 
 
 fix problem of commiting 
+
+
+
+
+check test scenarios 
+add request struct
+write test for other folder
+
+read

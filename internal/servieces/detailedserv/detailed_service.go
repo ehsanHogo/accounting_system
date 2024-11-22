@@ -9,7 +9,7 @@ import (
 
 
 
-func InsertDetailed(db *repositories.Repositories, d *models.Detailed) error {
+func InsertDetailed(db *repositories.Repositories, d *models.InsertDetailedRequest) error {
 
 	err := validations.InsertDetailedValidation(d)
 
@@ -17,7 +17,10 @@ func InsertDetailed(db *repositories.Repositories, d *models.Detailed) error {
 		return fmt.Errorf("can not insert detailed due to validation failure : %v", err)
 	}
 
-	err = repositories.CreateRecord(db, d)
+
+	newDetailed := &models.Detailed{Code : d.Code, Title: d.Title, Version: d.Version}
+
+	err = repositories.CreateRecord(db, newDetailed)
 	if err != nil {
 		return fmt.Errorf("can not insert detailed due to database operation failure: %v", err)
 	} else {
@@ -26,9 +29,6 @@ func InsertDetailed(db *repositories.Repositories, d *models.Detailed) error {
 	}
 
 }
-
-
-
 
 func UpdateDetailed(db *repositories.Repositories, d *models.Detailed) error {
 	err := validations.UpdateDetailedValidation(db, d)
@@ -80,5 +80,3 @@ func ReadDetailed(db *repositories.Repositories, id uint) (*models.Detailed, err
 		return res, nil
 	}
 }
-
-
