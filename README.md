@@ -24,3 +24,8 @@
 ```bash
     $ migrate -database ${POSTGRESQL_URL} -path internal/db/migrations down
 ```
+
+### Logic
+
+- the voucher id in voucherItem set by db (from Voucher primary key)
+- preventing updating detailed if were reffrenced in voucherItem is handled in code

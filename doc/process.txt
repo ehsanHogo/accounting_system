@@ -1,4 +1,0 @@
-testing creation of voucherItem
-
-
-fix problem of commiting 
