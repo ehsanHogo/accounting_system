@@ -26,15 +26,14 @@ func InsertVoucher(db *gorm.DB, d *models.Voucher) error {
 
 func UpdateVoucher(db *gorm.DB, d *models.Voucher, updatedItem []*models.VoucherItem, deletedItem []*models.VoucherItem, insertedItem []*models.VoucherItem) error {
 
-	tx := db.Begin() 
+	tx := db.Begin()
 	if tx.Error != nil {
 		return fmt.Errorf("can not begin transaction: %v", tx.Error)
 	}
 
-	
 	defer func() {
 		if tx.Error != nil {
-			tx.Rollback() 
+			tx.Rollback()
 		}
 	}()
 
@@ -44,7 +43,7 @@ func UpdateVoucher(db *gorm.DB, d *models.Voucher, updatedItem []*models.Voucher
 		return fmt.Errorf("can not update voucher due to validation failure: %v", err)
 	}
 
-	newV := &models.Voucher{Number: d.Number, Version: d.Version + 1}
+	newV := &models.Voucher{Number: d.Number}
 	fmt.Println("here newV")
 	fmt.Println(newV.Number)
 	for _, vi := range deletedItem {

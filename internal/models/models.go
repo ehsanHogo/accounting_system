@@ -1,12 +1,16 @@
 package models
 
-import "gorm.io/gorm"
+import (
+	"fmt"
+
+	"gorm.io/gorm"
+)
 
 type Detailed struct {
 	gorm.Model
 	Code    string `gorm:"unique"`
 	Title   string `gorm:"unique"`
-	Version uint
+	Version uint   `gorm:"default:0"`
 }
 
 type Subsidiary struct {
@@ -14,7 +18,7 @@ type Subsidiary struct {
 	Code        string `gorm:"unique"`
 	Title       string `gorm:"unique"`
 	HasDetailed bool
-	Version     uint
+	Version     uint `gorm:"default:0"`
 }
 
 type VoucherItem struct {
@@ -31,5 +35,23 @@ type Voucher struct {
 	gorm.Model
 	Number       string         `gorm:"unique"`
 	VoucherItems []*VoucherItem `gorm:"foreignKey:VoucherID"`
-	Version      uint
+	Version      uint           `gorm:"default:0"`
+}
+
+func (u *Detailed) BeforeUpdate(tx *gorm.DB) (err error) {
+	fmt.Println("here")
+	u.Version++
+	return
+}
+
+func (u *Subsidiary) BeforeUpdate(tx *gorm.DB) (err error) {
+	fmt.Println("here")
+	u.Version++
+	return
+}
+
+func (u *Voucher) BeforeUpdate(tx *gorm.DB) (err error) {
+	fmt.Println("here")
+	u.Version++
+	return
 }

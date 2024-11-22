@@ -35,9 +35,9 @@ func UpdateDetailed(db *gorm.DB, d *models.Detailed) error {
 	}
 
 	newV := &models.Detailed{
-		Code:    d.Code,
-		Title:   d.Title,
-		Version: d.Version + 1}
+		Code:  d.Code,
+		Title: d.Title,
+	}
 
 	err = repositories.UpdateRecord[models.Detailed](db, newV, d.Model.ID)
 	if err != nil {

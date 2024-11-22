@@ -196,6 +196,8 @@ func TestUpdateDetailed(t *testing.T) {
 		detailed.Code = repositories.GenerateUniqeCode[models.Detailed](repo.AccountingDB, "code")
 		err = UpdateDetailed(repo.AccountingDB, detailed)
 		assert.Error(t, err, "expected error indicate the versions are different")
+		// err = UpdateDetailed(repo.AccountingDB, detailed)
+		// assert.Error(t, err, "expected error indicate the versions are different")
 
 	})
 
