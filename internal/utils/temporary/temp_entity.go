@@ -9,7 +9,7 @@ import (
 	"gorm.io/gorm"
 )
 
-func CreateTempVoucher(repo *gorm.DB, IDs ...uint) (*models.Voucher, error) {
+func CreateTempVoucher(repo *gorm.DB, IDs ...int64) (*models.Voucher, error) {
 	temp := make([]*models.VoucherItem, 4)
 
 	subsidiary := &models.Subsidiary{Code: repositories.GenerateUniqeCode[models.Subsidiary](repo, "code"), Title: repositories.GenerateUniqeTitle[models.Subsidiary](repo), HasDetailed: true}

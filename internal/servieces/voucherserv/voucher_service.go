@@ -103,7 +103,7 @@ func DeleteVoucher(db *gorm.DB, d *models.Voucher) error {
 
 }
 
-func ReadVoucher(db *gorm.DB, id uint) (*models.Voucher, error) {
+func ReadVoucher(db *gorm.DB, id int64) (*models.Voucher, error) {
 
 	res, err := repositories.ReadRecord[models.Voucher](db, id)
 	if err != nil {
@@ -114,7 +114,7 @@ func ReadVoucher(db *gorm.DB, id uint) (*models.Voucher, error) {
 	}
 }
 
-func ReadVoucherItem(db *gorm.DB, id uint) (*models.VoucherItem, error) {
+func ReadVoucherItem(db *gorm.DB, id int64) (*models.VoucherItem, error) {
 
 	res, err := repositories.ReadRecord[models.VoucherItem](db, id)
 	if err != nil {
@@ -125,7 +125,7 @@ func ReadVoucherItem(db *gorm.DB, id uint) (*models.VoucherItem, error) {
 	}
 }
 
-func UpdateVoucherItem(db *gorm.DB, v *models.VoucherItem, id uint) error {
+func UpdateVoucherItem(db *gorm.DB, v *models.VoucherItem, id int64) error {
 	var newV models.VoucherItem
 	if err := db.First(&newV, id).Error; err != nil {
 		return fmt.Errorf("record not found: %w", err)

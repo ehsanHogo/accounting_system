@@ -67,7 +67,7 @@ func DeleteSubsidiary(db *gorm.DB, d *models.Subsidiary) error {
 
 }
 
-func ReadSubsidiary(db *gorm.DB, id uint) (*models.Subsidiary, error) {
+func ReadSubsidiary(db *gorm.DB, id int64) (*models.Subsidiary, error) {
 
 	res, err := repositories.ReadRecord[models.Subsidiary](db, id)
 	if err != nil {

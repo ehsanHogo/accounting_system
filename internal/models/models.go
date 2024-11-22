@@ -5,35 +5,35 @@ import (
 )
 
 type Detailed struct {
-	ID        uint           `gorm:"primaryKey"`
+	ID        int64           `gorm:"primaryKey"`
 	Code    string `gorm:"unique"`
 	Title   string `gorm:"unique"`
-	Version uint   `gorm:"default:0"`
+	Version int64   `gorm:"default:0"`
 }
 
 type Subsidiary struct {
-	ID        uint           `gorm:"primaryKey"`
+	ID        int64           `gorm:"primaryKey"`
 	Code        string `gorm:"unique"`
 	Title       string `gorm:"unique"`
 	HasDetailed bool
-	Version     uint `gorm:"default:0"`
+	Version     int64 `gorm:"default:0"`
 }
 
 type VoucherItem struct {
-	ID        uint           `gorm:"primaryKey"`
-	VoucherID uint `gorm:"not null;constraint:OnDelete:CASCADE;"`
+	ID        int64           `gorm:"primaryKey"`
+	VoucherID int64 `gorm:"not null;constraint:OnDelete:CASCADE;"`
 
-	DetailedId   uint `gorm:"constraint:OnUpdate:CASCADE,OnDelete:RESTRICT;default:null;"`
-	SubsidiaryId uint `gorm:"not null;constraint:OnUpdate:RESTRICT,OnDelete:RESTRICT;"`
+	DetailedId   int64 `gorm:"constraint:OnUpdate:CASCADE,OnDelete:RESTRICT;default:null;"`
+	SubsidiaryId int64 `gorm:"not null;constraint:OnUpdate:RESTRICT,OnDelete:RESTRICT;"`
 	Debit        int32
 	Credit       int32
 }
 
 type Voucher struct {
-	ID        uint           `gorm:"primaryKey"`
+	ID        int64           `gorm:"primaryKey"`
 	Number       string         `gorm:"unique"`
 	VoucherItems []*VoucherItem `gorm:"foreignKey:VoucherID"`
-	Version      uint           `gorm:"default:0"`
+	Version      int64           `gorm:"default:0"`
 }
 
 func (u *Detailed) BeforeUpdate(tx *gorm.DB) (err error) {

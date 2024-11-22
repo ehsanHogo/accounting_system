@@ -310,7 +310,7 @@ func UpdateVoucherValidation(db *gorm.DB, d *models.Voucher, updatedItem []*mode
 		return fmt.Errorf("can not fetch prev voucherItems due to : %v ", result.Error)
 	}
 
-	exists := make(map[uint]bool)
+	exists := make(map[int64]bool)
 	for _, val := range deletedItem {
 		exists[val.ID] = true
 	}

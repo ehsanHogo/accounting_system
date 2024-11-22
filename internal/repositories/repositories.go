@@ -68,7 +68,7 @@ func DeleteRecord[T any](db *gorm.DB, v *T) error {
 
 }
 
-func ReadRecord[T any](db *gorm.DB, id uint) (*T, error) {
+func ReadRecord[T any](db *gorm.DB, id int64) (*T, error) {
 	var res T
 
 	if err := db.First(&res, id).Error; err != nil {
@@ -78,7 +78,7 @@ func ReadRecord[T any](db *gorm.DB, id uint) (*T, error) {
 	return &res, nil
 }
 
-func UpdateRecord[T any](db *gorm.DB, v *T, id uint) error {
+func UpdateRecord[T any](db *gorm.DB, v *T, id int64) error {
 
 	if err := db.Model(v).Where("id = ?", id).Updates(v).Error; err != nil {
 		return fmt.Errorf("can not  update record due to : %v", err)

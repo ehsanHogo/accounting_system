@@ -67,7 +67,7 @@ func DeleteDetailed(db *gorm.DB, d *models.Detailed) error {
 
 }
 
-func ReadDetailed(db *gorm.DB, id uint) (*models.Detailed, error) {
+func ReadDetailed(db *gorm.DB, id int64) (*models.Detailed, error) {
 
 	res, err := repositories.ReadRecord[models.Detailed](db, id)
 	if err != nil {
