@@ -268,50 +268,6 @@ func UpdateVoucherValidation(db *gorm.DB, d *models.Voucher, updatedItem []*mode
 		return fmt.Errorf("number validation fail due to : %v", err)
 	}
 
-	for _, v := range insertedItem {
-
-		err = CheckDebitCredit(v.Credit, v.Debit)
-		if err != nil {
-			return fmt.Errorf("debit and credit validation in inserted voucher items fail due to : %v", err)
-		}
-	}
-
-	err = CheckBalance(insertedItem)
-
-	if err != nil {
-		return fmt.Errorf("balance credit and debit validation in inserted voucher items fail  due to : %v", err)
-	}
-
-	for _, v := range updatedItem {
-
-		err = CheckDebitCredit(v.Credit, v.Debit)
-		if err != nil {
-			return fmt.Errorf("debit and credit validation in updated voucher items fail due to : %v", err)
-		}
-	}
-
-	err = CheckBalance(updatedItem)
-
-	if err != nil {
-		return fmt.Errorf("balance credit and debit validation in updated voucher items  fail due to : %v", err)
-	}
-
-	deletedItemList := make([]*models.VoucherItem, 0)
-	var temVoucherItem *models.VoucherItem
-	for _, val := range deletedItem {
-		temVoucherItem, err = repositories.ReadRecord[models.VoucherItem](db, val)
-		if err != nil {
-			return fmt.Errorf("can not find voucher item due to : %v", err)
-		}
-		deletedItemList = append(deletedItemList, temVoucherItem)
-	}
-
-	err = CheckBalance(deletedItemList)
-
-	if err != nil {
-		return fmt.Errorf("balance redit and debit  validation in deleted voucher items fail due to : %v", err)
-	}
-
 	var prevVoucherItems []*models.VoucherItem
 
 	result := db.Where("voucher_id = ?", fmt.Sprintf("%d", d.ID)).Find(&prevVoucherItems)
@@ -320,19 +276,42 @@ func UpdateVoucherValidation(db *gorm.DB, d *models.Voucher, updatedItem []*mode
 		return fmt.Errorf("can not fetch prev voucherItems due to : %v ", result.Error)
 	}
 
-	exists := make(map[int64]bool)
-	for _, val := range deletedItem {
-		exists[val] = true
+	voucherItemsMap := make(map[int64]*models.VoucherItem, 0)
+	for _, vi := range prevVoucherItems {
+		voucherItemsMap[vi.ID] = vi
 	}
 
-	newVoucherItems := []*models.VoucherItem{}
-	for _, val := range prevVoucherItems {
-		if !exists[val.ID] {
-			newVoucherItems = append(newVoucherItems, val)
+	for _, vi := range updatedItem {
+		if _, ok := voucherItemsMap[vi.ID]; ok {
+			voucherItemsMap[vi.ID] = vi
 		}
 	}
 
-	newVoucherItems = append(newVoucherItems, insertedItem...)
+	for _, val := range deletedItem {
+
+		delete(voucherItemsMap, val)
+
+	}
+
+	prevVoucherItems = make([]*models.VoucherItem, 0)
+	for _, v := range voucherItemsMap {
+		prevVoucherItems = append(prevVoucherItems, v)
+	}
+
+	newVoucherItems := append(prevVoucherItems, insertedItem...)
+
+	for _, v := range newVoucherItems {
+
+		err = CheckDebitCredit(v.Credit, v.Debit)
+		if err != nil {
+			return fmt.Errorf("debit and credit validation in updated voucher items fail due to : %v", err)
+		}
+	}
+	err = CheckBalance(newVoucherItems)
+
+	if err != nil {
+		return fmt.Errorf("balance redit and debit  validation in deleted voucher items fail due to : %v", err)
+	}
 
 	err = CheckVoucherItemsLength(len(newVoucherItems))
 
@@ -340,13 +319,7 @@ func UpdateVoucherValidation(db *gorm.DB, d *models.Voucher, updatedItem []*mode
 		return fmt.Errorf("length of voucher items is invalied due to : %v", err)
 	}
 
-	err = checkHasDetailed(db, insertedItem)
-
-	if err != nil {
-		return fmt.Errorf("there are invalied voucher items due to : %v", err)
-	}
-
-	err = checkHasDetailed(db, updatedItem)
+	err = checkHasDetailed(db, newVoucherItems)
 
 	if err != nil {
 		return fmt.Errorf("there are invalied voucher items due to : %v", err)

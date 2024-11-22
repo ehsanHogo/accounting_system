@@ -45,7 +45,7 @@ func main() {
 	voucher.VoucherItems[0].Credit -= 100
 	voucher.VoucherItems[1].Debit += 100
 
-	err = voucherserv.UpdateVoucher(repo.AccountingDB, voucher, voucher.VoucherItems, []int64{voucher.VoucherItems[2].ID}, []*models.VoucherItem{{SubsidiaryId: subsidiary.ID, DetailedId: detailed.ID, Credit: 200}, {SubsidiaryId: subsidiary.ID, DetailedId: detailed.ID, Debit: 200}})
+	err = voucherserv.UpdateVoucher(repo.AccountingDB, voucher, []*models.VoucherItem{voucher.VoucherItems[0], voucher.VoucherItems[1]}, []int64{voucher.VoucherItems[2].ID}, []*models.VoucherItem{{SubsidiaryId: subsidiary.ID, DetailedId: detailed.ID, Credit: 200}, {SubsidiaryId: subsidiary.ID, DetailedId: detailed.ID, Debit: 200}})
 
 	if err != nil {
 		fmt.Printf("can not update voucher due to : %v\n", err)
