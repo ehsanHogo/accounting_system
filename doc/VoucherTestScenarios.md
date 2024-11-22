@@ -122,26 +122,6 @@
 - **Then** a message "Voucher entity version is deleted successfully from the database" is displayed
   - **And** the entity is deleted
 
-### Scenario: Accounting Vouchers must be balanced
-
-- **Given** the user is trying to delete items from a voucher
-  - **And** the total debits do not equal the total credits
-- **When** the user clicks the "Submit" button
-- **Then** an error message "The voucher must be balanced" is displayed
-  - **And** the voucher is not submitted
-
-### Scenario: An accounting voucher must have at least 2 items
-
-- **Given** the user is trying to delete items from an accounting voucher
-- **When** the voucher has less than 2 items
-  - **And** clicks the "Submit" button
-- **Then** an error message "A voucher must have at least 2 items" is displayed
-  - **And** the voucher is not submitted
-
-## Insert:
-
-(Empty for now)
-
 ## Update:
 
 ### Scenario: User cannot update an accounting voucher if the requested version was different from the database
@@ -186,7 +166,68 @@
 - **When** the user enters both debit and credit as zero or both as non-zero or one of them as negative
   - **And** clicks the "Submit" button
 - **Then** an error message "One of the debit or credit must be greater than zero and the other must be zero" is displayed
-  - **And** the Voucher Item is not created
+  - **And** the Voucher Item is not updated
+
+### Scenario: User cannot udate the number to empty field for an Accounting Voucher
+
+- **Given** the user is on the "update Accounting Voucher" page
+- **When** the user leaves the "Number" field empty
+  - **And** clicks the "Submit" button
+- **Then** an error message "Voucher number cannot be empty" is displayed
+  - **And** the Accounting Voucher is not updated
+
+### Scenario: User cannot update a number to longer than 64 characters for an Accounting Voucher
+
+- **Given** the user is on the "update Accounting Voucher" page
+- **When** the user enters a number longer than 64 characters
+  - **And** clicks the "Submit" button
+- **Then** an error message "Accounting Voucher number cannot exceed 64 characters" is displayed
+  - **And** the Accounting Voucher is not updated
+
+### Scenario: User cannot update voucher to a duplicate number
+
+- **Given** an Accounting Voucher with the number "123" already exists
+- **When** the user update the number to "123"
+  - **And** clicks the "Submit" button
+- **Then** an error message "Accounting Voucher number must be unique" is displayed
+  - **And** the Accounting Voucher is not updated
+
+### Scenario: DL is required and must be in database when the SL is DL-enabled
+
+- **Given** the user is updating a Voucher Item
+  - **And** its SL is DL-enabled
+- **When** the user does not select a DL
+  - **And** clicks the "Submit" button
+- **Then** an error message "DL is mandatory for a SL that is DL-enabled" is displayed
+
+  - **And** the Voucher Item is not updated
+
+- **When** the selected DL does not exist in the database
+  - **And** the user clicks the "Submit" button
+- **Then** an error message "The selected DL does not exist in the database" is displayed
+  - **And** the Voucher Item is not updated
+
+### Scenario: DL must be empty if the SL is not DL-enabled
+
+- **Given** the user is updating a Voucher Item whose SL is not DL-enabled
+- **When** the user selects a DL
+  - **And** clicks the "Submit" button
+- **Then** an error message "DL must be empty for a voucher Item that its SL is not DL-enabled" is displayed
+  - **And** the Voucher Item is not updated
+
+### Scenario: The SL must exist in the database and is mandatory
+
+- **Given** the user is updating a Voucher Item
+- **When** the user does not add SL
+  - **And** clicks the "Submit" button
+- **Then** an error message "SL is mandatory for voucher item" is displayed
+
+  - **And** the Voucher Item is not updated
+
+- **When** the SL does not exist in the database
+  - **And** the user clicks the "Submit" button
+- **Then** an error message "The SL does not exist in the database" is displayed
+  - **And** the Voucher Item is not updated
 
 ## Read:
 

@@ -115,6 +115,54 @@
 - **Then** a message "SL entity version is updated successfully in the database" is displayed
   - And the entity is updated
 
+### Scenario: User cannot leave the code field empty for an SL entity
+
+- **Given** the user is on the "Create SL" page
+- **When** the user update the "Code" to empty field
+  - And clicks the "Submit" button
+- **Then** an error message "SL entity code cannot be empty" is displayed
+  - And the SL entity is not created
+
+### Scenario: User cannot enter a code longer than 64 characters for an SL entity
+
+- **Given** the user is on the "Create SL" page
+- **When** the user update a code to longer than 64 characters
+  - And clicks the "Submit" button
+- **Then** an error message "SL entity code cannot exceed 64 characters" is displayed
+  - And the SL entity is not created
+
+### Scenario: User cannot enter a duplicate code for an SL entity
+
+- **Given** an SL entity with the code "789" already exists
+- **When** the user update the code to "789"
+  - And clicks the "Submit" button
+- **Then** an error message "SL entity code must be unique" is displayed
+  - And the SL entity is not created
+
+### Scenario: User cannot leave the title field empty for an SL entity
+
+- **Given** the user is on the "Create SL" page
+- **When** the user update the "Title" to a empty field
+  - And clicks the "Submit" button
+- **Then** an error message "SL entity title cannot be empty" is displayed
+  - And the SL entity is not created
+
+### Scenario: User cannot enter a title longer than 64 characters for an SL entity
+
+- **Given** the user is on the "Create Detail" page
+- **When** the user update a title to longer than 64 characters
+  - And clicks the "Submit" button
+- **Then** an error message "SL entity title cannot exceed 64 characters" is displayed
+  - And the SL entity is not created
+
+### Scenario: User cannot enter a duplicate title for an SL entity
+
+- **Given** an SL entity with the title "123" already exists
+- **When** the user update the title to "123"
+  - And clicks the "Submit" button
+- **Then** an error message "SL entity title must be unique" is displayed
+  - And the SL entity is not created
+
 ## Read
 
 ### Scenario: User cannot read an SL entity if it is not in the database

@@ -106,7 +106,58 @@
 - **Given** a DL entity with id "0" and version "0" is in the database
 - **When** the user wants to update the DL entity with id "0" and version "0"
 - **Then** a message "DL entity version is updated successfully in the database" is displayed
+
   - And the entity is updated
+
+  ### Scenario: User cannot enter a duplicate code for a DL entity
+
+- **Given** a DL entity with the code "123" already exists
+- **When** the user update the code to "123"
+  - And clicks the "Submit" button
+- **Then** an error message "DL entity code must be unique" is displayed
+
+  - And the DL entity is not creat
+
+  ### Scenario: User cannot enter a duplicate title for a DL entity
+
+- **Given** a DL entity with the title "abc" already exists
+- **When** the user update the title "abc"
+  - And clicks the "Submit" button
+- **Then** an error message "DL entity title must be unique" is displayed
+  - And the DL entity is not created
+
+### Scenario: User cannot leave the code field empty for a DL entity
+
+- **Given** the user is on the "Create Detail" page
+- **When** the user update the "Code" to empty field
+  - And clicks the "Submit" button
+- **Then** an error message "DL entity code cannot be empty" is displayed
+  - And the DL entity is not created
+
+### Scenario: User cannot enter a code longer than 64 characters for a DL entity
+
+- **Given** the user is on the "Create Detail" page
+- **When** the user update a code to longer than 64 characters
+  - And clicks the "Submit" button
+- **Then** an error message "DL entity code cannot exceed 64 characters" is displayed
+
+  - And the DL entity is not created
+
+  ### Scenario: User cannot leave the title field empty for a DL entity
+
+- **Given** the user is on the "Create Detail" page
+- **When** the user update the "Title" to empty field
+  - And clicks the "Submit" button
+- **Then** an error message "DL entity title cannot be empty" is displayed
+  - And the DL entity is not created
+
+### Scenario: User cannot enter a title longer than 64 characters for a DL entity
+
+- **Given** the user is on the "Create Detail" page
+- **When** the user update a title to longer than 64 characters
+  - And clicks the "Submit" button
+- **Then** an error message "DL entity title cannot exceed 64 characters" is displayed
+  - And the DL entity is not created
 
 ## Read
 

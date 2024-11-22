@@ -165,6 +165,18 @@ func TestInsertVoucher(t *testing.T) {
 
 		assert.Error(t, err, "expected error indicate voucher items should not have detailed")
 	})
+
+	t.Run("can not insert voucher record when voucher item does not  specify subsidiary", func(t *testing.T) {
+
+		voucherItem1  := &models.VoucherItem{Credit: 100}
+		voucherItem2  := &models.VoucherItem{Debit: 100}
+
+		voucher := &models.Voucher{Number: repositories.GenerateUniqeCode[models.Voucher](repo.AccountingDB, "number"), VoucherItems: []*models.VoucherItem{voucherItem1, voucherItem2}}
+
+		err = InsertVoucher(repo.AccountingDB, voucher)
+
+		assert.Error(t, err, "expected error indicate voucher items should have subsidiary")
+	})
 }
 
 func TestUpdateVoucher(t *testing.T) {
