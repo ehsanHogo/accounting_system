@@ -38,7 +38,7 @@ func UpdateSubsidiary(db *gorm.DB, d *models.Subsidiary) error {
 		Code:        d.Code,
 		Title:       d.Title,
 		HasDetailed: d.HasDetailed,
-		Version:     d.Version + 1}
+	}
 
 	err = repositories.UpdateRecord[models.Subsidiary](db, newV, d.Model.ID)
 	if err != nil {
