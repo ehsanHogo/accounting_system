@@ -66,7 +66,7 @@ func CreateTempVoucher(repo *repositories.Repositories, IDs ...uint) (*models.Vo
 	return voucher, nil
 }
 
-func CreateTempVoucherItem(repo *repositories.Repositories) (*models.VoucherItem, error) {
+func ReturnTempVoucherItem(repo *repositories.Repositories) (*models.VoucherItem, error) {
 
 	subsidiary, err := CreateTempSubsidiary(repo)
 	if err != nil {

@@ -201,11 +201,11 @@ func TestUpdateVoucher(t *testing.T) {
 
 		// fmt.Printf("prev Code %v\n", voucher.Number)
 
-		newVoucherItem, err := temporary.CreateTempVoucherItem(repo)
+		newVoucherItem, err := temporary.ReturnTempVoucherItem(repo)
 		assert.NoError(t, err, "can not create voucher item record")
 		temp := append(voucher.VoucherItems, newVoucherItem)
 
-		newVoucherItem, err = temporary.CreateTempVoucherItem(repo)
+		newVoucherItem, err = temporary.ReturnTempVoucherItem(repo)
 		assert.NoError(t, err, "can not create voucher item record")
 		temp = append(temp, newVoucherItem)
 		temp[len(temp)-1].Credit = 250
