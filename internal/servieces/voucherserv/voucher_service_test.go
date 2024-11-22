@@ -218,10 +218,10 @@ func TestUpdateVoucher(t *testing.T) {
 
 		// fmt.Printf("new Code %v\n", code)
 		assert.NoError(t, err, "expected no error while updating voucher ")
-		_, err = repositories.ReadRecord[models.VoucherItem](repo, voucher.VoucherItems[0].Model.ID)
+		_, err = ReadVoucherItem(repo, voucher.VoucherItems[0].Model.ID)
 		assert.Error(t, err, "expected error indicate voucher item not found")
 
-		_, err = repositories.ReadRecord[models.VoucherItem](repo, voucher.VoucherItems[1].Model.ID)
+		_, err = ReadVoucherItem(repo, voucher.VoucherItems[1].Model.ID)
 		assert.NoError(t, err, "expexted no error when reading the voucherItem record")
 		// assert.Equal(t, voucher.VoucherItems[1].DetailedId, newVoucherItem.DetailedId)
 		// assert.Equal(t, voucher.VoucherItems[1].SubsidiaryId, newVoucherItem.SubsidiaryId)
@@ -229,16 +229,16 @@ func TestUpdateVoucher(t *testing.T) {
 		// assert.Equal(t, voucher.VoucherItems[1].Credit, newVoucherItem.Credit)
 		// assert.Equal(t, voucher.VoucherItems[1].VoucherID, newVoucherItem.VoucherID)
 
-		_, err = repositories.ReadRecord[models.VoucherItem](repo, voucher.VoucherItems[2].Model.ID)
+		_, err = ReadVoucherItem(repo, voucher.VoucherItems[2].Model.ID)
 		assert.NoError(t, err, "expexted no error when reading the voucherItem record")
 
-		_, err = repositories.ReadRecord[models.VoucherItem](repo, voucher.VoucherItems[3].Model.ID)
+		_, err = ReadVoucherItem(repo, voucher.VoucherItems[3].Model.ID)
 		assert.Error(t, err, "expexted no error when reading the voucherItem record")
 
-		_, err = repositories.ReadRecord[models.VoucherItem](repo, temp[4].Model.ID)
+		_, err = ReadVoucherItem(repo, temp[4].Model.ID)
 		assert.NoError(t, err, "expexted no error when reading the voucherItem record")
 
-		_, err = repositories.ReadRecord[models.VoucherItem](repo, temp[5].Model.ID)
+		_, err = ReadVoucherItem(repo, temp[5].Model.ID)
 		assert.NoError(t, err, "expexted no error when reading the voucherItem record")
 	})
 
@@ -532,4 +532,5 @@ func TestReadVoucher(t *testing.T) {
 		assert.Error(t, err, "expected  error indicate can not found the voucher record")
 
 	})
+
 }

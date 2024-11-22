@@ -118,7 +118,7 @@ func TestUpdateDetailed(t *testing.T) {
 
 		assert.NoError(t, err, "expected no error when updating detailed")
 
-		checkUpdated, err := repositories.ReadRecord[models.Detailed](repo, insertedDetailed.Model.ID)
+		checkUpdated, err := ReadDetailed(repo, insertedDetailed.Model.ID)
 		assert.NoError(t, err, "expected no error when reading detailed record ")
 		assert.Equal(t, insertedDetailed.Code, checkUpdated.Code)
 	})
@@ -216,7 +216,7 @@ func TestUpdateDetailed(t *testing.T) {
 		err = UpdateDetailed(repo, detailed)
 		assert.NoError(t, err, "expected no error while updating")
 
-		detailed, _ = repositories.ReadRecord[models.Detailed](repo, detailed.Model.ID)
+		detailed, _ = ReadDetailed(repo, detailed.Model.ID)
 		detailed.Code = repositories.GenerateUniqeCode[models.Detailed](repo, "code")
 		err = UpdateDetailed(repo, detailed)
 		fmt.Printf("new version : %v\n", detailed.Version)
@@ -327,7 +327,7 @@ func TestDeleteDetailed(t *testing.T) {
 		// fmt.Printf("prev version : %v\n", detailed.Version)
 		err = UpdateDetailed(repo, detailed)
 		assert.NoError(t, err, "can not update detailed record ")
-		detailed, _ = repositories.ReadRecord[models.Detailed](repo, detailed.Model.ID)
+		detailed, _ = ReadDetailed(repo, detailed.Model.ID)
 
 		err = DeleteDetailed(repo, detailed)
 		// fmt.Printf("new version : %v\n", detailed.Version)

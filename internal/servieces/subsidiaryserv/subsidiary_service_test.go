@@ -111,13 +111,13 @@ func TestUpdateSubsidiary(t *testing.T) {
 		subsidiary, err := temporary.CreateTempSubsidiary(repo)
 		assert.NoError(t, err, "expected no error while inserting")
 
-		fetchSubsidiary, err := repositories.ReadRecord[models.Subsidiary](repo, subsidiary.Model.ID)
+		fetchSubsidiary, err := ReadSubsidiary(repo, subsidiary.Model.ID)
 		assert.NoError(t, err, "expected no error when reading subsidiary record ")
 		fetchSubsidiary.Code = repositories.GenerateUniqeCode[models.Subsidiary](repo, "code")
 		// fetchSubsidiary.Title = repositories.GenerateUniqeTitle[models.Subsidiary](repo)
 		err = UpdateSubsidiary(repo, fetchSubsidiary)
 		assert.NoError(t, err, "expected no error when  updating subsidiary record")
-		checkUpdated, err := repositories.ReadRecord[models.Subsidiary](repo, fetchSubsidiary.Model.ID)
+		checkUpdated, err := ReadSubsidiary(repo, fetchSubsidiary.Model.ID)
 		assert.NoError(t, err, "expected no error when reading subsidiary record ")
 		assert.Equal(t, fetchSubsidiary.Code, checkUpdated.Code)
 	})
@@ -126,7 +126,7 @@ func TestUpdateSubsidiary(t *testing.T) {
 		subsidiary, err := temporary.CreateTempSubsidiary(repo)
 		assert.NoError(t, err, "expected no error while inserting")
 
-		fetchSubsidiary, err := repositories.ReadRecord[models.Subsidiary](repo, subsidiary.Model.ID)
+		fetchSubsidiary, err := ReadSubsidiary(repo, subsidiary.Model.ID)
 		assert.NoError(t, err, "expected no error when reading subsidiary record ")
 		fetchSubsidiary.Title = ""
 		err = UpdateSubsidiary(repo, fetchSubsidiary)
@@ -138,7 +138,7 @@ func TestUpdateSubsidiary(t *testing.T) {
 		subsidiary, err := temporary.CreateTempSubsidiary(repo)
 		assert.NoError(t, err, "expected no error while inserting")
 
-		fetchSubsidiary, err := repositories.ReadRecord[models.Subsidiary](repo, subsidiary.Model.ID)
+		fetchSubsidiary, err := ReadSubsidiary(repo, subsidiary.Model.ID)
 		assert.NoError(t, err, "expected no error when reading subsidiary record ")
 		fetchSubsidiary.Code = ""
 		err = UpdateSubsidiary(repo, fetchSubsidiary)
@@ -150,7 +150,7 @@ func TestUpdateSubsidiary(t *testing.T) {
 		subsidiary, err := temporary.CreateTempSubsidiary(repo)
 		assert.NoError(t, err, "expected no error while inserting")
 
-		fetchSubsidiary, err := repositories.ReadRecord[models.Subsidiary](repo, subsidiary.Model.ID)
+		fetchSubsidiary, err := ReadSubsidiary(repo, subsidiary.Model.ID)
 		assert.NoError(t, err, "expected no error when reading subsidiary record ")
 		s := "1"
 		fetchSubsidiary.Code = ""
@@ -167,7 +167,7 @@ func TestUpdateSubsidiary(t *testing.T) {
 		subsidiary, err := temporary.CreateTempSubsidiary(repo)
 		assert.NoError(t, err, "expected no error while inserting")
 
-		fetchSubsidiary, err := repositories.ReadRecord[models.Subsidiary](repo, subsidiary.Model.ID)
+		fetchSubsidiary, err := ReadSubsidiary(repo, subsidiary.Model.ID)
 		assert.NoError(t, err, "expected no error when reading subsidiary record ")
 		s := "a"
 		fetchSubsidiary.Code = ""
@@ -216,7 +216,7 @@ func TestUpdateSubsidiary(t *testing.T) {
 		// fmt.Printf("code : %v\n", subsidiary.Code)
 		// fmt.Printf("prev version : %v\n", subsidiary.Version)
 		UpdateSubsidiary(repo, subsidiary)
-		subsidiary, _ = repositories.ReadRecord[models.Subsidiary](repo, subsidiary.Model.ID)
+		subsidiary, _ = ReadSubsidiary(repo, subsidiary.Model.ID)
 		subsidiary.Code = repositories.GenerateUniqeCode[models.Subsidiary](repo, "code")
 		err = UpdateSubsidiary(repo, subsidiary)
 		// fmt.Printf("new version : %v\n", subsidiary.Version)
@@ -341,7 +341,7 @@ func TestDeleteSubsidiary(t *testing.T) {
 		err = UpdateSubsidiary(repo, subsidiary)
 		assert.NoError(t, err, "cann not update subsidiary record due to ")
 
-		subsidiary, _ = repositories.ReadRecord[models.Subsidiary](repo, subsidiary.Model.ID)
+		subsidiary, _ = ReadSubsidiary(repo, subsidiary.Model.ID)
 
 		err = DeleteSubsidiary(repo, subsidiary)
 		// fmt.Printf("new version : %v\n", subsidiary.Version)

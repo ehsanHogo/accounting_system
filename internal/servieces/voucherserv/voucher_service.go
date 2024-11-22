@@ -96,6 +96,17 @@ func ReadVoucher(db *repositories.Repositories, id uint) (*models.Voucher, error
 	}
 }
 
+func ReadVoucherItem(db *repositories.Repositories, id uint) (*models.VoucherItem, error) {
+
+	res, err := repositories.ReadRecord[models.VoucherItem](db, id)
+	if err != nil {
+		return nil, fmt.Errorf("can not read voucher item due to database operation failure : %v", err)
+	} else {
+
+		return res, nil
+	}
+}
+
 func UpdateVoucherItem(db *repositories.Repositories, v *models.VoucherItem, id uint) error {
 	var newV models.VoucherItem
 	if err := db.AccountingDB.First(&newV, id).Error; err != nil {
