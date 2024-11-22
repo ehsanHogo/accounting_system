@@ -24,11 +24,6 @@ func main() {
 
 	repo := repositories.NewConnection(db)
 
-	// temp := make([]models.VoucherItem, 2)
-	// fmt.Printf("eeeee : %v\n", temp)
-	// repo.CreateVoucher(&models.Voucher{Number: "13", VoucherItems: temp})
-
-	// voucher := &models.Voucher{Number: "12345", VoucherItems: temp}
 	detailed := &models.Detailed{Code: "13", Title: "te2st"}
 	repositories.CreateRecord(repo.AccountingDB, detailed)
 
