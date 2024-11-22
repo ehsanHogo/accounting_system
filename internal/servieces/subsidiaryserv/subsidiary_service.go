@@ -40,7 +40,7 @@ func UpdateSubsidiary(db *gorm.DB, d *models.Subsidiary) error {
 		HasDetailed: d.HasDetailed,
 	}
 
-	err = repositories.UpdateRecord[models.Subsidiary](db, newV, d.Model.ID)
+	err = repositories.UpdateRecord[models.Subsidiary](db, newV, d.ID)
 	if err != nil {
 		return fmt.Errorf("can not update subsidiary due to database operation failure: %v", err)
 	} else {

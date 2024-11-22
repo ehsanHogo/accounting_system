@@ -54,7 +54,7 @@ func UpdateVoucher(db *gorm.DB, d *models.Voucher, updatedItem []*models.Voucher
 	}
 
 	for _, vi := range updatedItem {
-		err := UpdateVoucherItem(tx, vi, vi.Model.ID)
+		err := UpdateVoucherItem(tx, vi, vi.ID)
 		if err != nil {
 			return fmt.Errorf("can not update voucher item : %w", err)
 		}
@@ -62,7 +62,7 @@ func UpdateVoucher(db *gorm.DB, d *models.Voucher, updatedItem []*models.Voucher
 
 	for _, vi := range insertedItem {
 
-		vi.VoucherID = d.Model.ID
+		vi.VoucherID = d.ID
 		err := repositories.CreateRecord(tx, vi)
 
 		if err != nil {
@@ -70,7 +70,7 @@ func UpdateVoucher(db *gorm.DB, d *models.Voucher, updatedItem []*models.Voucher
 		}
 	}
 
-	err = repositories.UpdateRecord[models.Voucher](tx, newV, d.Model.ID)
+	err = repositories.UpdateRecord[models.Voucher](tx, newV, d.ID)
 	if err != nil {
 		return fmt.Errorf("can not update voucher due to database operation failure : %v", err)
 	} else {
@@ -136,7 +136,7 @@ func UpdateVoucherItem(db *gorm.DB, v *models.VoucherItem, id uint) error {
 	newV.DetailedId = v.DetailedId
 	newV.SubsidiaryId = v.SubsidiaryId
 
-	if err := db.Model(&newV).Where("id = ?", v.Model.ID).Updates(newV).Error; err != nil {
+	if err := db.Model(&newV).Where("id = ?", v.ID).Updates(newV).Error; err != nil {
 		return fmt.Errorf("failed to update record: %w", err)
 	}
 

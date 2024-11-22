@@ -110,12 +110,12 @@ func TestUpdateSubsidiary(t *testing.T) {
 		subsidiary, err := temporary.CreateTempSubsidiary(repo.AccountingDB)
 		assert.NoError(t, err, "expected no error while inserting")
 
-		fetchSubsidiary, err := ReadSubsidiary(repo.AccountingDB, subsidiary.Model.ID)
+		fetchSubsidiary, err := ReadSubsidiary(repo.AccountingDB, subsidiary.ID)
 		assert.NoError(t, err, "expected no error when reading subsidiary record ")
 		fetchSubsidiary.Code = repositories.GenerateUniqeCode[models.Subsidiary](repo.AccountingDB, "code")
 		err = UpdateSubsidiary(repo.AccountingDB, fetchSubsidiary)
 		assert.NoError(t, err, "expected no error when  updating subsidiary record")
-		checkUpdated, err := ReadSubsidiary(repo.AccountingDB, fetchSubsidiary.Model.ID)
+		checkUpdated, err := ReadSubsidiary(repo.AccountingDB, fetchSubsidiary.ID)
 		assert.NoError(t, err, "expected no error when reading subsidiary record ")
 		assert.Equal(t, fetchSubsidiary.Code, checkUpdated.Code)
 	})
@@ -124,7 +124,7 @@ func TestUpdateSubsidiary(t *testing.T) {
 		subsidiary, err := temporary.CreateTempSubsidiary(repo.AccountingDB)
 		assert.NoError(t, err, "expected no error while inserting")
 
-		fetchSubsidiary, err := ReadSubsidiary(repo.AccountingDB, subsidiary.Model.ID)
+		fetchSubsidiary, err := ReadSubsidiary(repo.AccountingDB, subsidiary.ID)
 		assert.NoError(t, err, "expected no error when reading subsidiary record ")
 		fetchSubsidiary.Title = ""
 		err = UpdateSubsidiary(repo.AccountingDB, fetchSubsidiary)
@@ -136,7 +136,7 @@ func TestUpdateSubsidiary(t *testing.T) {
 		subsidiary, err := temporary.CreateTempSubsidiary(repo.AccountingDB)
 		assert.NoError(t, err, "expected no error while inserting")
 
-		fetchSubsidiary, err := ReadSubsidiary(repo.AccountingDB, subsidiary.Model.ID)
+		fetchSubsidiary, err := ReadSubsidiary(repo.AccountingDB, subsidiary.ID)
 		assert.NoError(t, err, "expected no error when reading subsidiary record ")
 		fetchSubsidiary.Code = ""
 		err = UpdateSubsidiary(repo.AccountingDB, fetchSubsidiary)
@@ -148,7 +148,7 @@ func TestUpdateSubsidiary(t *testing.T) {
 		subsidiary, err := temporary.CreateTempSubsidiary(repo.AccountingDB)
 		assert.NoError(t, err, "expected no error while inserting")
 
-		fetchSubsidiary, err := ReadSubsidiary(repo.AccountingDB, subsidiary.Model.ID)
+		fetchSubsidiary, err := ReadSubsidiary(repo.AccountingDB, subsidiary.ID)
 		assert.NoError(t, err, "expected no error when reading subsidiary record ")
 		s := "1"
 		fetchSubsidiary.Code = ""
@@ -165,7 +165,7 @@ func TestUpdateSubsidiary(t *testing.T) {
 		subsidiary, err := temporary.CreateTempSubsidiary(repo.AccountingDB)
 		assert.NoError(t, err, "expected no error while inserting")
 
-		fetchSubsidiary, err := ReadSubsidiary(repo.AccountingDB, subsidiary.Model.ID)
+		fetchSubsidiary, err := ReadSubsidiary(repo.AccountingDB, subsidiary.ID)
 		assert.NoError(t, err, "expected no error when reading subsidiary record ")
 		s := "a"
 		fetchSubsidiary.Title = ""
@@ -181,7 +181,7 @@ func TestUpdateSubsidiary(t *testing.T) {
 	t.Run("return error when update subsidiary record that is not in databse", func(t *testing.T) {
 		subsidiary, err := temporary.CreateTempSubsidiary(repo.AccountingDB)
 		assert.NoError(t, err, "expected no error while inserting")
-		subsidiary.Model.ID = InvalidRecordID
+		subsidiary.ID = InvalidRecordID
 		err = UpdateSubsidiary(repo.AccountingDB, subsidiary)
 		assert.Error(t, err, "expected error indicate there is such id in database")
 
@@ -209,7 +209,7 @@ func TestUpdateSubsidiary(t *testing.T) {
 		subsidiary.Code = repositories.GenerateUniqeCode[models.Subsidiary](repo.AccountingDB, "code")
 
 		UpdateSubsidiary(repo.AccountingDB, subsidiary)
-		subsidiary, _ = ReadSubsidiary(repo.AccountingDB, subsidiary.Model.ID)
+		subsidiary, _ = ReadSubsidiary(repo.AccountingDB, subsidiary.ID)
 		subsidiary.Code = repositories.GenerateUniqeCode[models.Subsidiary](repo.AccountingDB, "code")
 		err = UpdateSubsidiary(repo.AccountingDB, subsidiary)
 		assert.NoError(t, err, "expected no error")
@@ -220,7 +220,7 @@ func TestUpdateSubsidiary(t *testing.T) {
 		subsidiary, err := temporary.CreateTempSubsidiary(repo.AccountingDB)
 		assert.NoError(t, err, "expected no error while inserting")
 
-		_, err = temporary.CreateTempVoucher(repo.AccountingDB, 0, subsidiary.Model.ID)
+		_, err = temporary.CreateTempVoucher(repo.AccountingDB, 0, subsidiary.ID)
 
 		assert.NoError(t, err, "expected no error while inserting")
 		subsidiary.Code = repositories.GenerateUniqeCode[models.Subsidiary](repo.AccountingDB, "code")
@@ -276,7 +276,7 @@ func TestDeleteSubsidiary(t *testing.T) {
 
 	t.Run("deletion subsidiary record fail because record does not exist in database", func(t *testing.T) {
 		subsidiary := &models.Subsidiary{}
-		subsidiary.Model.ID = InvalidRecordID
+		subsidiary.ID = InvalidRecordID
 		err := DeleteSubsidiary(repo.AccountingDB, subsidiary)
 
 		assert.Error(t, err, "expected error indicate subsiduary record not found")
@@ -286,7 +286,7 @@ func TestDeleteSubsidiary(t *testing.T) {
 		subsidiary, err := temporary.CreateTempSubsidiary(repo.AccountingDB)
 		assert.NoError(t, err, "expected no error while inserting")
 
-		_, err = temporary.CreateTempVoucher(repo.AccountingDB, 0, subsidiary.Model.ID)
+		_, err = temporary.CreateTempVoucher(repo.AccountingDB, 0, subsidiary.ID)
 		assert.NoError(t, err, "expected no error while inserting")
 
 		err = DeleteSubsidiary(repo.AccountingDB, subsidiary)
@@ -317,7 +317,7 @@ func TestDeleteSubsidiary(t *testing.T) {
 		err = UpdateSubsidiary(repo.AccountingDB, subsidiary)
 		assert.NoError(t, err, "cann not update subsidiary record due to ")
 
-		subsidiary, _ = ReadSubsidiary(repo.AccountingDB, subsidiary.Model.ID)
+		subsidiary, _ = ReadSubsidiary(repo.AccountingDB, subsidiary.ID)
 
 		err = DeleteSubsidiary(repo.AccountingDB, subsidiary)
 		assert.NoError(t, err, "expected no error while deleting")
@@ -332,7 +332,7 @@ func TestReadSubsidiary(t *testing.T) {
 		subsidairy, err := temporary.CreateTempSubsidiary(repo.AccountingDB)
 		assert.NoError(t, err, "expected no error while craeting subsidairy")
 
-		_, err = ReadSubsidiary(repo.AccountingDB, subsidairy.Model.ID)
+		_, err = ReadSubsidiary(repo.AccountingDB, subsidairy.ID)
 		assert.NoError(t, err, "expected no error")
 
 	})

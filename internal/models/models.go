@@ -5,14 +5,14 @@ import (
 )
 
 type Detailed struct {
-	gorm.Model
+	ID        uint           `gorm:"primaryKey"`
 	Code    string `gorm:"unique"`
 	Title   string `gorm:"unique"`
 	Version uint   `gorm:"default:0"`
 }
 
 type Subsidiary struct {
-	gorm.Model
+	ID        uint           `gorm:"primaryKey"`
 	Code        string `gorm:"unique"`
 	Title       string `gorm:"unique"`
 	HasDetailed bool
@@ -20,7 +20,7 @@ type Subsidiary struct {
 }
 
 type VoucherItem struct {
-	gorm.Model
+	ID        uint           `gorm:"primaryKey"`
 	VoucherID uint `gorm:"not null;constraint:OnDelete:CASCADE;"`
 
 	DetailedId   uint `gorm:"constraint:OnUpdate:CASCADE,OnDelete:RESTRICT;default:null;"`
@@ -30,7 +30,7 @@ type VoucherItem struct {
 }
 
 type Voucher struct {
-	gorm.Model
+	ID        uint           `gorm:"primaryKey"`
 	Number       string         `gorm:"unique"`
 	VoucherItems []*VoucherItem `gorm:"foreignKey:VoucherID"`
 	Version      uint           `gorm:"default:0"`

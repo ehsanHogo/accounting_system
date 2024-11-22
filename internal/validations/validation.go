@@ -114,7 +114,7 @@ func InsertDetailedValidation(d *models.Detailed) error {
 
 func UpdateDetailedValidation(repo *gorm.DB, d *models.Detailed) error {
 
-	prevDetailed, err := repositories.ReadRecord[models.Detailed](repo, d.Model.ID)
+	prevDetailed, err := repositories.ReadRecord[models.Detailed](repo, d.ID)
 	if err != nil {
 		return fmt.Errorf("update validation fail due to absence of detailed id in database  : %v", err)
 	}
@@ -156,7 +156,7 @@ func InsertSubsidiaryValidation(d *models.Subsidiary) error {
 }
 
 func UpdateSubsidiaryValidation(repo *gorm.DB, d *models.Subsidiary) error {
-	prevSubsidiary, err := repositories.ReadRecord[models.Subsidiary](repo, d.Model.ID)
+	prevSubsidiary, err := repositories.ReadRecord[models.Subsidiary](repo, d.ID)
 	if err != nil {
 		return fmt.Errorf("update validation fail due to absence of subsidiary id in database  : %v", err)
 	}
@@ -167,7 +167,7 @@ func UpdateSubsidiaryValidation(repo *gorm.DB, d *models.Subsidiary) error {
 	}
 
 	var voucherHasThisSubsidiary models.VoucherItem
-	if err := repo.First(&voucherHasThisSubsidiary, "subsidiary_id = ?", d.Model.ID).Error; err == nil {
+	if err := repo.First(&voucherHasThisSubsidiary, "subsidiary_id = ?", d.ID).Error; err == nil {
 
 		return fmt.Errorf("can not update subsidiary record because it is reffrenced by some voucherItems")
 
@@ -190,7 +190,7 @@ func UpdateSubsidiaryValidation(repo *gorm.DB, d *models.Subsidiary) error {
 
 func DeleteDetailedValidation(db *gorm.DB, d *models.Detailed) error {
 
-	prevDetailed, err := repositories.ReadRecord[models.Detailed](db, d.Model.ID)
+	prevDetailed, err := repositories.ReadRecord[models.Detailed](db, d.ID)
 	if err != nil {
 		return fmt.Errorf("delete validation fail due to absence of detailed id in database  : %v", err)
 	}
@@ -204,7 +204,7 @@ func DeleteDetailedValidation(db *gorm.DB, d *models.Detailed) error {
 
 func DeleteSubsidiaryValidation(db *gorm.DB, d *models.Subsidiary) error {
 
-	prevDetailed, err := repositories.ReadRecord[models.Subsidiary](db, d.Model.ID)
+	prevDetailed, err := repositories.ReadRecord[models.Subsidiary](db, d.ID)
 	if err != nil {
 		return fmt.Errorf("delete validation fail due to absence of subsidiary id in database  : %v", err)
 	}
@@ -254,7 +254,7 @@ func InsertVoucherValidation(db *gorm.DB, d *models.Voucher) error {
 
 func UpdateVoucherValidation(db *gorm.DB, d *models.Voucher, updatedItem []*models.VoucherItem, deletedItem []*models.VoucherItem, insertedItem []*models.VoucherItem) error {
 
-	prevVoucher, err := repositories.ReadRecord[models.Voucher](db, d.Model.ID)
+	prevVoucher, err := repositories.ReadRecord[models.Voucher](db, d.ID)
 	if err != nil {
 		return fmt.Errorf("delete validation fail due to absence of voucher id in database  : %v", err)
 	}
@@ -304,7 +304,7 @@ func UpdateVoucherValidation(db *gorm.DB, d *models.Voucher, updatedItem []*mode
 
 	var prevVoucherItems []*models.VoucherItem
 
-	result := db.Where("voucher_id = ?", fmt.Sprintf("%d", d.Model.ID)).Find(&prevVoucherItems)
+	result := db.Where("voucher_id = ?", fmt.Sprintf("%d", d.ID)).Find(&prevVoucherItems)
 
 	if result.Error != nil {
 		return fmt.Errorf("can not fetch prev voucherItems due to : %v ", result.Error)
@@ -312,12 +312,12 @@ func UpdateVoucherValidation(db *gorm.DB, d *models.Voucher, updatedItem []*mode
 
 	exists := make(map[uint]bool)
 	for _, val := range deletedItem {
-		exists[val.Model.ID] = true
+		exists[val.ID] = true
 	}
 
 	newVoucherItems := []*models.VoucherItem{}
 	for _, val := range prevVoucherItems {
-		if !exists[val.Model.ID] {
+		if !exists[val.ID] {
 			newVoucherItems = append(newVoucherItems, val)
 		}
 	}
@@ -372,7 +372,7 @@ func checkHasDetailed(repo *gorm.DB, vi []*models.VoucherItem) error {
 }
 
 func DeleteVoucherValidation(db *gorm.DB, d *models.Voucher) error {
-	prevVoucher, err := repositories.ReadRecord[models.Voucher](db, d.Model.ID)
+	prevVoucher, err := repositories.ReadRecord[models.Voucher](db, d.ID)
 	if err != nil {
 		return fmt.Errorf("can not find voucher record : %v", err)
 	}

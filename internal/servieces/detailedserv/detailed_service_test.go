@@ -106,7 +106,7 @@ func TestUpdateDetailed(t *testing.T) {
 	t.Run("can update detailed record successfully", func(t *testing.T) {
 		detailed, err := temporary.CreateTempDetailed(repo.AccountingDB)
 		assert.NoError(t, err, "expected no error while inserting detailed")
-		insertedDetailed, err := ReadDetailed(repo.AccountingDB, detailed.Model.ID)
+		insertedDetailed, err := ReadDetailed(repo.AccountingDB, detailed.ID)
 		assert.NoError(t, err, "expected no error while reading detailed")
 		insertedDetailed.Code = repositories.GenerateUniqeCode[models.Detailed](repo.AccountingDB, "code")
 
@@ -114,7 +114,7 @@ func TestUpdateDetailed(t *testing.T) {
 
 		assert.NoError(t, err, "expected no error when updating detailed")
 
-		checkUpdated, err := ReadDetailed(repo.AccountingDB, insertedDetailed.Model.ID)
+		checkUpdated, err := ReadDetailed(repo.AccountingDB, insertedDetailed.ID)
 		assert.NoError(t, err, "expected no error when reading detailed record ")
 		assert.Equal(t, insertedDetailed.Code, checkUpdated.Code)
 	})
@@ -123,7 +123,7 @@ func TestUpdateDetailed(t *testing.T) {
 		detailed, err := temporary.CreateTempDetailed(repo.AccountingDB)
 		assert.NoError(t, err, "expected no error while inserting detailed")
 
-		insertedDetailed, err := ReadDetailed(repo.AccountingDB, detailed.Model.ID)
+		insertedDetailed, err := ReadDetailed(repo.AccountingDB, detailed.ID)
 		assert.NoError(t, err, "expected no error while reading detailed")
 		insertedDetailed.Code = ""
 		err = UpdateDetailed(repo.AccountingDB, insertedDetailed)
@@ -135,7 +135,7 @@ func TestUpdateDetailed(t *testing.T) {
 		detailed, err := temporary.CreateTempDetailed(repo.AccountingDB)
 		assert.NoError(t, err, "expected no error while inserting detailed")
 
-		insertedDetailed, err := ReadDetailed(repo.AccountingDB, detailed.Model.ID)
+		insertedDetailed, err := ReadDetailed(repo.AccountingDB, detailed.ID)
 		assert.NoError(t, err, "expected no error while reading detailed")
 		insertedDetailed.Title = ""
 		err = UpdateDetailed(repo.AccountingDB, insertedDetailed)
@@ -147,7 +147,7 @@ func TestUpdateDetailed(t *testing.T) {
 		detailed, err := temporary.CreateTempDetailed(repo.AccountingDB)
 		assert.NoError(t, err, "expected no error while inserting detailed")
 
-		insertedDetailed, err := ReadDetailed(repo.AccountingDB, detailed.Model.ID)
+		insertedDetailed, err := ReadDetailed(repo.AccountingDB, detailed.ID)
 		assert.NoError(t, err, "expected no error while reading detailed")
 		s := "1"
 		for i := 0; i < validations.MaxCodeLength+1; i++ {
@@ -162,7 +162,7 @@ func TestUpdateDetailed(t *testing.T) {
 		detailed, err := temporary.CreateTempDetailed(repo.AccountingDB)
 		assert.NoError(t, err, "expected no error while inserting detailed")
 
-		insertedDetailed, err := ReadDetailed(repo.AccountingDB, detailed.Model.ID)
+		insertedDetailed, err := ReadDetailed(repo.AccountingDB, detailed.ID)
 		assert.NoError(t, err, "expected no error while reading detailed")
 		s := "a"
 		for i := 0; i < validations.MaxTitleLength+1; i++ {
@@ -177,7 +177,7 @@ func TestUpdateDetailed(t *testing.T) {
 		code := randgenerator.GenerateRandomCode()
 		title := randgenerator.GenerateRandomTitle()
 		detailed := &models.Detailed{Code: code, Title: title}
-		detailed.Model.ID = InvalidRecordID
+		detailed.ID = InvalidRecordID
 		err := UpdateDetailed(repo.AccountingDB, detailed)
 		assert.Error(t, err, "expected error indicate there is such id in database")
 
@@ -209,7 +209,7 @@ func TestUpdateDetailed(t *testing.T) {
 		err = UpdateDetailed(repo.AccountingDB, detailed)
 		assert.NoError(t, err, "expected no error while updating")
 
-		detailed, _ = ReadDetailed(repo.AccountingDB, detailed.Model.ID)
+		detailed, _ = ReadDetailed(repo.AccountingDB, detailed.ID)
 		detailed.Code = repositories.GenerateUniqeCode[models.Detailed](repo.AccountingDB, "code")
 		err = UpdateDetailed(repo.AccountingDB, detailed)
 
@@ -266,7 +266,7 @@ func TestDeleteDetailed(t *testing.T) {
 
 	t.Run("deletion detailed record fail because record does not exist in database", func(t *testing.T) {
 		detailed := &models.Detailed{}
-		detailed.Model.ID = InvalidRecordID
+		detailed.ID = InvalidRecordID
 		err := DeleteDetailed(repo.AccountingDB, detailed)
 		assert.Error(t, err, "expected error indicate detailed record not found")
 	})
@@ -275,7 +275,7 @@ func TestDeleteDetailed(t *testing.T) {
 		detailed, err := temporary.CreateTempDetailed(repo.AccountingDB)
 		assert.NoError(t, err, "expected no error while inserting")
 
-		_, err = temporary.CreateTempVoucher(repo.AccountingDB, detailed.Model.ID)
+		_, err = temporary.CreateTempVoucher(repo.AccountingDB, detailed.ID)
 		assert.NoError(t, err, "expected no error while inserting")
 
 		err = DeleteDetailed(repo.AccountingDB, detailed)
@@ -305,7 +305,7 @@ func TestDeleteDetailed(t *testing.T) {
 
 		err = UpdateDetailed(repo.AccountingDB, detailed)
 		assert.NoError(t, err, "can not update detailed record ")
-		detailed, _ = ReadDetailed(repo.AccountingDB, detailed.Model.ID)
+		detailed, _ = ReadDetailed(repo.AccountingDB, detailed.ID)
 
 		err = DeleteDetailed(repo.AccountingDB, detailed)
 		assert.NoError(t, err, "expected no error")
@@ -320,7 +320,7 @@ func TestReadDetailed(t *testing.T) {
 		detailed, err := temporary.CreateTempDetailed(repo.AccountingDB)
 		assert.NoError(t, err, "expected no error while craeting detailed")
 
-		_, err = ReadDetailed(repo.AccountingDB, detailed.Model.ID)
+		_, err = ReadDetailed(repo.AccountingDB, detailed.ID)
 		assert.NoError(t, err, "expected no error")
 
 	})

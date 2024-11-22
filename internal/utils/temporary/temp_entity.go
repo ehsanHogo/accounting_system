@@ -26,19 +26,19 @@ func CreateTempVoucher(repo *gorm.DB, IDs ...uint) (*models.Voucher, error) {
 			return nil, err
 		}
 
-		temp[0] = &models.VoucherItem{DetailedId: detailed.Model.ID, SubsidiaryId: subsidiary.Model.ID, Credit: 250}
+		temp[0] = &models.VoucherItem{DetailedId: detailed.ID, SubsidiaryId: subsidiary.ID, Credit: 250}
 
-		temp[1] = &models.VoucherItem{DetailedId: detailed.Model.ID, SubsidiaryId: subsidiary.Model.ID, Credit: 250}
+		temp[1] = &models.VoucherItem{DetailedId: detailed.ID, SubsidiaryId: subsidiary.ID, Credit: 250}
 
-		temp[2] = &models.VoucherItem{DetailedId: detailed.Model.ID, SubsidiaryId: subsidiary.Model.ID, Debit: 250}
-		temp[3] = &models.VoucherItem{DetailedId: detailed.Model.ID, SubsidiaryId: subsidiary.Model.ID, Debit: 250}
+		temp[2] = &models.VoucherItem{DetailedId: detailed.ID, SubsidiaryId: subsidiary.ID, Debit: 250}
+		temp[3] = &models.VoucherItem{DetailedId: detailed.ID, SubsidiaryId: subsidiary.ID, Debit: 250}
 	} else {
 		temp = make([]*models.VoucherItem, 2)
 
 		if len(IDs) == 1 {
 
-			temp[0] = &models.VoucherItem{DetailedId: IDs[0], SubsidiaryId: subsidiary.Model.ID, Credit: 500}
-			temp[1] = &models.VoucherItem{DetailedId: IDs[0], SubsidiaryId: subsidiary.Model.ID, Debit: 500}
+			temp[0] = &models.VoucherItem{DetailedId: IDs[0], SubsidiaryId: subsidiary.ID, Credit: 500}
+			temp[1] = &models.VoucherItem{DetailedId: IDs[0], SubsidiaryId: subsidiary.ID, Debit: 500}
 		} else {
 
 			temp[0] = &models.VoucherItem{SubsidiaryId: IDs[1], Credit: 500}
@@ -67,7 +67,7 @@ func ReturnTempVoucherItem(repo *gorm.DB) (*models.VoucherItem, error) {
 		return nil, err
 	}
 
-	return &models.VoucherItem{SubsidiaryId: subsidiary.Model.ID, Debit: 250}, nil
+	return &models.VoucherItem{SubsidiaryId: subsidiary.ID, Debit: 250}, nil
 }
 
 func CreateTempSubsidiary(repo *gorm.DB) (*models.Subsidiary, error) {

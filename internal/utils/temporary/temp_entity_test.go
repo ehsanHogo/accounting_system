@@ -23,7 +23,7 @@ func TestCreateVoucher(t *testing.T) {
 		voucher, err := CreateTempVoucher(repo.AccountingDB)
 		assert.NoError(t, err, "expected no error while creating temp voucher")
 
-		_, err = repositories.ReadRecord[models.Voucher](repo.AccountingDB, voucher.Model.ID)
+		_, err = repositories.ReadRecord[models.Voucher](repo.AccountingDB, voucher.ID)
 		assert.NoError(t, err, "expected no error while reading temp voucher")
 
 	})
@@ -33,7 +33,7 @@ func TestCreateVoucher(t *testing.T) {
 		subsidairy, err := CreateTempSubsidiary(repo.AccountingDB)
 		assert.NoError(t, err, "expected no error while creating temp subsidairy")
 
-		_, err = repositories.ReadRecord[models.Subsidiary](repo.AccountingDB, subsidairy.Model.ID)
+		_, err = repositories.ReadRecord[models.Subsidiary](repo.AccountingDB, subsidairy.ID)
 		assert.NoError(t, err, "expected no error while reading temp subsidairy")
 
 	})
@@ -43,7 +43,7 @@ func TestCreateVoucher(t *testing.T) {
 		detailed, err := CreateTempDetailed(repo.AccountingDB)
 		assert.NoError(t, err, "expected no error while creating temp detailed")
 
-		_, err = repositories.ReadRecord[models.Detailed](repo.AccountingDB, detailed.Model.ID)
+		_, err = repositories.ReadRecord[models.Detailed](repo.AccountingDB, detailed.ID)
 		assert.NoError(t, err, "expected no error while reading temp detailed")
 
 	})

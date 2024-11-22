@@ -39,7 +39,7 @@ func UpdateDetailed(db *gorm.DB, d *models.Detailed) error {
 		Title: d.Title,
 	}
 
-	err = repositories.UpdateRecord[models.Detailed](db, newV, d.Model.ID)
+	err = repositories.UpdateRecord[models.Detailed](db, newV, d.ID)
 	if err != nil {
 		return fmt.Errorf("can not update detailed due to database operation failure: %v", err)
 	} else {
