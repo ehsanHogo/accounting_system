@@ -5,9 +5,11 @@ import (
 	"accounting_system/internal/repositories"
 	"accounting_system/internal/validations"
 	"fmt"
+
+	"gorm.io/gorm"
 )
 
-func InsertSubsidiary(db *repositories.Repositories, d *models.Subsidiary) error {
+func InsertSubsidiary(db *gorm.DB, d *models.Subsidiary) error {
 
 	err := validations.InsertSubsidiaryValidation(d)
 
@@ -25,7 +27,7 @@ func InsertSubsidiary(db *repositories.Repositories, d *models.Subsidiary) error
 
 }
 
-func UpdateSubsidiary(db *repositories.Repositories, d *models.Subsidiary) error {
+func UpdateSubsidiary(db *gorm.DB, d *models.Subsidiary) error {
 	err := validations.UpdateSubsidiaryValidation(db, d)
 
 	if err != nil {
@@ -48,7 +50,7 @@ func UpdateSubsidiary(db *repositories.Repositories, d *models.Subsidiary) error
 
 }
 
-func DeleteSubsidiary(db *repositories.Repositories, d *models.Subsidiary) error {
+func DeleteSubsidiary(db *gorm.DB, d *models.Subsidiary) error {
 
 	err := validations.DeleteSubsidiaryValidation(db, d)
 
@@ -65,7 +67,7 @@ func DeleteSubsidiary(db *repositories.Repositories, d *models.Subsidiary) error
 
 }
 
-func ReadSubsidiary(db *repositories.Repositories, id uint) (*models.Subsidiary, error) {
+func ReadSubsidiary(db *gorm.DB, id uint) (*models.Subsidiary, error) {
 
 	res, err := repositories.ReadRecord[models.Subsidiary](db, id)
 	if err != nil {

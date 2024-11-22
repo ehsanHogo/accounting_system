@@ -5,9 +5,11 @@ import (
 	"accounting_system/internal/repositories"
 
 	"fmt"
+
+	"gorm.io/gorm"
 )
 
-func CreateTempVoucher(repo *repositories.Repositories, IDs ...uint) (*models.Voucher, error) {
+func CreateTempVoucher(repo *gorm.DB, IDs ...uint) (*models.Voucher, error) {
 	temp := make([]*models.VoucherItem, 4)
 
 	subsidiary := &models.Subsidiary{Code: repositories.GenerateUniqeCode[models.Subsidiary](repo, "code"), Title: repositories.GenerateUniqeTitle[models.Subsidiary](repo), HasDetailed: true}
@@ -49,19 +51,16 @@ func CreateTempVoucher(repo *repositories.Repositories, IDs ...uint) (*models.Vo
 	number := repositories.GenerateUniqeCode[models.Voucher](repo, "number")
 	voucher := &models.Voucher{Number: number, VoucherItems: temp}
 
-
-
 	err = repositories.CreateRecord(repo, voucher)
 	if err != nil {
 		return nil, fmt.Errorf("error during record creation: %v", err)
 
 	}
 
-
 	return voucher, nil
 }
 
-func ReturnTempVoucherItem(repo *repositories.Repositories) (*models.VoucherItem, error) {
+func ReturnTempVoucherItem(repo *gorm.DB) (*models.VoucherItem, error) {
 
 	subsidiary, err := CreateTempSubsidiary(repo)
 	if err != nil {
@@ -71,7 +70,7 @@ func ReturnTempVoucherItem(repo *repositories.Repositories) (*models.VoucherItem
 	return &models.VoucherItem{SubsidiaryId: subsidiary.Model.ID, Debit: 250}, nil
 }
 
-func CreateTempSubsidiary(repo *repositories.Repositories) (*models.Subsidiary, error) {
+func CreateTempSubsidiary(repo *gorm.DB) (*models.Subsidiary, error) {
 	subsidiary := &models.Subsidiary{Code: repositories.GenerateUniqeCode[models.Subsidiary](repo, "code"), Title: repositories.GenerateUniqeTitle[models.Subsidiary](repo), HasDetailed: false}
 
 	err := repositories.CreateRecord(repo, subsidiary)
@@ -83,7 +82,7 @@ func CreateTempSubsidiary(repo *repositories.Repositories) (*models.Subsidiary, 
 	return subsidiary, nil
 }
 
-func CreateTempDetailed(repo *repositories.Repositories) (*models.Detailed, error) {
+func CreateTempDetailed(repo *gorm.DB) (*models.Detailed, error) {
 
 	detailed := &models.Detailed{Code: repositories.GenerateUniqeCode[models.Detailed](repo, "code"), Title: repositories.GenerateUniqeTitle[models.Detailed](repo)}
 

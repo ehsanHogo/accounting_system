@@ -5,9 +5,11 @@ import (
 	"accounting_system/internal/repositories"
 	"accounting_system/internal/validations"
 	"fmt"
+
+	"gorm.io/gorm"
 )
 
-func InsertVoucher(db *repositories.Repositories, d *models.Voucher) error {
+func InsertVoucher(db *gorm.DB, d *models.Voucher) error {
 
 	err := validations.InsertVoucherValidation(db, d)
 
@@ -22,8 +24,21 @@ func InsertVoucher(db *repositories.Repositories, d *models.Voucher) error {
 	return nil
 }
 
-func UpdateVoucher(db *repositories.Repositories, d *models.Voucher, updatedItem []*models.VoucherItem, deletedItem []*models.VoucherItem, insertedItem []*models.VoucherItem) error {
-	err := validations.UpdateVoucherValidation(db, d, updatedItem, deletedItem, insertedItem)
+func UpdateVoucher(db *gorm.DB, d *models.Voucher, updatedItem []*models.VoucherItem, deletedItem []*models.VoucherItem, insertedItem []*models.VoucherItem) error {
+
+	tx := db.Begin() 
+	if tx.Error != nil {
+		return fmt.Errorf("can not begin transaction: %v", tx.Error)
+	}
+
+	
+	defer func() {
+		if tx.Error != nil {
+			tx.Rollback() 
+		}
+	}()
+
+	err := validations.UpdateVoucherValidation(tx, d, updatedItem, deletedItem, insertedItem)
 
 	if err != nil {
 		return fmt.Errorf("can not update voucher due to validation failure: %v", err)
@@ -34,14 +49,14 @@ func UpdateVoucher(db *repositories.Repositories, d *models.Voucher, updatedItem
 	fmt.Println(newV.Number)
 	for _, vi := range deletedItem {
 
-		err := repositories.DeleteRecord(db, vi)
+		err := repositories.DeleteRecord(tx, vi)
 		if err != nil {
 			return fmt.Errorf("can not delete voucher item : %w", err)
 		}
 	}
 
 	for _, vi := range updatedItem {
-		err := UpdateVoucherItem(db, vi, vi.Model.ID)
+		err := UpdateVoucherItem(tx, vi, vi.Model.ID)
 		if err != nil {
 			return fmt.Errorf("can not update voucher item : %w", err)
 		}
@@ -50,24 +65,29 @@ func UpdateVoucher(db *repositories.Repositories, d *models.Voucher, updatedItem
 	for _, vi := range insertedItem {
 
 		vi.VoucherID = d.Model.ID
-		err := repositories.CreateRecord(db, vi)
+		err := repositories.CreateRecord(tx, vi)
 
 		if err != nil {
 			return fmt.Errorf("can not insert voucher item : %w", err)
 		}
 	}
 
-	err = repositories.UpdateRecord[models.Voucher](db, newV, d.Model.ID)
+	err = repositories.UpdateRecord[models.Voucher](tx, newV, d.Model.ID)
 	if err != nil {
 		return fmt.Errorf("can not update voucher due to database operation failure : %v", err)
 	} else {
+
+		err = tx.Commit().Error
+		if err != nil {
+			return fmt.Errorf("can not commit transaction: %v", err)
+		}
 
 		return nil
 	}
 
 }
 
-func DeleteVoucher(db *repositories.Repositories, d *models.Voucher) error {
+func DeleteVoucher(db *gorm.DB, d *models.Voucher) error {
 
 	err := validations.DeleteVoucherValidation(db, d)
 
@@ -85,7 +105,7 @@ func DeleteVoucher(db *repositories.Repositories, d *models.Voucher) error {
 
 }
 
-func ReadVoucher(db *repositories.Repositories, id uint) (*models.Voucher, error) {
+func ReadVoucher(db *gorm.DB, id uint) (*models.Voucher, error) {
 
 	res, err := repositories.ReadRecord[models.Voucher](db, id)
 	if err != nil {
@@ -96,7 +116,7 @@ func ReadVoucher(db *repositories.Repositories, id uint) (*models.Voucher, error
 	}
 }
 
-func ReadVoucherItem(db *repositories.Repositories, id uint) (*models.VoucherItem, error) {
+func ReadVoucherItem(db *gorm.DB, id uint) (*models.VoucherItem, error) {
 
 	res, err := repositories.ReadRecord[models.VoucherItem](db, id)
 	if err != nil {
@@ -107,9 +127,9 @@ func ReadVoucherItem(db *repositories.Repositories, id uint) (*models.VoucherIte
 	}
 }
 
-func UpdateVoucherItem(db *repositories.Repositories, v *models.VoucherItem, id uint) error {
+func UpdateVoucherItem(db *gorm.DB, v *models.VoucherItem, id uint) error {
 	var newV models.VoucherItem
-	if err := db.AccountingDB.First(&newV, id).Error; err != nil {
+	if err := db.First(&newV, id).Error; err != nil {
 		return fmt.Errorf("record not found: %w", err)
 	}
 
@@ -118,7 +138,7 @@ func UpdateVoucherItem(db *repositories.Repositories, v *models.VoucherItem, id 
 	newV.DetailedId = v.DetailedId
 	newV.SubsidiaryId = v.SubsidiaryId
 
-	if err := db.AccountingDB.Model(&newV).Where("id = ?", v.Model.ID).Updates(newV).Error; err != nil {
+	if err := db.Model(&newV).Where("id = ?", v.Model.ID).Updates(newV).Error; err != nil {
 		return fmt.Errorf("failed to update record: %w", err)
 	}
 

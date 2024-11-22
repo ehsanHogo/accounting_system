@@ -5,11 +5,11 @@ import (
 	"accounting_system/internal/repositories"
 	"accounting_system/internal/validations"
 	"fmt"
+
+	"gorm.io/gorm"
 )
 
-
-
-func InsertDetailed(db *repositories.Repositories, d *models.Detailed) error {
+func InsertDetailed(db *gorm.DB, d *models.Detailed) error {
 
 	err := validations.InsertDetailedValidation(d)
 
@@ -27,10 +27,7 @@ func InsertDetailed(db *repositories.Repositories, d *models.Detailed) error {
 
 }
 
-
-
-
-func UpdateDetailed(db *repositories.Repositories, d *models.Detailed) error {
+func UpdateDetailed(db *gorm.DB, d *models.Detailed) error {
 	err := validations.UpdateDetailedValidation(db, d)
 
 	if err != nil {
@@ -52,7 +49,7 @@ func UpdateDetailed(db *repositories.Repositories, d *models.Detailed) error {
 
 }
 
-func DeleteDetailed(db *repositories.Repositories, d *models.Detailed) error {
+func DeleteDetailed(db *gorm.DB, d *models.Detailed) error {
 	err := validations.DeleteDetailedValidation(db, d)
 
 	if err != nil {
@@ -70,7 +67,7 @@ func DeleteDetailed(db *repositories.Repositories, d *models.Detailed) error {
 
 }
 
-func ReadDetailed(db *repositories.Repositories, id uint) (*models.Detailed, error) {
+func ReadDetailed(db *gorm.DB, id uint) (*models.Detailed, error) {
 
 	res, err := repositories.ReadRecord[models.Detailed](db, id)
 	if err != nil {
@@ -80,5 +77,3 @@ func ReadDetailed(db *repositories.Repositories, id uint) (*models.Detailed, err
 		return res, nil
 	}
 }
-
-

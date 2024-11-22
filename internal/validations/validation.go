@@ -5,6 +5,8 @@ import (
 	"accounting_system/internal/repositories"
 	"errors"
 	"fmt"
+
+	"gorm.io/gorm"
 )
 
 func CheckEmpty(s string) error {
@@ -105,7 +107,7 @@ func InsertDetailedValidation(d *models.Detailed) error {
 	return nil
 }
 
-func UpdateDetailedValidation(repo *repositories.Repositories, d *models.Detailed) error {
+func UpdateDetailedValidation(repo *gorm.DB, d *models.Detailed) error {
 
 	prevDetailed, err := repositories.ReadRecord[models.Detailed](repo, d.Model.ID)
 	if err != nil {
@@ -148,7 +150,7 @@ func InsertSubsidiaryValidation(d *models.Subsidiary) error {
 	return nil
 }
 
-func UpdateSubsidiaryValidation(repo *repositories.Repositories, d *models.Subsidiary) error {
+func UpdateSubsidiaryValidation(repo *gorm.DB, d *models.Subsidiary) error {
 	prevSubsidiary, err := repositories.ReadRecord[models.Subsidiary](repo, d.Model.ID)
 	if err != nil {
 		return fmt.Errorf("update validation fail due to absence of subsidiary id in database  : %v", err)
@@ -160,7 +162,7 @@ func UpdateSubsidiaryValidation(repo *repositories.Repositories, d *models.Subsi
 	}
 
 	var voucherHasThisSubsidiary models.VoucherItem
-	if err := repo.AccountingDB.First(&voucherHasThisSubsidiary, "subsidiary_id = ?", d.Model.ID).Error; err == nil {
+	if err := repo.First(&voucherHasThisSubsidiary, "subsidiary_id = ?", d.Model.ID).Error; err == nil {
 
 		return fmt.Errorf("can not update subsidiary record because it is reffrenced by some voucherItems")
 
@@ -181,7 +183,7 @@ func UpdateSubsidiaryValidation(repo *repositories.Repositories, d *models.Subsi
 	return nil
 }
 
-func DeleteDetailedValidation(db *repositories.Repositories, d *models.Detailed) error {
+func DeleteDetailedValidation(db *gorm.DB, d *models.Detailed) error {
 
 	prevDetailed, err := repositories.ReadRecord[models.Detailed](db, d.Model.ID)
 	if err != nil {
@@ -195,7 +197,7 @@ func DeleteDetailedValidation(db *repositories.Repositories, d *models.Detailed)
 	}
 }
 
-func DeleteSubsidiaryValidation(db *repositories.Repositories, d *models.Subsidiary) error {
+func DeleteSubsidiaryValidation(db *gorm.DB, d *models.Subsidiary) error {
 
 	prevDetailed, err := repositories.ReadRecord[models.Subsidiary](db, d.Model.ID)
 	if err != nil {
@@ -209,7 +211,7 @@ func DeleteSubsidiaryValidation(db *repositories.Repositories, d *models.Subsidi
 	}
 }
 
-func InsertVoucherValidation(db *repositories.Repositories, d *models.Voucher) error {
+func InsertVoucherValidation(db *gorm.DB, d *models.Voucher) error {
 
 	err := ChackCodeValidation(d.Number)
 
@@ -245,7 +247,7 @@ func InsertVoucherValidation(db *repositories.Repositories, d *models.Voucher) e
 	return nil
 }
 
-func UpdateVoucherValidation(db *repositories.Repositories, d *models.Voucher, updatedItem []*models.VoucherItem, deletedItem []*models.VoucherItem, insertedItem []*models.VoucherItem) error {
+func UpdateVoucherValidation(db *gorm.DB, d *models.Voucher, updatedItem []*models.VoucherItem, deletedItem []*models.VoucherItem, insertedItem []*models.VoucherItem) error {
 
 	prevVoucher, err := repositories.ReadRecord[models.Voucher](db, d.Model.ID)
 	if err != nil {
@@ -297,7 +299,7 @@ func UpdateVoucherValidation(db *repositories.Repositories, d *models.Voucher, u
 
 	var prevVoucherItems []*models.VoucherItem
 
-	result := db.AccountingDB.Where("voucher_id = ?", fmt.Sprintf("%d", d.Model.ID)).Find(&prevVoucherItems)
+	result := db.Where("voucher_id = ?", fmt.Sprintf("%d", d.Model.ID)).Find(&prevVoucherItems)
 
 	if result.Error != nil {
 		return fmt.Errorf("can not fetch prev voucherItems due to : %v ", result.Error)
@@ -339,10 +341,10 @@ func UpdateVoucherValidation(db *repositories.Repositories, d *models.Voucher, u
 	return nil
 }
 
-func checkHasDetailed(repo *repositories.Repositories, vi []*models.VoucherItem) error {
+func checkHasDetailed(repo *gorm.DB, vi []*models.VoucherItem) error {
 	var subsidiary *models.Subsidiary
 	for _, v := range vi {
-		err := repo.AccountingDB.First(&subsidiary, v.SubsidiaryId).Error
+		err := repo.First(&subsidiary, v.SubsidiaryId).Error
 		fmt.Println(err)
 		if err != nil {
 			return fmt.Errorf("can not read subsidiary record %v : %v", v.SubsidiaryId, err)
@@ -369,7 +371,7 @@ func checkHasDetailed(repo *repositories.Repositories, vi []*models.VoucherItem)
 	return nil
 }
 
-func DeleteVoucherValidation(db *repositories.Repositories, d *models.Voucher) error {
+func DeleteVoucherValidation(db *gorm.DB, d *models.Voucher) error {
 	prevVoucher, err := repositories.ReadRecord[models.Voucher](db, d.Model.ID)
 	if err != nil {
 		return fmt.Errorf("can not find voucher record : %v", err)

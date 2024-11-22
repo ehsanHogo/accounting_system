@@ -39,9 +39,9 @@ func CreateConnectionForTest() (*Repositories, error) {
 	return NewConnection(db), nil
 }
 
-func CreateRecord[T any](db *Repositories, v *T) error {
+func CreateRecord[T any](db *gorm.DB, v *T) error {
 
-	res := db.AccountingDB.Create(v)
+	res := db.Create(v)
 	if res.Error != nil {
 
 		return fmt.Errorf("can not create record due to : %v", res.Error)
@@ -54,8 +54,8 @@ func CreateRecord[T any](db *Repositories, v *T) error {
 
 }
 
-func DeleteRecord[T any](db *Repositories, v *T) error {
-	res := db.AccountingDB.Unscoped().Delete(&v)
+func DeleteRecord[T any](db *gorm.DB, v *T) error {
+	res := db.Unscoped().Delete(&v)
 
 	if res.Error != nil {
 		return fmt.Errorf("can not delete record due to: %v", res.Error)
@@ -68,18 +68,18 @@ func DeleteRecord[T any](db *Repositories, v *T) error {
 
 }
 
-func ReadRecord[T any](db *Repositories, id uint) (*T, error) {
+func ReadRecord[T any](db *gorm.DB, id uint) (*T, error) {
 	var res T
 
-	if err := db.AccountingDB.First(&res, id).Error; err != nil {
+	if err := db.First(&res, id).Error; err != nil {
 		return nil, fmt.Errorf("record not found: %w", err)
 	}
 	return &res, nil
 }
 
-func UpdateRecord[T any](db *Repositories, v *T, id uint) error {
+func UpdateRecord[T any](db *gorm.DB, v *T, id uint) error {
 
-	if err := db.AccountingDB.Model(v).Where("id = ?", id).Updates(v).Error; err != nil {
+	if err := db.Model(v).Where("id = ?", id).Updates(v).Error; err != nil {
 		return fmt.Errorf("can not  update record due to : %v", err)
 	}
 
@@ -87,15 +87,15 @@ func UpdateRecord[T any](db *Repositories, v *T, id uint) error {
 
 }
 
-func FindRecord[T any, U any](db *Repositories, val U, columnName string) bool {
+func FindRecord[T any, U any](db *gorm.DB, val U, columnName string) bool {
 	var res T
-	if err := db.AccountingDB.First(&res, fmt.Sprintf("%s = ?", columnName), val).Error; err != nil {
+	if err := db.First(&res, fmt.Sprintf("%s = ?", columnName), val).Error; err != nil {
 		return false
 	}
 	return true
 }
 
-func GenerateUniqeCode[T any](repo *Repositories, columnName string) string {
+func GenerateUniqeCode[T any](repo *gorm.DB, columnName string) string {
 	code := randgenerator.GenerateRandomCode()
 	for {
 		exist := FindRecord[T](repo, code, columnName)
@@ -110,7 +110,7 @@ func GenerateUniqeCode[T any](repo *Repositories, columnName string) string {
 	return code
 }
 
-func GenerateUniqeTitle[T any](repo *Repositories) string {
+func GenerateUniqeTitle[T any](repo *gorm.DB) string {
 	title := randgenerator.GenerateRandomTitle()
 	for {
 		exist := FindRecord[T](repo, title, "title")
