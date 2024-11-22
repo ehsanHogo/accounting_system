@@ -30,7 +30,7 @@ func CheckMaxLength(s string, maxLen int) error {
 	}
 }
 
-func CheckDebitCredit(credit, debit int64) error {
+func CheckDebitCredit(credit, debit int32) error {
 	if debit < 0 || credit < 0 {
 		return errors.New("debit or credit cant be negative")
 	} else if debit == 0 && credit == 0 {
@@ -43,8 +43,8 @@ func CheckDebitCredit(credit, debit int64) error {
 }
 
 func CheckBalance(v []*models.VoucherItem) error {
-	var credits int64 = 0
-	var debits int64 = 0
+	var credits int32   = 0
+	var debits int32 = 0
 
 	for _, v := range v {
 		credits += v.Credit
